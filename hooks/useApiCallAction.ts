@@ -11,6 +11,7 @@ import {
 import { variableUtil } from '@/uitls';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
+import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
 import { useCustomFunction } from './useCustomFunction';
 import { useHandleData } from './useHandleData';
@@ -30,7 +31,7 @@ const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string 
     baseUrl
   );
 };
-export const useApiCallAction = (): TUseActions => {
+export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const router = useRouter();
   const { getApiMember } = useApiCall();
   const { getData } = useHandleData({});
@@ -39,7 +40,7 @@ export const useApiCallAction = (): TUseActions => {
   const forbiddenCode = authSettingStore((state) => state.forbiddenCode);
   const findVariable = stateManagementStore((state) => state.findVariable);
   const updateVariables = stateManagementStore((state) => state.updateVariables);
-  const { handleCustomFunction } = useCustomFunction();
+  const { handleCustomFunction } = useCustomFunction(props);
   const { getState } = actionHookSliceStore;
   const convertActionVariables = useCallback(
     (actionVariables: TActionVariable[], apiCall: TApiCallValue): any[] => {
@@ -130,7 +131,7 @@ export const useApiCallAction = (): TUseActions => {
         params: ['GET'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),
       });
 
-      if (outputVariable) {
+      if (outputVariable?.id) {
         updateVariables({
           type: 'apiResponse',
           dataUpdate: {

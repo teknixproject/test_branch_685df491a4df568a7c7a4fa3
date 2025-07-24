@@ -2,12 +2,7 @@ import _ from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
 import {
-  TAction,
-  TActionApiCall,
-  TActionNavigate,
-  TActionUpdateState,
-  TTriggerActions,
-  TTriggerValue,
+    TAction, TActionApiCall, TActionNavigate, TActionUpdateState, TTriggerActions, TTriggerValue
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 
@@ -164,7 +159,7 @@ export const useHandleProps = ({
 
   const actionsMap = useMemo(() => createActionsMap(dataProps), [dataProps]);
 
-  const { handleApiCallAction } = useApiCallAction();
+  const { handleApiCallAction } = useApiCallAction({ valueStream, data });
   const { executeActionFCType } = useActions({ valueStream, data });
 
   // const { executeConditional } = useConditionAction();

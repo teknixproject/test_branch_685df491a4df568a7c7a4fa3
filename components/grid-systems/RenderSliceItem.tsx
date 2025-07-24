@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import dayjs from 'dayjs';
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
@@ -53,8 +52,9 @@ const handleCssWithEmotion = (staticProps: Record<string, any>) => {
 // Custom hook to extract common logic
 const useRenderItem = (data: GridItem, valueStream?: any) => {
   const valueType = useMemo(() => data?.value?.toLowerCase() || '', [data?.value]);
-  const { isForm, isNoChildren, isChart, isDatePicker } = getComponentType(data?.value || '');
+  const { isNoChildren } = getComponentType(data?.value || '');
   const { findVariable } = stateManagementStore();
+  // const setValueStream = useDataStreamStore((state) => state.setValueStream);
   const { dataState, getData } = useHandleData({
     dataProp: getPropData(data),
     componentProps: data?.componentProps,
@@ -62,6 +62,10 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
     valueType,
     activeData: data,
   });
+
+  // useEffect(() => {
+  //   setValueStream(data.id, valueStream);
+  // }, [data.id, setValueStream, valueStream]);
 
   const { actions } = useHandleProps({ dataProps: getPropActions(data), data, valueStream });
 
@@ -88,19 +92,15 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
             ...actions,
           };
 
-    if (isDatePicker) {
-      if (typeof result.value === 'string') result.value = dayjs(result.value);
-      if (typeof result.defaultValue === 'string') result.defaultValue = dayjs(result.defaultValue);
-    }
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
     }
     if ('styleMultiple' in result) _.unset(result, 'styleMultiple');
     if ('dataProps' in result) _.unset(result, 'dataProps');
+
     const plainProps = convertToPlainProps(result, getData);
 
     result = cleanProps(plainProps, valueType);
-
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dataState, valueStream]);
@@ -136,7 +136,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
   const { data, valueStream } = useMemo(() => props, [props]);
 
   const { isLoading, valueType, Component, propsCpn, dataState } = useRenderItem(data, valueStream);
-  // console.log(`🚀 ~ propsCpn: ${data.id}`, propsCpn);
+  console.log(`🚀 ~ propsCpn: ${data.id}`, propsCpn);
 
   const { isForm, isNoChildren, isChart, isMap } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;
@@ -190,7 +190,7 @@ const RenderForm: FC<TProps> = (props) => {
   };
 
   if (!valueType) return <div></div>;
-  if (isLoading) return <></>;
+  if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
     <FormProvider {...methods}>
@@ -239,7 +239,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     return <Component {...rest} />;
   }
   if (!valueType) return <div></div>;
-  if (isLoading) return;
+  if (isLoading) return <LoadingPage />;
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
       {data?.childs?.map((child) => (

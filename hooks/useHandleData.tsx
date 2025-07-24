@@ -240,8 +240,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   //#region handle item list
   const handleItemInList = (data: TData, valueStream: any) => {
-    console.log(`🚀 ~ handleItemInList ~ data:${props.activeData?.id}`, { data, valueStream });
-
+    console.log('🚀 ~ handleItemInList ~ props.valueStream:', props.valueStream);
     const { jsonPath } = data.itemInList;
     if (jsonPath) {
       const result = JSONPath({
@@ -350,9 +349,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   };
   //#region getData
   const getData = useCallback(
-    (data: TData | null | undefined, valueStream?: any) => {
-      console.log('🚀 ~ useHandleData ~ data:', { data, valueStream });
-
+    (data: TData | null | undefined, valueStream?: any): any => {
       if (_.isEmpty(data) && valueStream) return valueStream;
       if (_.isEmpty(data) && props.valueStream) return props.valueStream;
       if (_.isEmpty(data) || !data.type) return data?.defaultValue || data?.valueInput;
@@ -458,6 +455,9 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
       ...dataMultiple,
       ...componentConverted,
     };
+    // if (props.valueType?.toLowerCase() === 'datepicker') {
+    //   console.log('🚀 ~ useHandleData ~ reslt:', reslt);
+    // }
 
     return reslt;
   }, [
