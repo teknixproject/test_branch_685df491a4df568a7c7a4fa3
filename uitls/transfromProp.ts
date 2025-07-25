@@ -34,53 +34,23 @@ export const convertDataToProps = (props: Record<string, TData>): Record<string,
     {}
   );
 };
-
-// export const convertToPlainProps = (props: Record<string, any>, getData: any) => {
-//   // Initialize result with a deep clone to ensure no read-only issues
-//   const result: Record<string, any> = _.cloneDeep({});
-
-//   for (const [key, val] of Object.entries(props)) {
-//     if (key.includes('-')) {
-//       // Handle dash-separated fields (e.g., style-fill -> style.fill)
-//       const path = key.split('-');
-//       const processedVal = isTData(val) ? getData(val) : _.cloneDeep(val); // Deep clone to avoid read-only issues
-//       // Ensure the target object is writable
-//       let target = result;
-//       for (let i = 0; i < path.length - 1; i++) {
-//         const part = path[i];
-//         // Create nested object if it doesn't exist or is read-only
-//         if (!target[part] || Object.isFrozen(target[part]) || Object.isSealed(target[part])) {
-//           target[part] = {};
-//         }
-//         target = target[part];
-//       }
-//       target[path[path.length - 1]] = processedVal;
-//     } else if (!isTData(val)) {
-//       // Non-TData, non-dashed keys
-//       result[key] = _.cloneDeep(val); // Deep clone to avoid read-only issues
-//     } else {
-//       // TData, non-dashed keys
-//       const converted = getData(val);
-//       result[key] = converted;
-//     }
-//   }
-
-//   return result;
-// };
-// ✅ Production-ready version
 export const convertToPlainProps = (props: Record<string, any>, getData: any) => {
-  const result: Record<string, any> = {};
+  // Start with a shallow copy of props
+  const result: Record<string, any> = { ...props };
+  const result2: Record<string, any> = {};
 
   for (const [key, val] of Object.entries(props)) {
-    result[key] = isTData(val) ? getData(val) : val;
+    const processedVal = isTData(val) ? getData(val) : val;
+
+    result[key] = processedVal;
+
     if (key.includes('-')) {
-      const path = key.split('-');
-      const processedVal = isTData(val) ? getData(val) : val;
-      _.set(result, path, processedVal);
+      const path = key.split('-').join('.');
+      _.set(result2, path, processedVal);
     }
   }
 
-  return result;
+  return { ...result, ...result2 };
 };
 export const isTData = (value: any): value is TData => {
   // Must be a plain object
