@@ -46,6 +46,7 @@ export const componentRegistry = {
   radarchart: Radar,
   rosechart: Rose,
   stockchart: Stock,
+
   menu: ConfigMenu,
   modal: Modal,
   drawer: Drawer,
