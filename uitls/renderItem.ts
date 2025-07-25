@@ -19,7 +19,7 @@ export const cleanProps = (props: any, valueType: string) => {
   }
 
   try {
-    const { isDatePicker, isNoChildren } = getComponentType(valueType);
+    const { isNoChildren } = getComponentType(valueType);
 
     // Create a safe copy of props
     const cleanData: Record<string, any> = {};
@@ -43,16 +43,6 @@ export const cleanProps = (props: any, valueType: string) => {
 
     // Component-specific cleanup
     const lowerValueType = valueType.toLowerCase();
-
-    if (isDatePicker) {
-      delete cleanData.value;
-      delete cleanData.defaultValue;
-    } else if (lowerValueType === 'form') {
-      delete cleanData.formKeys;
-    } else if (lowerValueType === 'tabs') {
-      // Add tabs-specific cleanup if needed
-      // For example: delete cleanData.tabBarExtraContent
-    }
 
     if (isNoChildren) {
       delete cleanData.children;

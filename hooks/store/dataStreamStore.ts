@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -82,10 +83,18 @@ export const useDataStreamStore = create<Store>()(
 
       setValueStream: (key, valueStream) =>
         set((state) => {
+          // Initialize if key doesn't exist
           if (!state.values[key]) {
             state.values[key] = { formData: {}, valueStream: null };
           }
-          state.values[key].valueStream = valueStream;
+
+          // Check if new valueStream is the same as current one
+          const currentValueStream = state.values[key].valueStream;
+
+          // Only update if values are different
+          if (!_.isEqual(currentValueStream, valueStream)) {
+            state.values[key].valueStream = valueStream;
+          }
         }),
 
       mergeFormData: (key, partialFormData) =>

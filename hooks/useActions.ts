@@ -39,13 +39,13 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const actions = useMemo(() => _.get(data, 'actions') as TTriggerActions, [data]);
   const setMultipleActions = actionHookSliceStore((state) => state.setMultipleActions);
   const findAction = actionHookSliceStore((state) => state.findAction);
-  const { handleApiCallAction } = useApiCallAction();
+  const { handleApiCallAction } = useApiCallAction(props);
   // const { executeConditional } = useConditionAction();
   const { executeConditionalChild } = useConditionChildAction();
   const { handleUpdateStateAction } = useUpdateStateAction();
   const { handleNavigateAction } = useNavigateAction({ data, valueStream });
   const { executeLoopOverList } = useLoopActions();
-  const { handleCustomFunction } = useCustomFunction();
+  const { handleCustomFunction } = useCustomFunction(props);
   const [isLoading, setIsLoading] = useState(false);
 
   const executeConditional = (action: TAction<TConditional>) => {
@@ -164,7 +164,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     if (mounted.current && !_.isEmpty(actions) && 'onPageLoad' in actions) {
       handleAction('onPageLoad');
     }
-  }, [mounted.current]);
+  }, []);
 
   return { handleAction, isLoading, executeActionFCType };
 };

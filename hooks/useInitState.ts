@@ -231,7 +231,7 @@ export const useInitStateRender = () => {
   const setCustomFunctions = customFunctionStore((state) => state.setCustomFunctions);
   const { enable, pages, entryPage } = authSettingStore();
   const { bodyLayout, isLoading } = useConstructorDataAPI(uid || '');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [deviceType, setDeviceType] = useState<DeviceType>(getDeviceType());
   const selectedBodyLayout = bodyLayout[deviceType] ?? bodyLayout ?? {};
