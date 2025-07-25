@@ -20,25 +20,23 @@ export const useCustomFunction = (props: TActionsProps): TUseActions => {
   const handleCustomFunction = async (action: TAction<TActionCustomFunction>): Promise<void> => {
     try {
       const { customFunctionId, output, isList, outputType } = action?.data || {};
-
+      const typeStore = output?.typeStore || 'appState';
       if (customFunctionId) {
         const result = await handleFunction({
           data: action?.data as TActionCustomFunction,
           findCustomFunction,
           getData,
         });
-        console.log('🚀 ~ handleCustomFunction ~ result:', result);
         const resultStander = transformVariable({
           isList: !!isList,
           type: outputType!,
           value: result,
         });
-        console.log('🚀 ~ handleCustomFunction ~ resultStander:', resultStander);
 
         if (output?.variableId) {
-          const variable = findVariable({ type: 'appState', id: output.variableId });
+          const variable = findVariable({ type: typeStore, id: output.variableId });
           updateVariables({
-            type: 'appState',
+            type: typeStore,
             dataUpdate: {
               ...variable!,
               type: outputType!,
