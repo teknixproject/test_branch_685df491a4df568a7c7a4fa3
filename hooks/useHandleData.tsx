@@ -418,7 +418,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     return result;
   }, []);
   const dataState = useMemo(() => {
-    const dataMultiple = props.dataProp?.reduce((obj, item) => {
+    const dataMultiple = props?.dataProp?.reduce((obj, item) => {
       return {
         ...obj,
         [item.name]: getData(item.data, props.valueStream),
@@ -465,9 +465,9 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     globalState,
     componentState,
     apiResponseState,
-    props.componentProps,
-    props.valueStream,
-    props.dataProp,
+    props?.componentProps,
+    props?.valueStream,
+    props?.dataProp,
   ]);
   return {
     getData,
