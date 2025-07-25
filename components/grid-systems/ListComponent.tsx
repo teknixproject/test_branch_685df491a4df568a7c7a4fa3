@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {
-    Badge, Button, Card, Checkbox, Collapse, DatePicker, Drawer, Dropdown, DropdownProps, Form,
-    Image, Input, InputNumber, List, Modal, Popover, Radio, Select, Statistic, Table, TableProps,
-    Tabs, Tag, Typography
+  Badge, Button, Card, Checkbox, Collapse, DatePicker, Drawer, Dropdown, DropdownProps, Form,
+  Image, Input, InputNumber, List, Modal, Popover, Radio, Select, Statistic, Table, TableProps,
+  Tabs, Tag, Typography
 } from 'antd';
 import GoogleMapReact from 'google-map-react';
 import _ from 'lodash';
@@ -107,6 +107,7 @@ export const convertProps = ({
       };
     case 'table':
       const configs: any = _.cloneDeep(initialProps) || {};
+
       let summary = null;
       if (configs.enableFooter && configs.footerColumns?.length > 0) {
         summary = () => (
@@ -129,6 +130,7 @@ export const convertProps = ({
       }
       return {
         ...initialProps,
+        rowKey: (record: any) => record.id || record.key,
         columns: initialProps?.columns?.map((item: any) => {
           return {
             ...item,
