@@ -78,6 +78,7 @@ export const componentRegistry = {
   badge: Badge,
   icon: Icon,
   map: GoogleMapReact,
+  textarea: Input.TextArea,
 };
 
 const convertIconStringToComponent = (iconString: string) => {
