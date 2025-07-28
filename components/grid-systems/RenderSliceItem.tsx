@@ -118,7 +118,8 @@ const ComponentRenderer: FC<{
 }> = ({ Component, propsCpn, data, children }) => {
   // console.log('ComponentRenderer', propsCpn?.style);
   const { style, ...newPropsCpn } = propsCpn;
-
+  if (_.isObject(children) && 'value' in children && 'lable' in children)
+    return <div>{JSON.stringify(children)}</div>;
   return (
     <Component key={data?.id} {...newPropsCpn}>
       {!_.isEmpty(data?.childs) ? children : propsCpn.children}

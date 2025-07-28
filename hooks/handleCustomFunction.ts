@@ -51,20 +51,21 @@ export const handleCustomFunction = async ({
   getData,
   findCustomFunction,
 }: THandleCustomData): Promise<any> => {
-  function buildArgsFromDefinedProps(
+  async function buildArgsFromDefinedProps(
     props: TCustomFunction['props'],
     inputs: TData['customFunction']['props']
   ) {
     const args: Record<string, any> = {};
 
-    props.forEach(async (prop) => {
+    for (const prop of props) {
       if (!prop.key) return;
+
       const input = inputs?.find((item) => item.key === prop.key);
 
       const rawData = await getData(input?.value || null);
 
       args[prop.key] = convertValueByType(rawData, prop.type, prop.isList);
-    });
+    }
 
     return args;
   }
@@ -72,6 +73,7 @@ export const handleCustomFunction = async ({
 
   if (_.isEmpty(customFunction)) return;
   const args = await buildArgsFromDefinedProps(customFunction?.props, data?.props);
+
   const runFunction = async () => {
     try {
       const fn = new Function(`return ${customFunction.code}`)() as (args: any) => any;

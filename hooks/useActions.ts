@@ -3,8 +3,16 @@ import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
-    TAction, TActionApiCall, TActionCustomFunction, TActionLoop, TActionNavigate,
-    TActionUpdateState, TConditional, TConditionChildMap, TTriggerActions, TTriggerValue
+  TAction,
+  TActionApiCall,
+  TActionCustomFunction,
+  TActionLoop,
+  TActionNavigate,
+  TActionUpdateState,
+  TConditional,
+  TConditionChildMap,
+  TTriggerActions,
+  TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 import { transformVariable } from '@/uitls/tranformVariable';
@@ -48,14 +56,14 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const { handleCustomFunction } = useCustomFunction(props);
   const [isLoading, setIsLoading] = useState(false);
 
-  const executeConditional = (action: TAction<TConditional>) => {
+  const executeConditional = async (action: TAction<TConditional>) => {
     const conditions = action?.data?.conditions as string[];
     if (_.isEmpty(conditions)) return;
     for (const conditionId of conditions) {
       const condition = findAction(conditionId) as TAction<TConditionChildMap>;
 
       if (condition) {
-        executeActionFCType(condition);
+        await executeActionFCType(condition);
       }
     }
   };
@@ -67,10 +75,12 @@ export const useActions = (props: TActionsProps): TUseActions => {
         await executeAction(action as TAction<TActionApiCall>);
         break;
       case 'conditional':
-        executeConditional(action as TAction<TConditional>);
+        await executeConditional(action as TAction<TConditional>);
         break;
       case 'conditionalChild':
         const isMatch = await executeConditionalChild(action as TAction<TConditionChildMap>);
+        console.log('🚀 ~ executeActionFCType ~ isMatch:', isMatch);
+
         const conditionChildData = action?.data as TConditionChildMap;
         const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
         if (isReturnValue && isMatch) {
@@ -105,7 +115,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     try {
       switch (action.type) {
         case 'navigate':
-          return handleNavigateAction(action as TAction<TActionNavigate>);
+          return await handleNavigateAction(action as TAction<TActionNavigate>);
         case 'apiCall':
           return await handleApiCallAction(action as TAction<TActionApiCall>);
         case 'updateStateManagement':

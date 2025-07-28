@@ -154,7 +154,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
       console.log('🚀 ~ useApiCallAction ~ error:', error);
       if (axios.isAxiosError(error)) {
         if (error.status === forbiddenCode) {
-          await handleRefreshToken(apiCall, body, variableId);
+          // await handleRefreshToken(apiCall, body, variableId);
           return;
         }
         if (outputVariable) {
