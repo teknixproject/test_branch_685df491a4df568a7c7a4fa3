@@ -129,13 +129,16 @@ export const evaluateCompareCondition = async (
   compare: TConditionalChild['compare'],
   getData: (value: any) => any
 ): Promise<boolean> => {
+  console.log('🚀 ~ evaluateCompareCondition ~ compare:', compare);
   if (!compare?.firstValue || !compare?.secondValue) {
     console.warn('Missing comparison values');
     return false;
   }
 
   const firstValue = await getData(compare.firstValue);
+  console.log('🚀 ~ evaluateCompareCondition ~ firstValue:', firstValue);
   const secondValue = await getData(compare.secondValue);
+  console.log('🚀 ~ evaluateCompareCondition ~ secondValue:', secondValue);
 
   // Check for null/undefined values
   if (firstValue == null || secondValue == null) {
@@ -177,7 +180,6 @@ export const handleCompareCondition = async (
   // Handle simple comparison condition
   if (conditionChild.type === ConditionType.COMPARE) {
     const valueCompareSignle = await evaluateCompareCondition(conditionChild.compare, getData);
-    console.log('🚀 ~ valueCompareSignle:', valueCompareSignle);
 
     return valueCompareSignle;
   }
@@ -224,7 +226,11 @@ export const processCondition = async (
     return false;
   }
 
-  const isConditionMet = handleCompareCondition(rootCondition.id, conditionChild.data, getData);
+  const isConditionMet = await handleCompareCondition(
+    rootCondition.id,
+    conditionChild.data,
+    getData
+  );
 
   return isConditionMet;
 };

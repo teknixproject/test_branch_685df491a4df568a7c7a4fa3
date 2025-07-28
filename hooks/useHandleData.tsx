@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { JSONPath } from 'jsonpath-plus';
 import _ from 'lodash';
 import { useParams } from 'next/navigation';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { stateManagementStore } from '@/stores';
 import { customFunctionStore } from '@/stores/customFunction';
@@ -58,14 +58,13 @@ const getVariableIdsFormData = (dataProps: TUseHandleData['dataProp']) => {
 
 export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   const params = useParams();
-  const [customFunctionResult, setCustomFunctionResult] = useState(null);
-  // const { getState } = actionHookSliceStore;
   const apiResponseState = stateManagementStore((state) => state.apiResponse);
   const findCustomFunction = customFunctionStore((state) => state.findCustomFunction);
+  const [isProcessing, setIsProcessing] = useState(false);
   const appState = stateManagementStore((state) => state.appState);
   const componentState = stateManagementStore((state) => state.componentState);
   const globalState = stateManagementStore((state) => state.globalState);
-  // const [dataState, setDataState] = useState<any>();
+  const [dataState, setDataState] = useState<any>();
   const itemInList = useRef(null);
   const findVariable = stateManagementStore((state) => state.findVariable);
 
@@ -75,13 +74,13 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   //#region handle api
   const handleApiResponse = useCallback(
-    (data: TData) => {
+    async (data: TData) => {
       if (_.isEmpty(data)) return;
       const apiResponse = data.apiResponse;
       const variableId = apiResponse?.variableId || '';
       const variable = findVariable({ id: variableId, type: 'apiResponse' });
 
-      const handleOption = (
+      const handleOption = async (
         item: NonNullable<TDataField<TOptionApiResponse>['options']>[number],
         value?: TVariable
       ) => {
@@ -89,7 +88,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'jsonPath':
             const valueJsonPath = JSONPath({
               json: value?.value,
-              path: getData(item.jsonPath as TData) || '',
+              path: (await getData(item.jsonPath as TData)) || '',
             });
             return valueJsonPath?.[0];
           case 'statusCode':
@@ -115,7 +114,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
       let value = variable as TVariable;
       for (const option of apiResponse?.options || []) {
-        value = handleOption(
+        value = await handleOption(
           option as NonNullable<TDataField<TOptionApiResponse>['options']>[number],
           value
         );
@@ -128,7 +127,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   //#region  handle state
   const handleState = useCallback(
-    (data: TData) => {
+    async (data: TData) => {
       const state = data[data.type] as TDataField;
       if ('variableId' in state || {}) {
         const variableId = state?.variableId || '';
@@ -143,7 +142,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'noAction':
               break;
             case 'jsonPath':
-              const jsonPathValue = getData(optionItem.jsonPath as TData);
+              const jsonPathValue = await getData(optionItem.jsonPath as TData);
               const valueJsonPath = JSONPath({
                 json: value,
                 path: jsonPathValue || '',
@@ -152,7 +151,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
               break;
 
             case 'itemAtIndex':
-              const index = getData(optionItem?.itemAtIndex as TData);
+              const index = await getData(optionItem?.itemAtIndex as TData);
               let indexValid: number = 0;
               if (typeof index !== 'number') {
                 indexValid = parseInt(index);
@@ -176,7 +175,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'sort':
               if (Array.isArray(value)) {
                 const sortOption = optionItem.sortOrder || 'asc';
-                const jsonPath = getData(optionItem.jsonPath as TData);
+                const jsonPath = await getData(optionItem.jsonPath as TData);
 
                 value = [...value].sort((a: any, b: any) => {
                   let aVal = a;
@@ -236,7 +235,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   //#region handle custom function
   //#region handle dynamic generate
-  const handleDynamicGenerate = (data: TData) => {
+  const handleDynamicGenerate = async (data: TData) => {
     const state = data[data.type] as TDataField;
     const dynamicItem = data.temp;
 
@@ -247,7 +246,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
       switch (optionItem.option) {
         case 'jsonPath':
-          const jsonPathValue = getData(optionItem.jsonPath as TData);
+          const jsonPathValue = await getData(optionItem.jsonPath as TData);
           const valueJsonPath = JSONPath({
             json: value,
             path: jsonPathValue || '',
@@ -256,7 +255,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           break;
 
         case 'itemAtIndex':
-          const index = getData(optionItem?.itemAtIndex as TData);
+          const index = await getData(optionItem?.itemAtIndex as TData);
           let indexValid: number = 0;
           if (typeof index !== 'number') {
             indexValid = parseInt(index);
@@ -280,7 +279,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case 'sort':
           if (Array.isArray(value)) {
             const sortOption = optionItem.sortOrder || 'asc';
-            const jsonPath = getData(optionItem.jsonPath as TData);
+            const jsonPath = await getData(optionItem.jsonPath as TData);
 
             value = [...value].sort((a: any, b: any) => {
               let aVal = a;
@@ -331,7 +330,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   };
   //#region getData
   const getData = useCallback(
-    (data: TData | null | undefined, valueStream?: any): any => {
+    async (data: TData | null | undefined, valueStream?: any): Promise<any> => {
       if (_.isEmpty(data) && valueStream) return valueStream;
       if (_.isEmpty(data) && props.valueStream) return props.valueStream;
       if (_.isEmpty(data) || !data.type) return data?.defaultValue || data?.valueInput;
@@ -340,29 +339,29 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case 'valueInput':
           return handleInputValue(data.valueInput);
         case 'parameters':
-          return handleParemeters(data);
+          return await handleParemeters(data);
         case 'dynamicGenerate':
-          return handleDynamicGenerate(data);
+          return await handleDynamicGenerate(data);
         case 'apiResponse':
-          return handleState(data);
+          return await handleState(data);
         case 'appState':
-          return handleState(data);
+          return await handleState(data);
         case 'componentState':
-          return handleState(data);
+          return await handleState(data);
         case 'globalState':
-          return handleState(data);
+          return await handleState(data);
         case 'combineText':
           return data.combineText;
         case 'itemInList':
-          return handleItemInList(data, valueStream);
+          return await handleItemInList(data, valueStream);
         case 'customFunction':
-          return handleCustomFunction({
+          return await handleCustomFunction({
             data: data.customFunction,
             findCustomFunction,
             getData,
           });
         case 'condition':
-          return handleCondition(data);
+          return await handleCondition(data);
         default:
           return data?.defaultValue || data.valueInput;
       }
@@ -399,55 +398,132 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     const result = getData(data, valueStream);
     return result;
   }, []);
-  const dataState = useMemo(() => {
-    const dataMultiple = props?.dataProp?.reduce((obj, item) => {
-      return {
-        ...obj,
-        [item.name]: getData(item.data, props.valueStream),
-      };
-    }, {});
 
-    const componentConverted = Object.entries(props?.componentProps || {}).reduce(
-      (obj, [key, value]) => {
-        if (isTData(value)) {
-          const data = {
-            type: value.type,
-            [value.type]: value[value.type],
-          } as TData;
+  const processDataState = useCallback(async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
 
-          let valueConvert = getData(data, props.valueStream);
-          if (props.valueType?.toLowerCase() === 'datepicker') {
-            if (key === 'value' || key === 'defaultValue') {
-              valueConvert = dayjs(valueConvert);
+    try {
+      const newDataState: any = {};
+
+      if (props?.dataProp?.length) {
+        const dataPromises = props.dataProp.map(async (item) => {
+          const value = await getData(item.data, props.valueStream);
+          return { name: item.name, value };
+        });
+
+        const resolvedData = await Promise.all(dataPromises);
+        resolvedData.forEach(({ name, value }) => {
+          newDataState[name] = value;
+        });
+      }
+
+      if (props?.componentProps) {
+        const componentPromises = Object.entries(props.componentProps).map(async ([key, value]) => {
+          if (isTData(value)) {
+            const data = {
+              type: value.type,
+              [value.type]: value[value.type],
+            } as TData;
+
+            let valueConvert = await getData(data, props.valueStream);
+            if (props.valueType?.toLowerCase() === 'datepicker') {
+              if (key === 'value' || key === 'defaultValue') {
+                valueConvert = dayjs(valueConvert);
+              }
             }
+            return { key, value: valueConvert };
           }
-          return {
-            ...obj,
-            [key]: valueConvert,
-          };
-        }
-        return {
-          ...obj,
-          [key]: value,
-        };
-      },
-      {}
-    );
-    const reslt = {
-      ...dataMultiple,
-      ...componentConverted,
-    };
+          return { key, value };
+        });
 
-    return reslt;
+        const resolvedComponents = await Promise.all(componentPromises);
+        resolvedComponents.forEach(({ key, value }) => {
+          newDataState[key] = value;
+        });
+      }
+
+      setDataState((prevState: any) => {
+        if (_.isEqual(prevState, newDataState)) return prevState;
+        return newDataState;
+      });
+    } catch (error) {
+      console.error('Error processing data state:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   }, [
-    appState,
-    globalState,
-    componentState,
-    apiResponseState,
+    getData,
+    props?.dataProp,
     props?.componentProps,
     props?.valueStream,
-    props?.dataProp,
+    props?.valueType,
+    isProcessing,
   ]);
+  const [hasProcessed, setHasProcessed] = useState(false);
+
+  useEffect(() => {
+    if (hasProcessed) return;
+
+    const run = async () => {
+      await processDataState();
+      setHasProcessed(true);
+    };
+
+    run();
+  }, [hasProcessed]);
+
+  // const dataState = useMemo(() => {
+  //   const dataMultiple = props?.dataProp?.reduce(async (obj, item) => {
+  //     return {
+  //       ...obj,
+  //       [item.name]: await getData(item.data, props.valueStream),
+  //     };
+  //   }, {});
+
+  //   const componentConverted = Object.entries(props?.componentProps || {}).reduce(
+  //     async (obj, [key, value]) => {
+  //       if (isTData(value)) {
+  //         const data = {
+  //           type: value.type,
+  //           [value.type]: value[value.type],
+  //         } as TData;
+
+  //         let valueConvert = await getData(data, props.valueStream);
+  //         console.log('🚀 ~ useHandleData ~ valueConvert:', valueConvert);
+
+  //         if (props.valueType?.toLowerCase() === 'datepicker') {
+  //           if (key === 'value' || key === 'defaultValue') {
+  //             valueConvert = dayjs(valueConvert);
+  //           }
+  //         }
+  //         return {
+  //           ...obj,
+  //           [key]: valueConvert,
+  //         };
+  //       }
+  //       return {
+  //         ...obj,
+  //         [key]: value,
+  //       };
+  //     },
+  //     {}
+  //   );
+  //   const reslt = {
+  //     ...dataMultiple,
+  //     ...componentConverted,
+  //   };
+
+  //   return reslt;
+  // }, [
+  //   appState,
+  //   globalState,
+  //   componentState,
+  //   apiResponseState,
+  //   props?.componentProps,
+  //   props?.valueStream,
+  //   props?.dataProp,
+  // ]);
   return {
     getData,
     dataState,
