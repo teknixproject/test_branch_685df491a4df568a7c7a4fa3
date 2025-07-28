@@ -158,28 +158,9 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
     (menuInfo: { key: string }) => {
       const key = menuInfo.key;
 
-      const findItemByKey = (items: any[], targetKey: string): any => {
-        for (const item of items || []) {
-          if (item.key === targetKey) return item;
-          if (item.children?.length) {
-            const found = findItemByKey(item.children, targetKey);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const menuItem = findItemByKey(items, key);
-      if (menuItem?.key) {
-        console.log('handleMenuClick if');
-
-        router.push(menuItem.key);
-      } else if (key) {
-        console.log('handleMenuClick else');
-        router.push(`/${key}`);
-      }
+      router.push(key);
     },
-    [router, items]
+    [router]
   );
 
   // Processed items

@@ -399,86 +399,79 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     return result;
   }, []);
 
-  useEffect(() => {
-    const processDataState = async () => {
-      if (isProcessing) return; // Prevent multiple simultaneous processing
+  const processDataState = useCallback(async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
 
-      setIsProcessing(true);
+    try {
+      const newDataState: any = {};
 
-      try {
-        const newDataState: any = {};
-
-        // Process dataProp
-        if (props?.dataProp?.length) {
-          const dataPromises = props.dataProp.map(async (item) => {
-            const value = await getData(item.data, props.valueStream);
-            return { name: item.name, value };
-          });
-
-          const resolvedData = await Promise.all(dataPromises);
-          resolvedData.forEach(({ name, value }) => {
-            newDataState[name] = value;
-          });
-        }
-
-        // Process componentProps
-        if (props?.componentProps) {
-          const componentPromises = Object.entries(props.componentProps).map(
-            async ([key, value]) => {
-              if (isTData(value)) {
-                const data = {
-                  type: value.type,
-                  [value.type]: value[value.type],
-                } as TData;
-
-                let valueConvert = await getData(data, props.valueStream);
-
-                // Handle datepicker special case
-                if (props.valueType?.toLowerCase() === 'datepicker') {
-                  if (key === 'value' || key === 'defaultValue') {
-                    valueConvert = dayjs(valueConvert);
-                  }
-                }
-
-                return { key, value: valueConvert };
-              }
-              return { key, value };
-            }
-          );
-
-          const resolvedComponents = await Promise.all(componentPromises);
-          resolvedComponents.forEach(({ key, value }) => {
-            newDataState[key] = value;
-          });
-        }
-
-        // Only update state if it has actually changed
-        setDataState((prevState: any) => {
-          if (_.isEqual(prevState, newDataState)) {
-            return prevState;
-          }
-          return newDataState;
+      if (props?.dataProp?.length) {
+        const dataPromises = props.dataProp.map(async (item) => {
+          const value = await getData(item.data, props.valueStream);
+          return { name: item.name, value };
         });
-      } catch (error) {
-        console.error('Error processing data state:', error);
-      } finally {
-        setIsProcessing(false);
-      }
-    };
 
-    processDataState();
+        const resolvedData = await Promise.all(dataPromises);
+        resolvedData.forEach(({ name, value }) => {
+          newDataState[name] = value;
+        });
+      }
+
+      if (props?.componentProps) {
+        const componentPromises = Object.entries(props.componentProps).map(async ([key, value]) => {
+          if (isTData(value)) {
+            const data = {
+              type: value.type,
+              [value.type]: value[value.type],
+            } as TData;
+
+            let valueConvert = await getData(data, props.valueStream);
+            if (props.valueType?.toLowerCase() === 'datepicker') {
+              if (key === 'value' || key === 'defaultValue') {
+                valueConvert = dayjs(valueConvert);
+              }
+            }
+            return { key, value: valueConvert };
+          }
+          return { key, value };
+        });
+
+        const resolvedComponents = await Promise.all(componentPromises);
+        resolvedComponents.forEach(({ key, value }) => {
+          newDataState[key] = value;
+        });
+      }
+
+      setDataState((prevState: any) => {
+        if (_.isEqual(prevState, newDataState)) return prevState;
+        return newDataState;
+      });
+    } catch (error) {
+      console.error('Error processing data state:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   }, [
-    appState,
-    globalState,
-    componentState,
-    apiResponseState,
-    isProcessing,
+    getData,
+    props?.dataProp,
     props?.componentProps,
     props?.valueStream,
-    props?.dataProp,
     props?.valueType,
-    getData,
+    isProcessing,
   ]);
+  const [hasProcessed, setHasProcessed] = useState(false);
+
+  useEffect(() => {
+    if (hasProcessed) return;
+
+    const run = async () => {
+      await processDataState();
+      setHasProcessed(true);
+    };
+
+    run();
+  }, [hasProcessed]);
 
   // const dataState = useMemo(() => {
   //   const dataMultiple = props?.dataProp?.reduce(async (obj, item) => {

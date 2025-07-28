@@ -61,7 +61,7 @@ export const useNavigateAction = ({ data, valueStream }: TProps): TUseActions =>
       const { url, isExternal, isNewTab, parameters = [] } = action?.data || {};
       if (!url) return;
 
-      const urlConverted = buildPathFromPattern(url, parameters, getData, valueStream);
+      const urlConverted = await buildPathFromPattern(url, parameters, getData, valueStream);
 
       if (!isValidUrl(urlConverted)) {
         return;
