@@ -54,8 +54,8 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
   const valueType = useMemo(() => data?.value?.toLowerCase() || '', [data?.value]);
   const { isNoChildren } = getComponentType(data?.value || '');
   const findVariable = stateManagementStore((state) => state.findVariable);
-  // const setValueStream = useDataStreamStore((state) => state.setValueStream);
-  const { dataState, getData } = useHandleData({
+
+  const { dataState } = useHandleData({
     dataProp: getPropData(data),
     componentProps: data?.componentProps,
     valueStream,
@@ -63,12 +63,7 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
     activeData: data,
   });
 
-  // useEffect(() => {
-  //   setValueStream(data.id, valueStream);
-  // }, [data.id, setValueStream, valueStream]);
-
   const { actions } = useHandleProps({ dataProps: getPropActions(data), data, valueStream });
-
   const { isLoading } = useActions({ data, valueStream });
 
   const Component = useMemo(
@@ -97,8 +92,7 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
     }
     if ('styleMultiple' in result) _.unset(result, 'styleMultiple');
     if ('dataProps' in result) _.unset(result, 'dataProps');
-    if (data.id.includes('Image')) console.log(`🚀 ~ result: ${data.id}`, result);
-    const plainProps = convertToPlainProps(result, getData);
+    const plainProps = convertToPlainProps(result);
 
     result = cleanProps(plainProps, valueType);
     return result;
@@ -106,7 +100,7 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
   }, [data, dataState, valueStream]);
 
   return {
-    isLoading,
+    isLoading: isLoading,
     valueType,
     Component,
     propsCpn,
@@ -135,8 +129,7 @@ const ComponentRenderer: FC<{
 const RenderSliceItem: FC<TProps> = (props) => {
   const { data, valueStream } = useMemo(() => props, [props]);
 
-  const { isLoading, valueType, Component, propsCpn, dataState } = useRenderItem(data, valueStream);
-  // if (data.id.includes('Image')) console.log(`🚀 ~ propsCpn: ${data.id}`, propsCpn);
+  const { isLoading, valueType, Component, propsCpn } = useRenderItem(data, valueStream);
 
   const { isForm, isNoChildren, isChart, isMap } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;

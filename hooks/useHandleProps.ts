@@ -2,7 +2,12 @@ import _ from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
 import {
-    TAction, TActionApiCall, TActionNavigate, TActionUpdateState, TTriggerActions, TTriggerValue
+  TAction,
+  TActionApiCall,
+  TActionNavigate,
+  TActionUpdateState,
+  TTriggerActions,
+  TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 
@@ -128,26 +133,53 @@ export const createActionHandlerFactory = (
     };
 };
 
+// export const createMouseEventHandlers = (
+//   dataProps: TDataProps[],
+//   createActionHandler: (actionName: string) => (triggerType?: TTriggerValue) => Promise<void>
+// ): Record<string, React.MouseEventHandler<HTMLButtonElement>> => {
+//   const validActions = dataProps?.filter((item) => !_.isEmpty(item.data?.onClick));
+//   const result: Record<string, React.MouseEventHandler<HTMLButtonElement>> = {};
+
+//   if (!_.isArray(validActions)) return {};
+
+//   for (const item of validActions) {
+//     result[item.name] = async (e) => {
+//       e?.preventDefault?.();
+//       const handler = createActionHandler(item.name);
+//       await handler();
+//     };
+//   }
+
+//   return result;
+// };
 export const createMouseEventHandlers = (
   dataProps: TDataProps[],
-  createActionHandler: (actionName: string) => (triggerType?: TTriggerValue) => Promise<void>
+  createActionHandler: (actionName: string) => (triggerType?: TTriggerValue) => Promise<void>,
+  executeInParallel = false
 ): Record<string, React.MouseEventHandler<HTMLButtonElement>> => {
   const validActions = dataProps?.filter((item) => !_.isEmpty(item.data?.onClick));
-  const result: Record<string, React.MouseEventHandler<HTMLButtonElement>> = {};
 
-  if (!_.isArray(validActions)) return {};
-
-  for (const item of validActions) {
-    result[item.name] = async (e) => {
-      e?.preventDefault?.();
-      const handler = createActionHandler(item.name);
-      await handler();
-    };
+  if (!_.isArray(validActions) || validActions.length === 0) {
+    return {};
   }
 
-  return result;
-};
+  return validActions.reduce((handlers, item) => {
+    handlers[item.name] = async (e) => {
+      e?.preventDefault?.();
 
+      if (executeInParallel && validActions.length > 1) {
+        // Execute all handlers in parallel
+        const allHandlers = validActions.map((action) => createActionHandler(action.name)());
+        await Promise.all(allHandlers);
+      } else {
+        // Execute single handler
+        const handler = createActionHandler(item.name);
+        await handler();
+      }
+    };
+    return handlers;
+  }, {} as Record<string, React.MouseEventHandler<HTMLButtonElement>>);
+};
 export const useHandleProps = ({
   dataProps,
   data,
@@ -164,7 +196,7 @@ export const useHandleProps = ({
 
   // const { executeConditional } = useConditionAction();
 
-  const { handleUpdateStateAction } = useUpdateStateAction();
+  const { handleUpdateStateAction } = useUpdateStateAction({ valueStream, data });
 
   const { handleNavigateAction } = useNavigateAction({ valueStream, data });
 

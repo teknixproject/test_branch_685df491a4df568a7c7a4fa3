@@ -6,7 +6,12 @@ import { useCallback } from 'react';
 import { stateManagementStore } from '@/stores';
 import { authSettingStore } from '@/stores/authSetting';
 import {
-    TAction, TActionApiCall, TActionCustomFunction, TActionVariable, TApiCallValue, TApiCallVariable
+  TAction,
+  TActionApiCall,
+  TActionCustomFunction,
+  TActionVariable,
+  TApiCallValue,
+  TApiCallVariable,
 } from '@/types';
 import { variableUtil } from '@/uitls';
 
@@ -43,10 +48,10 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const { handleCustomFunction } = useCustomFunction(props);
   const { getState } = actionHookSliceStore;
   const convertActionVariables = useCallback(
-    (actionVariables: TActionVariable[], apiCall: TApiCallValue): any[] => {
+    async (actionVariables: TActionVariable[], apiCall: TApiCallValue): Promise<any[]> => {
       if (_.isEmpty(actionVariables)) return [];
 
-      return actionVariables.map((item) => {
+      return actionVariables.map(async (item) => {
         const { firstValue, secondValue } = item;
 
         const data = apiCall?.variables?.find((item) => item.id === firstValue.variableId);
@@ -54,7 +59,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
         if (!data) return;
 
         if (secondValue?.type) {
-          const valueInStore = getData(secondValue);
+          const valueInStore = await getData(secondValue);
           data.value = valueInStore;
         }
 
