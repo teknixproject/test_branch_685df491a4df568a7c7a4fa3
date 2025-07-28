@@ -203,11 +203,21 @@ export const convertProps = ({
     case 'tree': {
       return {
         ...initialProps,
+        // renderItem: (item: any) => {
+        //   return (
+        //     <List.Item>
+        //       <RenderSliceItem data={initialProps.box} valueStream={item} />
+        //     </List.Item>
+        //   );
+        // },
         titleRender(node) {
-          return <RenderSliceItem data={initialProps.box} valueStream={node} />;
+          console.log('initialProps.title', initialProps.title);
+
+          return <RenderSliceItem data={initialProps.title} valueStream={node} />;
         },
       } as TreeProps;
     }
+
     default:
       break;
   }

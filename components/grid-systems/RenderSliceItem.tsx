@@ -87,10 +87,10 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
       valueType === 'menu'
         ? { ...staticProps, ...actions }
         : {
-            ...dataState,
-            ...staticProps,
-            ...actions,
-          };
+          ...dataState,
+          ...staticProps,
+          ...actions,
+        };
 
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
@@ -101,6 +101,9 @@ const useRenderItem = (data: GridItem, valueStream?: any) => {
     const plainProps = convertToPlainProps(result, getData);
 
     result = cleanProps(plainProps, valueType);
+
+    console.log('resultresultresult', result);
+
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dataState, valueStream]);
