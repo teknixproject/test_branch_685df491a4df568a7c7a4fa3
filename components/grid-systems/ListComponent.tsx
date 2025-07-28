@@ -26,6 +26,8 @@ import {
   TableProps,
   Tabs,
   Tag,
+  Tree,
+  TreeProps,
   Typography,
 } from 'antd';
 import GoogleMapReact from 'google-map-react';
@@ -79,6 +81,7 @@ export const componentRegistry = {
   icon: Icon,
   map: GoogleMapReact,
   textarea: Input.TextArea,
+  tree: Tree,
 };
 
 const convertIconStringToComponent = (iconString: string) => {
@@ -197,6 +200,14 @@ export const convertProps = ({
           <Maker key={`${item.lat}-${item.lng}`} lat={item.lat} lng={item.lng} text="My Marker" />
         )),
       };
+    case 'tree': {
+      return {
+        ...initialProps,
+        titleRender(node) {
+          return <RenderSliceItem data={initialProps.box} valueStream={node} />;
+        },
+      } as TreeProps;
+    }
     default:
       break;
   }
