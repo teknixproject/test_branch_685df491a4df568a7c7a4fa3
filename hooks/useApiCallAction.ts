@@ -51,20 +51,26 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     async (actionVariables: TActionVariable[], apiCall: TApiCallValue): Promise<any[]> => {
       if (_.isEmpty(actionVariables)) return [];
 
-      return actionVariables.map(async (item) => {
-        const { firstValue, secondValue } = item;
+      const result = await Promise.all(
+        actionVariables.map(async (item) => {
+          const { firstValue, secondValue } = item;
 
-        const data = apiCall?.variables?.find((item) => item.id === firstValue.variableId);
+          const data = apiCall?.variables?.find(
+            (variable) => variable.id === firstValue.variableId
+          );
 
-        if (!data) return;
+          if (!data) return;
 
-        if (secondValue?.type) {
-          const valueInStore = await getData(secondValue);
-          data.value = valueInStore;
-        }
+          if (secondValue?.type) {
+            const valueInStore = await getData(secondValue);
+            return { ...data, value: valueInStore };
+          }
 
-        return data;
-      });
+          return data;
+        })
+      );
+
+      return result.filter(Boolean); // lọc bỏ các giá trị `undefined`
     },
     [getData]
   );
@@ -197,8 +203,9 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     const apiCall = getApiMember(action?.data?.apiId ?? '');
 
     if (!apiCall) return;
-    const variables = convertActionVariables(action?.data?.variables ?? [], apiCall);
+    const variables = await convertActionVariables(action?.data?.variables ?? [], apiCall);
     const newBody = handleBody(apiCall, variables);
+    _.update(apiCall, 'variables', () => variables);
 
     await makeApiCall(apiCall, newBody, action?.data?.output?.variableId ?? '');
 
