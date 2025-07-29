@@ -169,12 +169,20 @@ export const useActions = (props: TActionsProps): TUseActions => {
     },
     [data?.actions, executeTriggerActions]
   );
+  const renderedIdRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (mounted.current && !_.isEmpty(actions) && 'onPageLoad' in actions) {
+    if (
+      mounted.current &&
+      data?.id &&
+      !renderedIdRef.current.has(data.id) &&
+      !_.isEmpty(actions) &&
+      'onPageLoad' in actions
+    ) {
+      renderedIdRef.current.add(data.id);
       handleAction('onPageLoad');
     }
-  }, []);
+  }, [data?.id, actions]);
 
   return { handleAction, isLoading, executeActionFCType };
 };
