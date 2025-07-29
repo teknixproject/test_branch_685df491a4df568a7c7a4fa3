@@ -135,7 +135,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
 
   const { isLoading, valueType, Component, propsCpn } = useRenderItem(data, valueStream);
 
-  const { isForm, isNoChildren, isChart, isMap } = getComponentType(data?.value || '');
+  const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;
   if (isLoading) return <LoadingPage />;
   if (isForm) return <RenderForm {...props} />;
@@ -147,6 +147,16 @@ const RenderSliceItem: FC<TProps> = (props) => {
         <Component key={data?.id} {...propsCpn} />
       </div>
     );
+  if (isBagde) {
+    const isBadgeStatus = data.componentProps?.badgeStatus?.valueInput
+    if (isBadgeStatus) return <Component text={data?.childs?.map((child, index) => (
+      <RenderSliceItem
+        {...props}
+        data={child}
+        key={child.id ? String(child.id) : `child-${index}`}
+      />
+    ))} key={data?.id} {...propsCpn} />
+  }
   return (
     <ComponentRenderer Component={Component} propsCpn={propsCpn} data={data}>
       {data?.childs?.map((child, index) => (
