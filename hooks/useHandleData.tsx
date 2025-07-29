@@ -323,9 +323,9 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     return result;
   };
 
-  const handleCondition = (data: TData) => {
+  const handleCondition = async (data: TData) => {
     if (!data?.condition) return;
-    const value = executeConditionalInData(data?.condition, getData);
+    const value = await executeConditionalInData(data?.condition, getData);
     return value;
   };
   //#region getData
@@ -400,8 +400,8 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   }, []);
 
   const processDataState = useCallback(async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+    // if (isProcessing) return;
+    // setIsProcessing(true);
 
     try {
       const newDataState: any = {};
@@ -450,28 +450,27 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     } catch (error) {
       console.error('Error processing data state:', error);
     } finally {
-      setIsProcessing(false);
+      // setIsProcessing(false);
     }
   }, [
-    getData,
     props?.dataProp,
     props?.componentProps,
     props?.valueStream,
     props?.valueType,
-    isProcessing,
+    // isProcessing,
   ]);
   const [hasProcessed, setHasProcessed] = useState(false);
 
   useEffect(() => {
-    if (hasProcessed) return;
+    // if (hasProcessed) return;
 
     const run = async () => {
       await processDataState();
-      setHasProcessed(true);
+      // setHasProcessed(true);
     };
 
     run();
-  }, [hasProcessed]);
+  }, [appState, globalState, componentState, apiResponseState]);
 
   // const dataState = useMemo(() => {
   //   const dataMultiple = props?.dataProp?.reduce(async (obj, item) => {

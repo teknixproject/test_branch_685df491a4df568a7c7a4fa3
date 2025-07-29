@@ -9,11 +9,11 @@ const findAction = (actionId: string, triggerFull: TTriggerActions): TAction<unk
   return onClick[actionId];
 };
 
-const processCondition = (
+const processCondition = async (
   conditionId: string,
   triggerFull: TTriggerActions,
   getData: (value: any) => any
-): boolean => {
+): Promise<boolean> => {
   const conditionChild = findAction(conditionId, triggerFull) as TAction<TConditionChildMap>;
 
   if (!conditionChild?.data) {
@@ -28,7 +28,7 @@ const processCondition = (
     return false;
   }
 
-  return handleCompareCondition(rootCondition.id, conditionChild.data, getData);
+  return await handleCompareCondition(rootCondition.id, conditionChild.data, getData);
 };
 
 const extractReturnValue = (condition: TAction<TConditionChildMap>): any => {
@@ -42,10 +42,10 @@ const isElseCondition = (condition: TAction<TConditionChildMap>): boolean => {
   return condition.data?.label === 'else';
 };
 
-export const executeConditionalInData = (
+export const executeConditionalInData = async (
   triggerFull: TTriggerActions,
   getData: (value: any) => any
-): any => {
+): Promise<void> => {
   const onClick = triggerFull.onClick || {};
   const conditionAction = Object.values(onClick).find(
     (item) => item.fcType === 'conditional'
@@ -53,14 +53,14 @@ export const executeConditionalInData = (
 
   if (!conditionAction) {
     console.warn('No conditional action found');
-    return null;
+    return;
   }
 
   const conditions = conditionAction.data?.conditions || [];
 
   if (conditions.length === 0) {
     console.warn('No conditions found in conditional action');
-    return null;
+    return;
   }
 
   let elseCondition: TAction<TConditionChildMap> | null = null;
@@ -82,7 +82,7 @@ export const executeConditionalInData = (
       }
 
       // Check if condition is met
-      const isConditionMet = processCondition(conditionId, triggerFull, getData);
+      const isConditionMet = await processCondition(conditionId, triggerFull, getData);
 
       if (isConditionMet) {
         return extractReturnValue(condition);
@@ -98,5 +98,5 @@ export const executeConditionalInData = (
     return extractReturnValue(elseCondition);
   }
 
-  return null;
+  return;
 };

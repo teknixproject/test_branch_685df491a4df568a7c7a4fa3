@@ -6,8 +6,10 @@ import { transformVariable } from '@/uitls/tranformVariable';
 import { useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  executeConditional: (action: TAction<TConditional>) => Promise<void>;
-  handleCompareCondition: (conditionChildId: string, condition: TConditionChildMap) => boolean;
+  handleCompareCondition: (
+    conditionChildId: string,
+    condition: TConditionChildMap
+  ) => Promise<boolean>;
 };
 
 // Enums for operators to avoid magic strings
@@ -123,17 +125,17 @@ export const getConditionChildById = (
  * @param getData - Function to retrieve data values
  * @returns Boolean result of the comparison
  */
-export const evaluateCompareCondition = (
+export const evaluateCompareCondition = async (
   compare: TConditionalChild['compare'],
   getData: (value: any) => any
-): boolean => {
+): Promise<boolean> => {
   if (!compare?.firstValue || !compare?.secondValue) {
     console.warn('Missing comparison values');
     return false;
   }
 
-  const firstValue = getData(compare.firstValue);
-  const secondValue = getData(compare.secondValue);
+  const firstValue = await getData(compare.firstValue);
+  const secondValue = await getData(compare.secondValue);
 
   // Check for null/undefined values
   if (firstValue == null || secondValue == null) {
@@ -160,11 +162,11 @@ export const evaluateCompareCondition = (
  * @param getData - Function to retrieve data values
  * @returns Boolean result of the condition evaluation
  */
-export const handleCompareCondition = (
+export const handleCompareCondition = async (
   conditionChildId: string,
   condition: TConditionChildMap,
   getData: (value: any) => any
-): boolean => {
+): Promise<boolean> => {
   const conditionChild = getConditionChildById(conditionChildId, condition);
 
   if (!conditionChild) {
@@ -174,17 +176,17 @@ export const handleCompareCondition = (
 
   // Handle simple comparison condition
   if (conditionChild.type === ConditionType.COMPARE) {
-    const valueCompareSignle = evaluateCompareCondition(conditionChild.compare, getData);
+    const valueCompareSignle = await evaluateCompareCondition(conditionChild.compare, getData);
     return valueCompareSignle;
   }
 
   // Handle complex logic condition
   const firstValue = conditionChild.fistCondition
-    ? handleCompareCondition(conditionChild.fistCondition, condition, getData)
+    ? await handleCompareCondition(conditionChild.fistCondition, condition, getData)
     : undefined;
 
   const secondValue = conditionChild.secondCondition
-    ? handleCompareCondition(conditionChild.secondCondition, condition, getData)
+    ? await handleCompareCondition(conditionChild.secondCondition, condition, getData)
     : undefined;
 
   const valueComparasion = evaluateLogicOperation(
@@ -223,7 +225,11 @@ export const processCondition = async (
     return false;
   }
 
-  const isConditionMet = handleCompareCondition(rootCondition.id, conditionChild.data, getData);
+  const isConditionMet = await handleCompareCondition(
+    rootCondition.id,
+    conditionChild.data,
+    getData
+  );
 
   const isReturnValue = conditionChild.data.isReturnValue;
   if (isConditionMet && conditionChild.next && !isReturnValue) {
@@ -298,20 +304,18 @@ export const useConditionAction = (): TUseActions => {
   /**
    * Wrapper for handleCompareCondition with injected dependencies
    */
-  const handleCompareConditionWrapper = (
+  const handleCompareConditionWrapper = async (
     conditionChildId: string,
     condition: TConditionChildMap
-  ): boolean => {
-    return handleCompareCondition(conditionChildId, condition, getData);
+  ): Promise<boolean> => {
+    return await handleCompareCondition(conditionChildId, condition, getData);
   };
 
   /**
    * Wrapper for executeConditional with injected dependencies
    */
-  const executeConditionalWrapper = async (action: TAction<TConditional>): Promise<void> => {};
 
   return {
-    executeConditional: executeConditionalWrapper,
     handleCompareCondition: handleCompareConditionWrapper,
   };
 };

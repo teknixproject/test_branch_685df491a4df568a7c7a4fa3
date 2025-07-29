@@ -29,22 +29,18 @@ export const actionHookSliceStore = create<TState & TActions>()(
       formData: null,
 
       setActions: (actions) => {
-        console.log('[setActions]', actions);
         set({ actions }, false, 'actionHook/setActions');
       },
 
       setTriggerName: (triggerName) => {
-        console.log('[setTriggerName]', triggerName);
         set({ triggerName }, false, 'actionHook/setTriggerName');
       },
 
       setFormData: (formData) => {
-        console.log('[setFormData]', formData);
         set({ formData }, false, 'actionHook/setFormData');
       },
 
       async setMultipleActions(data) {
-        console.log('[setMultipleActions]', data);
         set(
           (state) => ({
             ...state,
@@ -58,7 +54,6 @@ export const actionHookSliceStore = create<TState & TActions>()(
       },
 
       setValueStream: (valueStream) => {
-        console.log('[setvalueStream]', valueStream);
         set({ valueStream }, false, 'actionHook/setvalueStream');
       },
       findAction: (actionId) => {
