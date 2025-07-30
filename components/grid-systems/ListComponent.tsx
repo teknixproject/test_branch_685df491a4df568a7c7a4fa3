@@ -129,6 +129,7 @@ export const convertProps = ({
       return {
         ...initialProps,
         renderItem: (item: any) => {
+
           return (
             <List.Item>
               <RenderSliceItem data={initialProps.box} valueStream={item} />
@@ -206,10 +207,11 @@ export const convertProps = ({
       return {
         ...initialProps,
         titleRender(node) {
-          return <RenderSliceItem data={initialProps.box} valueStream={node} />;
+          return <RenderSliceItem data={node?.title as any} valueStream={node} />;
         },
       } as TreeProps;
     }
+
     default:
       break;
   }

@@ -102,10 +102,10 @@ const useRenderItem = ({
       valueType === 'menu'
         ? { ...staticProps, ...actions }
         : {
-            ...dataState,
-            ...staticProps,
-            ...actions,
-          };
+          ...dataState,
+          ...staticProps,
+          ...actions,
+        };
 
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
@@ -115,6 +115,9 @@ const useRenderItem = ({
     const plainProps = convertToPlainProps(result);
 
     result = cleanProps(plainProps, valueType);
+
+    console.log('resultresultresult', result);
+
     return result;
   }, [actions, dataState, isNoChildren, valueType]);
 
@@ -153,7 +156,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
   const { isLoading, valueType, Component, propsCpn } = useRenderItem({ data, valueStream });
   // console.log(`🚀 ~ RenderSliceItem ~ propsCpn: ${data.id}`, propsCpn);
 
-  const { isForm, isNoChildren, isChart, isMap } = getComponentType(data?.value || '');
+  const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;
   if (isLoading) return <LoadingPage />;
   if (isForm) return <RenderForm {...props} />;
@@ -165,6 +168,16 @@ const RenderSliceItem: FC<TProps> = (props) => {
         <Component key={data?.id} {...propsCpn} />
       </div>
     );
+  if (isBagde) {
+    const isBadgeStatus = data.componentProps?.badgeStatus?.valueInput
+    if (isBadgeStatus) return <Component text={data?.childs?.map((child, index) => (
+      <RenderSliceItem
+        {...props}
+        data={child}
+        key={child.id ? String(child.id) : `child-${index}`}
+      />
+    ))} key={data?.id} {...propsCpn} />
+  }
   return (
     <ComponentRenderer Component={Component} propsCpn={propsCpn} data={data}>
       {data?.childs?.map((child, index) => (
