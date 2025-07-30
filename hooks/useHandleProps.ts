@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
+import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
   TAction,
@@ -35,6 +36,7 @@ interface UseHandlePropsProps {
   valueStream?: any;
   formData?: any;
   data?: GridItem;
+  methods?: UseFormReturn<FieldValues, any, FieldValues>;
 }
 
 // Constants
@@ -42,6 +44,7 @@ const ACTION_TYPES = {
   NAVIGATE: 'navigate',
   API_CALL: 'apiCall',
   UPDATE_STATE: 'updateStateManagement',
+  UPDATE_FORM_STATE: 'updateFormState',
 } as const;
 
 const FC_TYPES = {
@@ -157,6 +160,7 @@ export const useHandleProps = ({
   dataProps,
   data,
   valueStream,
+  methods,
 }: UseHandlePropsProps): UseHandlePropsResult => {
   const triggerNameRef = useRef<TTriggerValue>(DEFAULT_TRIGGER);
   const previousActionsMapRef = useRef<Record<string, TTriggerActions>>({});
@@ -165,7 +169,7 @@ export const useHandleProps = ({
   const actionsMap = useMemo(() => createActionsMap(dataProps), [dataProps]);
 
   const { handleApiCallAction } = useApiCallAction({ valueStream, data });
-  const { executeActionFCType } = useActions({ valueStream, data });
+  const { executeActionFCType } = useActions({ valueStream, data, methods });
 
   // const { executeConditional } = useConditionAction();
 

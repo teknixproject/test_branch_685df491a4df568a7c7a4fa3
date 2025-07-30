@@ -70,9 +70,11 @@ export const handleCustomFunction = async ({
     return args;
   }
   const customFunction = findCustomFunction(data.customFunctionId);
+  console.log('🚀 ~ handleCustomFunction ~ customFunction:', customFunction);
 
   if (_.isEmpty(customFunction)) return;
   const args = await buildArgsFromDefinedProps(customFunction?.props, data?.props);
+  console.log('🚀 ~ handleCustomFunction ~ args:', args);
 
   const runFunction = async () => {
     try {
@@ -80,6 +82,7 @@ export const handleCustomFunction = async ({
 
       if (typeof fn === 'function') {
         const result = await fn(args);
+        console.log('🚀 ~ runFunction ~ result:', result);
 
         return result;
       } else {

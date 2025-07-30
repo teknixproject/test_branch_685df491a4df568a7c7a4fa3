@@ -14,6 +14,7 @@ import { authSettingStore } from '@/stores/authSetting';
 import { customFunctionStore } from '@/stores/customFunction';
 import { TAuthSetting, TTypeSelect, TTypeSelectState, TVariable, TVariableMap } from '@/types';
 import { getMatchingRoutePattern } from '@/uitls/pathname';
+import { useQuery } from '@tanstack/react-query';
 
 type DeviceType = 'mobile' | 'desktop';
 
@@ -81,7 +82,6 @@ export const useInitStatePreview = () => {
   const addAndUpdateApiResource = apiResourceStore((state) => state.addAndUpdateApiResource);
   const setStateManagement = stateManagementStore((state) => state.setStateManagement);
   const setCustomFunctions = customFunctionStore((state) => state.setCustomFunctions);
-  const resetAuthSettings = authSettingStore((state) => state.reset);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Device type management
@@ -104,43 +104,43 @@ export const useInitStatePreview = () => {
     selectedFooterLayout,
   } = useLayoutProcessing(dataPreviewUI, deviceType);
   // Optimized API calls with error handling
-  const apiCalls = useMemo(() => {
-    const effectiveProjectId = projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '';
+  // const apiCalls = useMemo(() => {
+  //   const effectiveProjectId = projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '';
 
-    const getApiCall = async (): Promise<void> => {
-      try {
-        const result = await apiCallService.getAll({ projectId: effectiveProjectId });
-        addAndUpdateApiResource({ apis: result?.data?.apis });
-      } catch (error) {
-        console.error('Failed to fetch API calls:', error);
-      }
-    };
+  //   const getApiCall = async (): Promise<void> => {
+  //     try {
+  //       const result = await apiCallService.getAll({ projectId: effectiveProjectId });
+  //       addAndUpdateApiResource({ apis: result?.data?.apis });
+  //     } catch (error) {
+  //       console.error('Failed to fetch API calls:', error);
+  //     }
+  //   };
 
-    const getAuthSettings = async (): Promise<void> => {
-      if (!projectId) return;
-      try {
-        const result = await authSettingService.get({ projectId });
-        resetAuthSettings(result?.data);
-      } catch (error) {
-        console.error('Failed to fetch auth settings:', error);
-      }
-    };
+  //   const getAuthSettings = async (): Promise<void> => {
+  //     if (!projectId) return;
+  //     try {
+  //       const result = await authSettingService.get({ projectId });
+  //       resetAuthSettings(result?.data);
+  //     } catch (error) {
+  //       console.error('Failed to fetch auth settings:', error);
+  //     }
+  //   };
 
-    const getCustomFunctions = async (): Promise<void> => {
-      if (!uid) return;
-      try {
-        const result = await customFunctionService.getAll({
-          uid,
-          projectId: effectiveProjectId,
-        });
-        setCustomFunctions(result.data);
-      } catch (error) {
-        console.error('Failed to fetch custom functions:', error);
-      }
-    };
+  //   const getCustomFunctions = async (): Promise<void> => {
+  //     if (!uid) return;
+  //     try {
+  //       const result = await customFunctionService.getAll({
+  //         uid,
+  //         projectId: effectiveProjectId,
+  //       });
+  //       setCustomFunctions(result.data);
+  //     } catch (error) {
+  //       console.error('Failed to fetch custom functions:', error);
+  //     }
+  //   };
 
-    return { getApiCall, getAuthSettings, getCustomFunctions };
-  }, [projectId, uid, addAndUpdateApiResource, resetAuthSettings, setCustomFunctions]);
+  //   return { getApiCall, getAuthSettings, getCustomFunctions };
+  // }, [projectId, uid, addAndUpdateApiResource, resetAuthSettings, setCustomFunctions]);
 
   // State management setup
   const setStateFormDataPreview = useCallback(() => {
@@ -172,9 +172,9 @@ export const useInitStatePreview = () => {
       try {
         await Promise.allSettled([
           setStateFormDataPreview(),
-          apiCalls.getApiCall(),
-          apiCalls.getCustomFunctions(),
-          apiCalls.getAuthSettings(),
+          getApiCall({ addAndUpdateApiResource }),
+          getCustomFunctions({ setCustomFunctions, uid }),
+          // getAuthSettings({ resetAuthSettings }),
         ]);
       } catch (error) {
         console.error('Failed to initialize data:', error);
@@ -183,7 +183,7 @@ export const useInitStatePreview = () => {
     setLoading(true);
     initializeData();
     setLoading(false);
-  }, [uid, projectId, setStateFormDataPreview, apiCalls]);
+  }, [uid, projectId, setStateFormDataPreview]);
 
   // Return optimized values
   return {
@@ -210,26 +210,26 @@ export const useInitStatePreview = () => {
 //#region State Render
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 export const useInitStateRender = () => {
-  const pathname = usePathname(); // /detail/123
+  const pathname = usePathname();
+  const router = useRouter();
   const [uid, setUid] = useState<string | null>(null);
-  useEffect(() => {
-    async function fetchData() {
-      const result = await documentService.getAllPageNames(projectId || '');
-      const uids = result?.data?.map((item: any) => item.uid) || [];
+  const [deviceType, setDeviceType] = useState<DeviceType>(getDeviceType());
 
-      const matched = getMatchingRoutePattern(pathname, uids);
-      setUid(matched);
-    }
-    fetchData();
-  }, [pathname]);
+  console.log('🚀 ~ useInitStateRender ~ uid:', uid);
 
   const addAndUpdateApiResource = apiResourceStore((state) => state.addAndUpdateApiResource);
   const setStateManagement = stateManagementStore((state) => state.setStateManagement);
   const findVariable = stateManagementStore((state) => state.findVariable);
   const resetAuthSettings = authSettingStore((state) => state.reset);
-
-  const router = useRouter();
   const setCustomFunctions = customFunctionStore((state) => state.setCustomFunctions);
+
+  const { bodyLayout } = useConstructorDataAPI(uid || '');
+
+  const selectedBodyLayout = useMemo(
+    () => bodyLayout[deviceType] ?? bodyLayout ?? {},
+    [bodyLayout, deviceType]
+  );
+
   const { enable, pages, entryPage } = authSettingStore((state) => {
     return {
       enable: state.enable,
@@ -237,14 +237,20 @@ export const useInitStateRender = () => {
       entryPage: state.entryPage,
     };
   }, isEqual);
-  const { bodyLayout, isLoading } = useConstructorDataAPI(uid || '');
-  const [loading, setLoading] = useState<boolean>(true);
 
-  const [deviceType, setDeviceType] = useState<DeviceType>(getDeviceType());
-  const selectedBodyLayout = useMemo(
-    () => bodyLayout[deviceType] ?? bodyLayout ?? {},
-    [bodyLayout, deviceType]
-  );
+  const { isLoading: isLoadingPageNames } = useQuery({
+    queryKey: [],
+    queryFn: async () => {
+      const result = await documentService.getAllPageNames(projectId || '');
+      const uids = result?.data?.map((item: any) => item.uid) || [];
+
+      const matched = getMatchingRoutePattern(pathname, uids);
+      setUid(matched);
+    },
+    enabled: Boolean(projectId) && Boolean(pathname),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -257,81 +263,6 @@ export const useInitStateRender = () => {
     };
   }, []);
 
-  const getStates = async () => {
-    const list: TTypeSelectState[] = [
-      'parameters',
-      'appState',
-      'componentState',
-      'globalState',
-      'apiResponse',
-      'dynamicGenerate',
-    ];
-    try {
-      await Promise.all(
-        list.map(async (type: TTypeSelectState) => {
-          const result = await stateManagerService.getData(
-            type === 'globalState'
-              ? {
-                  projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
-                  type,
-                }
-              : {
-                  uid: uid ?? '/',
-                  projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
-                  type,
-                }
-          );
-          if (_.isEmpty(result?.data)) return;
-          const { state } = result?.data;
-          if (_.isEmpty(state)) return;
-
-          if (state) {
-            setStateManagement({
-              type,
-              dataUpdate: state.reduce((acc: TVariableMap, item: TVariable) => {
-                return {
-                  ...acc,
-                  [item.id]: item,
-                };
-              }, {}),
-            });
-          }
-        })
-      );
-    } catch (error) {
-      console.log('🚀 ~ getStates ~ error:', error);
-    }
-  };
-
-  const getApiCall = async () => {
-    try {
-      const result = await apiCallService.getAll({
-        projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
-      });
-      addAndUpdateApiResource({ apis: result?.data?.apis });
-    } catch (error) {
-      console.log('🚀 ~ getApiCall ~ error:', error);
-    }
-  };
-  const getCustomFunctions = async () => {
-    try {
-      const result = await customFunctionService.getAll({
-        uid: uid || '',
-        projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
-      });
-      setCustomFunctions(result.data);
-    } catch (error) {
-      console.log('🚀 ~ getCustomFunctions ~ error:', error);
-    }
-  };
-  const getAuthSettings = async () => {
-    try {
-      const result = await authSettingService.get({ projectId });
-      resetAuthSettings(result?.data);
-    } catch (error) {
-      console.log('🚀 ~ getAuthSettings ~ error:', error);
-    }
-  };
   useEffect(() => {
     if (enable) {
       const pageRole = pages.find(
@@ -353,18 +284,120 @@ export const useInitStateRender = () => {
       }
     }
   }, [enable, findVariable, entryPage, pages, pathname, router]);
-  useEffect(() => {
-    if (!projectId) return;
-    setLoading(true);
-    async function fetchData() {
-      await Promise.all([getStates(), getApiCall(), getCustomFunctions(), getAuthSettings()]);
-    }
-    fetchData();
-    setLoading(false);
-  }, [uid, projectId]);
+
+  const { isLoading } = useQuery({
+    queryKey: ['initState', projectId, uid],
+    queryFn: async () => {
+      const [stateData, apiCallData, customFunctions, authSettings] = await Promise.all([
+        getStates({ setStateManagement, uid: uid! }),
+        getApiCall({ addAndUpdateApiResource }),
+        getCustomFunctions({ uid: uid!, setCustomFunctions }),
+        getAuthSettings({ resetAuthSettings }),
+      ]);
+
+      return {
+        stateData,
+        apiCallData,
+        customFunctions,
+        authSettings,
+      };
+    },
+    enabled: Boolean(projectId && uid), // chỉ chạy khi cả projectId và uid đều có,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   return {
-    isLoading: isLoading || loading,
+    isLoading: isLoading || isLoadingPageNames,
     selectedBodyLayout,
     deviceType,
+    uid,
   };
+};
+
+const getStates = async ({
+  uid,
+  setStateManagement,
+}: {
+  uid: string;
+  setStateManagement: Function;
+}) => {
+  const list: TTypeSelectState[] = [
+    'parameters',
+    'appState',
+    'componentState',
+    'globalState',
+    'apiResponse',
+  ];
+  try {
+    await Promise.all(
+      list.map(async (type: TTypeSelectState) => {
+        const result = await stateManagerService.getData(
+          type === 'globalState'
+            ? {
+                projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+                type,
+              }
+            : {
+                uid: uid ?? '/',
+                projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+                type,
+              }
+        );
+        if (_.isEmpty(result?.data)) return;
+        const { state } = result?.data;
+        if (_.isEmpty(state)) return;
+
+        if (state) {
+          setStateManagement({
+            type,
+            dataUpdate: state.reduce((acc: TVariableMap, item: TVariable) => {
+              return {
+                ...acc,
+                [item.id]: item,
+              };
+            }, {}),
+          });
+        }
+      })
+    );
+  } catch (error) {
+    console.log('🚀 ~ getStates ~ error:', error);
+  }
+};
+
+const getApiCall = async ({ addAndUpdateApiResource }: { addAndUpdateApiResource: Function }) => {
+  try {
+    const result = await apiCallService.getAll({
+      projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+    });
+    addAndUpdateApiResource({ apis: result?.data?.apis });
+  } catch (error) {
+    console.log('🚀 ~ getApiCall ~ error:', error);
+  }
+};
+const getCustomFunctions = async ({
+  setCustomFunctions,
+  uid,
+}: {
+  setCustomFunctions: Function;
+  uid: string;
+}) => {
+  try {
+    const result = await customFunctionService.getAll({
+      uid: uid || '',
+      projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+    });
+    setCustomFunctions(result.data);
+  } catch (error) {
+    console.log('🚀 ~ getCustomFunctions ~ error:', error);
+  }
+};
+const getAuthSettings = async ({ resetAuthSettings }: { resetAuthSettings: Function }) => {
+  try {
+    const result = await authSettingService.get({ projectId });
+    resetAuthSettings(result?.data);
+  } catch (error) {
+    console.log('🚀 ~ getAuthSettings ~ error:', error);
+  }
 };
