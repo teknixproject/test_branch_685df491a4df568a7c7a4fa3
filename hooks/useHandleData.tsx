@@ -68,7 +68,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   const itemInList = useRef(null);
   const findVariable = stateManagementStore((state) => state.findVariable);
 
-  const handleInputValue = (data: TData['valueInput']) => {
+  const handleInputValue = async (data: TData['valueInput']): Promise<any> => {
     return data;
   };
 

@@ -40,11 +40,11 @@ export type TUseActions = {
 
 export type TActionsProps = {
   data?: GridItem;
-  valueStream?: any;
+  valueStream: any;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
 };
 export const useActions = (props: TActionsProps): TUseActions => {
-  const { data, valueStream } = useMemo(() => {
+  const { data } = useMemo(() => {
     return props;
   }, [props]);
 
@@ -57,7 +57,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const { handleUpdateStateAction } = useUpdateStateAction(props);
   const { handleCustomFunction } = useCustomFunction(props);
   const { handleUpdateFormStateAction } = useUpdateFormStateAction(props);
-  const { handleNavigateAction } = useNavigateAction({ data, valueStream });
+  const { handleNavigateAction } = useNavigateAction(props);
   const { executeLoopOverList } = useLoopActions();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -84,7 +84,6 @@ export const useActions = (props: TActionsProps): TUseActions => {
         break;
       case 'conditionalChild':
         const isMatch = await executeConditionalChild(action as TAction<TConditionChildMap>);
-        console.log('🚀 ~ executeActionFCType ~ isMatch:', isMatch);
 
         const conditionChildData = action?.data as TConditionChildMap;
         const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
@@ -154,6 +153,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
 
     // Find and execute the root action (parentId === null)
     const rootAction = Object.values(actionsToExecute).find((action) => !action.parentId);
+
     if (rootAction) {
       if (rootAction.delay) {
         await new Promise((resolve) => setTimeout(resolve, rootAction.delay));

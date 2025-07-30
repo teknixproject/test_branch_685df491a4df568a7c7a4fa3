@@ -70,7 +70,7 @@ const useRenderItem = ({
 }) => {
   const valueType = useMemo(() => data?.value?.toLowerCase() || '', [data?.value]);
   const { isNoChildren } = getComponentType(data?.value || '');
-  const { isLoading } = useActions({ data, valueStream });
+  const { isLoading } = useActions({ data, valueStream, methods: methods });
   const findVariable = stateManagementStore((state) => state.findVariable);
   const { dataState } = useHandleData({
     dataProp: getPropData(data),
@@ -104,10 +104,10 @@ const useRenderItem = ({
       valueType === 'menu'
         ? { ...staticProps, ...actions }
         : {
-          ...dataState,
-          ...staticProps,
-          ...actions,
-        };
+            ...dataState,
+            ...staticProps,
+            ...actions,
+          };
 
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
@@ -169,14 +169,21 @@ const RenderSliceItem: FC<TProps> = (props) => {
       </div>
     );
   if (isBagde) {
-    const isBadgeStatus = data.componentProps?.badgeStatus?.valueInput
-    if (isBadgeStatus) return <Component text={data?.childs?.map((child, index) => (
-      <RenderSliceItem
-        {...props}
-        data={child}
-        key={child.id ? String(child.id) : `child-${index}`}
-      />
-    ))} key={data?.id} {...propsCpn} />
+    const isBadgeStatus = data.componentProps?.badgeStatus?.valueInput;
+    if (isBadgeStatus)
+      return (
+        <Component
+          text={data?.childs?.map((child, index) => (
+            <RenderSliceItem
+              {...props}
+              data={child}
+              key={child.id ? String(child.id) : `child-${index}`}
+            />
+          ))}
+          key={data?.id}
+          {...propsCpn}
+        />
+      );
   }
   return (
     <ComponentRenderer Component={Component} propsCpn={propsCpn} data={data}>
@@ -200,21 +207,13 @@ const RenderForm: FC<TProps> = (props) => {
     methods,
   });
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
-  // const formData = useWatch({ control: methods.control });
-  // console.log('🚀 ~ RenderForm ~ formData:', formData);
 
   const { handleSubmit } = methods;
   const setFormData = actionHookSliceStore((state) => state.setFormData);
   const formKeys = useMemo(() => data?.componentProps?.formKeys, [data?.componentProps?.formKeys]);
 
   const onSubmit = (formData: any) => {
-    const data = methods.getValues();
-    const dataSubmit = {
-      ...data,
-      ...formData,
-    };
-
-    setFormData(dataSubmit);
+    // setFormData(dataSubmit);
     rest?.onFinish();
   };
 
