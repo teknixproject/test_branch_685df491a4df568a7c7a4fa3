@@ -24,7 +24,9 @@ export const useUpdateFormStateAction = (props: TActionsProps): TUseActions => {
 
     for (const item of updates || []) {
       const { name, value } = item;
-      setValue(name, await getData(value));
+      const valueState = await getData(value);
+
+      setValue(name, valueState);
     }
   };
 

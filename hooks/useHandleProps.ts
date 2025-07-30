@@ -33,8 +33,7 @@ interface UseHandlePropsResult {
 
 interface UseHandlePropsProps {
   dataProps: TDataProps[];
-  valueStream?: any;
-  formData?: any;
+  valueStream: any;
   data?: GridItem;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
 }
@@ -148,7 +147,7 @@ export const createMouseEventHandlers = (
   for (const item of validActions) {
     result[item.name] = async (e) => {
       e?.preventDefault?.();
-      const handler = createActionHandler(item.name);
+      const handler = await createActionHandler(item.name);
       await handler();
     };
   }
@@ -156,26 +155,22 @@ export const createMouseEventHandlers = (
   return result;
 };
 
-export const useHandleProps = ({
-  dataProps,
-  data,
-  valueStream,
-  methods,
-}: UseHandlePropsProps): UseHandlePropsResult => {
+export const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
+  const { dataProps } = props;
   const triggerNameRef = useRef<TTriggerValue>(DEFAULT_TRIGGER);
   const previousActionsMapRef = useRef<Record<string, TTriggerActions>>({});
   const setMultipleActions = actionHookSliceStore((state) => state.setMultipleActions);
 
   const actionsMap = useMemo(() => createActionsMap(dataProps), [dataProps]);
 
-  const { handleApiCallAction } = useApiCallAction({ valueStream, data });
-  const { executeActionFCType } = useActions({ valueStream, data, methods });
+  const { handleApiCallAction } = useApiCallAction(props);
+  const { executeActionFCType } = useActions(props);
 
   // const { executeConditional } = useConditionAction();
 
-  const { handleUpdateStateAction } = useUpdateStateAction({ valueStream, data });
+  const { handleUpdateStateAction } = useUpdateStateAction(props);
 
-  const { handleNavigateAction } = useNavigateAction({ valueStream, data });
+  const { handleNavigateAction } = useNavigateAction(props);
 
   const executeAction = useMemo(
     () =>

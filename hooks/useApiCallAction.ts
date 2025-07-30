@@ -15,7 +15,6 @@ import {
 } from '@/types';
 import { variableUtil } from '@/uitls';
 
-import { actionHookSliceStore } from './store/actionSliceStore';
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
 import { useCustomFunction } from './useCustomFunction';
@@ -46,7 +45,6 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const findVariable = stateManagementStore((state) => state.findVariable);
   const updateVariables = stateManagementStore((state) => state.updateVariables);
   const { handleCustomFunction } = useCustomFunction(props);
-  const { getState } = actionHookSliceStore;
   const convertActionVariables = useCallback(
     async (actionVariables: TActionVariable[], apiCall: TApiCallValue): Promise<any[]> => {
       if (_.isEmpty(actionVariables)) return [];
@@ -196,7 +194,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     }
   };
   const handleBody = (apiCall: TApiCallValue, variables: Record<string, any>) => {
-    const formData = getState().formData;
+    const formData = props.methods?.getValues();
     return formData || convertApiCallBody(apiCall?.body, variables);
   };
   const handleApiCallAction = async (action: TAction<TActionApiCall>): Promise<void> => {
