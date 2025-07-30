@@ -31,7 +31,8 @@ export type TActionSelect =
   | 'conditional'
   | 'loopOverList'
   | 'loop'
-  | 'customFunction';
+  | 'customFunction'
+  | 'updateFormState';
 export type TActionFCType = 'action' | 'conditional' | 'conditionalChild' | 'loopOverList' | 'loop';
 export type TStatusResponse = 'success' | 'error';
 export type TOperatorCompare =
@@ -113,7 +114,9 @@ export type TActionUpdateStateVariable = {
 export type TActionUpdateState = {
   update: TActionUpdateStateVariable[];
 };
-
+export type TActionUpdateFormState = {
+  update: { name: string; value: TData }[];
+};
 export type TActionNavigate = {
   isExternal: boolean;
   isNewTab: boolean;

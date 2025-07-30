@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
   TAction,
@@ -8,6 +9,7 @@ import {
   TActionCustomFunction,
   TActionLoop,
   TActionNavigate,
+  TActionUpdateFormState,
   TActionUpdateState,
   TConditional,
   TConditionChildMap,
@@ -23,6 +25,7 @@ import { useConditionChildAction } from './useConditionChildAction';
 import { useCustomFunction } from './useCustomFunction';
 import { useLoopActions } from './useLoopActions';
 import { useNavigateAction } from './useNavigateAction';
+import { useUpdateFormStateAction } from './useUpdateFormStateAction';
 import { useUpdateStateAction } from './useUpdateStateAction';
 
 export type TUseActions = {
@@ -38,6 +41,7 @@ export type TUseActions = {
 export type TActionsProps = {
   data?: GridItem;
   valueStream?: any;
+  methods?: UseFormReturn<FieldValues, any, FieldValues>;
 };
 export const useActions = (props: TActionsProps): TUseActions => {
   const { data, valueStream } = useMemo(() => {
@@ -51,9 +55,10 @@ export const useActions = (props: TActionsProps): TUseActions => {
   // const { executeConditional } = useConditionAction();
   const { executeConditionalChild } = useConditionChildAction(props);
   const { handleUpdateStateAction } = useUpdateStateAction(props);
+  const { handleCustomFunction } = useCustomFunction(props);
+  const { handleUpdateFormStateAction } = useUpdateFormStateAction(props);
   const { handleNavigateAction } = useNavigateAction({ data, valueStream });
   const { executeLoopOverList } = useLoopActions();
-  const { handleCustomFunction } = useCustomFunction(props);
   const [isLoading, setIsLoading] = useState(false);
 
   const executeConditional = async (action: TAction<TConditional>) => {
@@ -122,6 +127,8 @@ export const useActions = (props: TActionsProps): TUseActions => {
           return await handleUpdateStateAction(action as TAction<TActionUpdateState>);
         case 'customFunction':
           return await handleCustomFunction(action as TAction<TActionCustomFunction>);
+        case 'updateFormState':
+          return await handleUpdateFormStateAction(action as TAction<TActionUpdateFormState>);
         default:
           console.error(`Unknown action type: ${action.type}`);
       }
@@ -135,7 +142,8 @@ export const useActions = (props: TActionsProps): TUseActions => {
     triggerType: TTriggerValue,
     formData?: Record<string, any>
   ): Promise<void> => {
-    const actionsToExecute = triggerActions[triggerType];
+    const triggerValues = triggerActions || data?.action;
+    const actionsToExecute = triggerValues[triggerType];
 
     await setMultipleActions({
       actions: triggerActions,
@@ -185,4 +193,25 @@ export const useActions = (props: TActionsProps): TUseActions => {
   }, [data?.id, actions]);
 
   return { handleAction, isLoading, executeActionFCType };
+};
+export const handleActionExternal = async (
+  triggerType: TTriggerValue,
+  actions: TTriggerActions = {},
+  formData?: Record<string, any>,
+  executeTriggerActions?: (
+    triggerActions: TTriggerActions,
+    triggerType: TTriggerValue,
+    formData?: Record<string, any>
+  ) => Promise<void>
+): Promise<void> => {
+  if (typeof executeTriggerActions !== 'function') {
+    console.warn('No executeTriggerActions function provided.');
+    return;
+  }
+
+  try {
+    await executeTriggerActions(actions, triggerType, formData);
+  } catch (error) {
+    console.error('Error while executing trigger actions:', error);
+  }
 };

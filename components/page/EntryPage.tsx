@@ -84,10 +84,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'max-image-preview': formMetadata?.robots?.maxImagePreview,
       googleBot: formMetadata?.robots?.googleBot
         ? {
-          index: formMetadata?.robots?.googleBot?.index,
-          follow: formMetadata?.robots?.googleBot?.follow,
-          noimageindex: formMetadata?.robots?.googleBot?.noimageindex,
-        }
+            index: formMetadata?.robots?.googleBot?.index,
+            follow: formMetadata?.robots?.googleBot?.follow,
+            noimageindex: formMetadata?.robots?.googleBot?.noimageindex,
+          }
         : undefined,
     },
     icons: {

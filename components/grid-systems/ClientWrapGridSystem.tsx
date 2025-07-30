@@ -17,9 +17,9 @@ const LoadingPage = dynamic(() => import('./loadingPage'), {
 
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
-  const { deviceType, isLoading, selectedBodyLayout } = useInitStateRender();
+  const { deviceType, isLoading, selectedBodyLayout, uid } = useInitStateRender();
 
-  if (isLoading) {
+  if (isLoading || !uid) {
     return <LoadingPage />;
   }
 
@@ -68,18 +68,21 @@ export const PreviewUI: FC = () => {
     return () => resizeObserver.disconnect();
   }, [selectedHeaderLayout]);
 
-  const sidebarStyle = useMemo(() => ({
-    flexShrink: 0,
-    position: 'sticky' as const,
-    top: `${headerHeight}px`,
-    zIndex: 10,
-    maxHeight: `calc(100vh - ${headerHeight}px)`,
-    overflow: 'hidden',
-  }), [headerHeight]);
+  const sidebarStyle = useMemo(
+    () => ({
+      flexShrink: 0,
+      position: 'sticky' as const,
+      top: `${headerHeight}px`,
+      zIndex: 10,
+      maxHeight: `calc(100vh - ${headerHeight}px)`,
+      overflow: 'hidden',
+    }),
+    [headerHeight]
+  );
 
   const isSidebarLeft = sidebarPosition === 'left';
   const isSidebarRight = sidebarPosition === 'right';
-  const isPreviewSidebar = !isSidebarLeft && !isSidebarRight && !_.isEmpty(selectedSidebarLayout)
+  const isPreviewSidebar = !isSidebarLeft && !isSidebarRight && !_.isEmpty(selectedSidebarLayout);
 
   // Conditional rendering AFTER all hooks have been called
   if (isLoading) {
@@ -91,14 +94,14 @@ export const PreviewUI: FC = () => {
   }
 
   const renderSidebar = (
-    <div id="sidebar" style={{ ...sidebarStyle }} className="sticky top-0 z-10 max-h-screen overflow-hidden">
-      <GridSystemContainer
-        page={selectedSidebarLayout}
-        deviceType={deviceType}
-        isHeader
-      />
+    <div
+      id="sidebar"
+      style={{ ...sidebarStyle }}
+      className="sticky top-0 z-10 max-h-screen overflow-hidden"
+    >
+      <GridSystemContainer page={selectedSidebarLayout} deviceType={deviceType} isHeader />
     </div>
-  )
+  );
 
   return (
     <div className="relative !z-0 h-screen">

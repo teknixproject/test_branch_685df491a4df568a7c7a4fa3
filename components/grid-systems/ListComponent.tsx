@@ -8,6 +8,7 @@ import {
   Checkbox,
   Collapse,
   DatePicker,
+  Descriptions,
   Drawer,
   Dropdown,
   DropdownProps,
@@ -52,7 +53,7 @@ export const componentRegistry = {
   inputnumber: InputNumber,
   table: Table,
   checkbox: Checkbox,
-  radio: Radio,
+  radio: Radio.Group,
   select: Select,
   form: Form,
   formitem: Form.Item,
@@ -82,6 +83,7 @@ export const componentRegistry = {
   map: GoogleMapReact,
   textarea: Input.TextArea,
   tree: Tree,
+  description: Descriptions,
 };
 
 const convertIconStringToComponent = (iconString: string) => {

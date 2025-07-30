@@ -317,6 +317,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   const handleParemeters = (data: TData) => {
     const paramName = data?.parameters?.paramName;
+    console.log('🚀 ~ handleParemeters ~ paramName:', paramName);
 
     if (!paramName) return '';
     const result = params[paramName];
@@ -438,6 +439,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         });
 
         const resolvedComponents = await Promise.all(componentPromises);
+
         resolvedComponents.forEach(({ key, value }) => {
           newDataState[key] = value;
         });
@@ -457,6 +459,10 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     props?.componentProps,
     props?.valueStream,
     props?.valueType,
+    appState,
+    globalState,
+    componentState,
+    apiResponseState,
     // isProcessing,
   ]);
   const [hasProcessed, setHasProcessed] = useState(false);

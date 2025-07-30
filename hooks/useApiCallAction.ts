@@ -204,6 +204,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
 
     if (!apiCall) return;
     const variables = await convertActionVariables(action?.data?.variables ?? [], apiCall);
+
     const newBody = handleBody(apiCall, variables);
     _.update(apiCall, 'variables', () => variables);
 

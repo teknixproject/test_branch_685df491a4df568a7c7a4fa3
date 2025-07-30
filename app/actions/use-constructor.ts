@@ -141,6 +141,5 @@ export function usePreviewUI(
 
   return {
     dataPreviewUI: dataPreviewUI?.data,
-    isLoading: false,
   };
 }
