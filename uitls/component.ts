@@ -4,9 +4,16 @@ export const getComponentType = (value: string) => {
   const isNoChildren = ['list', 'collapse', 'icon'].includes(valueType);
   const isChart = valueType.includes('chart');
   const isUseOptionsData = ['select', 'radio', 'checkbox'].includes(valueType);
-  const isInput = ['inputtext', 'inputnumber', 'textarea', 'radio', 'select', 'checkbox'].includes(
-    valueType
-  );
+  const isInput = [
+    'inputtext',
+    'inputnumber',
+    'radio',
+    'checkbox',
+    'select',
+    'datepicker',
+    'textarea',
+    'switch',
+  ].includes(valueType);
   const isMap = ['map'].includes(valueType);
   const isDatePicker = valueType === 'datepicker';
   const isFeebBack = ['modal', 'drawer'].includes(valueType);

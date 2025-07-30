@@ -430,7 +430,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             let valueConvert = await getData(data, props.valueStream);
             if (props.valueType?.toLowerCase() === 'datepicker') {
               if (key === 'value' || key === 'defaultValue') {
-                valueConvert = dayjs(valueConvert);
+                valueConvert = valueConvert ? dayjs(valueConvert) : dayjs();
               }
             }
             return { key, value: valueConvert };

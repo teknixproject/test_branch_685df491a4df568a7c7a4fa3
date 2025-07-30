@@ -253,7 +253,7 @@ const RenderFormItem: FC<TProps> = (props) => {
         <Controller
           control={control}
           name={inFormKeys.key}
-          render={({ field }) => <Component {...rest} {...field} />}
+          render={({ field }) => <Component {...rest} {...field} key={`form-child-${data?.id}`} />}
         />
       );
     }
