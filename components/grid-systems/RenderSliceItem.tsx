@@ -257,31 +257,6 @@ const RenderFormItem: FC<TProps> = (props) => {
 
   if (!valueType) return <div></div>;
 
-  if (valueType === 'datepicker') {
-    const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
-
-    if (inFormKeys) {
-      return (
-        <Controller
-          control={control}
-          name={inFormKeys.key}
-          render={({ field }) => (
-            <Component
-              {...rest}
-              {...field}
-              value={field.value ? dayjs(field.value) : null}
-              onChange={(date: any) => {
-                console.log('onChange', dayjs(date))
-
-              }}
-            />
-          )}
-        />
-      );
-    }
-    return <Component {...rest} />;
-  }
-
   if (valueType === 'upload') {
     const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
 

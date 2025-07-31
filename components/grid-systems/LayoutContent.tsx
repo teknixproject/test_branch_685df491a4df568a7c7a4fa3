@@ -68,10 +68,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const sidebarStyle = useMemo(() => ({
     flexShrink: 0,
     position: 'sticky' as const,
-    top: `${headerHeight}px`, // Đây là key fix - sidebar sẽ dính ở vị trí bằng chiều cao header
+    top: `${headerHeight}px`,
     zIndex: 10,
-    maxHeight: `calc(100vh - ${headerHeight}px)`, // Sử dụng maxHeight thay vì height
-    overflow: 'hidden', // Remove auto overflow để content có thể scroll cùng page
+    maxHeight: `calc(100vh - ${headerHeight}px)`,
+    overflow: 'hidden',
   }), [headerHeight]);
 
   const isSidebarLeft = sidebarPosition === 'left'
