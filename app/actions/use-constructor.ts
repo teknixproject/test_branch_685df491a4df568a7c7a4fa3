@@ -43,21 +43,21 @@ export function useConstructorDataAPI(uid?: string) {
 
   useEffect(() => {
     if (data && !error) {
-      if (newHeaderId && newHeaderId !== (headerLayout?._id || '')) {
+      if (newHeaderId !== (headerLayout?._id || '')) {
         setHeaderLayout({ _id: newHeaderId, layoutJson: newHeaderLayout });
       }
-      if (newSidebarId && newSidebarId !== (sidebarLayout?._id || '')) {
+      if (newSidebarId !== (sidebarLayout?._id || '')) {
         setSidebarLayout({ _id: newSidebarId, layoutJson: newSidebarLayout });
       }
-      if (newFooterId && newFooterId !== (footerLayout?._id || '')) {
+      if (newFooterId !== (footerLayout?._id || '')) {
         setFooterLayout({ layoutJson: newFooterLayout, _id: newFooterId });
       }
-      if (newSidebarPosition && newSidebarPosition !== sidebarPosition) {
+      if (newSidebarPosition !== sidebarPosition) {
         setSidebarPosition(newSidebarPosition);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newHeaderId, newFooterId, newSidebarPosition]);
+  }, [newHeaderId, newFooterId, newSidebarPosition, uid]);
 
   if (error) {
     console.error('❌ Error fetching constructor:', error);

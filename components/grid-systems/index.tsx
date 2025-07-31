@@ -8,9 +8,9 @@ import { GridItem } from '@/types/gridItem';
 import RenderSliceItem from './RenderSliceItem';
 import { GridSystemProps } from './types';
 
-const componentHasAction = ['pagination', 'button', 'input_text'];
-const componentHasMenu = ['dropdown'];
-const allowUpdateTitle = ['content'];
+// const componentHasAction = ['pagination', 'button', 'input_text'];
+// const componentHasMenu = ['dropdown'];
+// const allowUpdateTitle = ['content'];
 
 type TRenderSlice = {
   slice: GridItem | null | undefined;
@@ -31,7 +31,7 @@ interface ComponentProps {
 }
 
 //#region Grid System
-const GridSystemContainer: FC<GridSystemProps> = ({ page, isBody, isFooter, style }) => {
+const GridSystemContainer: FC<GridSystemProps> = ({ page }) => {
   if (!page?.childs) return;
   return <RenderSliceItem data={page} key={page.id} />;
 };
