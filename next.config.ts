@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
       disabled: true, // Tắt Turbopack rõ ràng
     },
   },
+  productionBrowserSourceMaps: true,
 };
 
 export default nextConfig;
