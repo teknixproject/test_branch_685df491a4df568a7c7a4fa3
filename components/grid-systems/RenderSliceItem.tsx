@@ -25,6 +25,8 @@ import { css } from '@emotion/react';
 
 import { componentRegistry, convertProps } from './ListComponent';
 import LoadingPage from './loadingPage';
+import dayjs from 'dayjs';
+import { Upload, UploadFile } from 'antd';
 
 type TProps = {
   data: GridItem;
@@ -254,6 +256,77 @@ const RenderFormItem: FC<TProps> = (props) => {
   const { isInput } = getComponentType(data?.value || '');
 
   if (!valueType) return <div></div>;
+
+  if (valueType === 'datepicker') {
+    const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
+
+    if (inFormKeys) {
+      return (
+        <Controller
+          control={control}
+          name={inFormKeys.key}
+          render={({ field }) => (
+            <Component
+              {...rest}
+              {...field}
+              value={field.value ? dayjs(field.value) : null}
+              onChange={(date: any) => {
+                console.log('onChange', dayjs(date))
+
+              }}
+            />
+          )}
+        />
+      );
+    }
+    return <Component {...rest} />;
+  }
+
+  if (valueType === 'upload') {
+    const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
+
+    if (inFormKeys) {
+      return (
+        <Controller
+          control={control}
+          name={inFormKeys.key}
+          render={({ field }) => (
+            <Component
+              {...rest}
+              fileList={field.value?.map((base64: string, index: number) => ({
+                uid: `-${index}`,
+                name: `file-${index}`,
+                status: 'done',
+                url: base64,
+              }))}
+              onChange={async ({ fileList }: any) => {
+                // Chuyển đổi file thành Base64
+                const base64Files = await Promise.all(
+                  fileList.map(async (file: UploadFile) => {
+                    if (file.originFileObj) {
+                      return new Promise<string>((resolve) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file.originFileObj as File);
+                        reader.onload = () => resolve(reader.result as string);
+                        reader.onerror = () => resolve('');
+                      });
+                    }
+                    return file.url || '';
+                  })
+                );
+                // Lưu mảng chuỗi Base64 vào form
+                field.onChange(base64Files.filter((base64) => base64 !== ''));
+              }}
+              beforeUpload={() => false} // Ngăn upload lên server
+            >
+              {rest.children || <button>Upload</button>}
+            </Component>
+          )}
+        />
+      );
+    }
+    return <Upload {...rest} />;
+  }
 
   if (isInput) {
     const inFormKeys = formKeys?.find((item) => item?.value === data?.name);

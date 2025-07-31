@@ -30,6 +30,7 @@ import {
   Tree,
   TreeProps,
   Typography,
+  Upload,
 } from 'antd';
 import GoogleMapReact from 'google-map-react';
 import _ from 'lodash';
@@ -83,6 +84,7 @@ export const componentRegistry = {
   map: GoogleMapReact,
   textarea: Input.TextArea,
   tree: Tree,
+  upload: Upload,
   description: Descriptions,
 };
 
