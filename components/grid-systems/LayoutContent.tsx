@@ -118,7 +118,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
             page={selectedFooterLayout}
             deviceType={deviceType}
             isFooter
-            style={{ width: '100%' }}
+            style={{ width: '100%', height: 'fit-content' }}
           />
         )
       }

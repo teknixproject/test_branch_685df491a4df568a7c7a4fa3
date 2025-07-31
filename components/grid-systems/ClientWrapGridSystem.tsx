@@ -24,7 +24,7 @@ export const RenderUIClient: FC = () => {
   }
 
   return (
-    <div className="relative h-screen overflow-y-auto">
+    <div className="relative min-h-screen">
       {!_.isEmpty(selectedBodyLayout) && (
         <GridSystemContainer page={selectedBodyLayout} deviceType={deviceType} isBody />
       )}
