@@ -45,7 +45,7 @@ export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
 
     for (const item of updates || []) {
       const { firstState, secondState } = item;
-      const { type } = item.firstState;
+      const type = item?.firstState?.type;
       if (!firstState || !secondState || !firstState[type]) continue;
       const variableFirst = findVariable({
         type: type as TTypeSelectState,

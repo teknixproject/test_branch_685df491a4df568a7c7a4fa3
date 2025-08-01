@@ -172,8 +172,8 @@ export const useInitStatePreview = () => {
       try {
         await Promise.allSettled([
           setStateFormDataPreview(),
-          getApiCall({ addAndUpdateApiResource }),
-          getCustomFunctions({ setCustomFunctions, uid }),
+          getApiCall({ addAndUpdateApiResource, projectId: projectId! }),
+          getCustomFunctions({ setCustomFunctions, uid, projectId: projectId! }),
           // getAuthSettings({ resetAuthSettings }),
         ]);
       } catch (error) {
@@ -289,10 +289,10 @@ export const useInitStateRender = () => {
     queryKey: ['initState', projectId, uid],
     queryFn: async () => {
       const [stateData, apiCallData, customFunctions, authSettings] = await Promise.all([
-        getStates({ setStateManagement, uid: uid! }),
-        getApiCall({ addAndUpdateApiResource }),
-        getCustomFunctions({ uid: uid!, setCustomFunctions }),
-        getAuthSettings({ resetAuthSettings }),
+        getStates({ setStateManagement, uid: uid!, projectId: projectId! }),
+        getApiCall({ addAndUpdateApiResource, projectId: projectId! }),
+        getCustomFunctions({ uid: uid!, setCustomFunctions, projectId: projectId! }),
+        getAuthSettings({ resetAuthSettings, projectId: projectId! }),
       ]);
 
       return {
@@ -318,9 +318,11 @@ export const useInitStateRender = () => {
 const getStates = async ({
   uid,
   setStateManagement,
+  projectId,
 }: {
   uid: string;
   setStateManagement: Function;
+  projectId: string;
 }) => {
   const list: TTypeSelectState[] = [
     'parameters',
@@ -366,7 +368,13 @@ const getStates = async ({
   }
 };
 
-const getApiCall = async ({ addAndUpdateApiResource }: { addAndUpdateApiResource: Function }) => {
+const getApiCall = async ({
+  addAndUpdateApiResource,
+  projectId,
+}: {
+  addAndUpdateApiResource: Function;
+  projectId: string;
+}) => {
   try {
     const result = await apiCallService.getAll({
       projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
@@ -379,9 +387,11 @@ const getApiCall = async ({ addAndUpdateApiResource }: { addAndUpdateApiResource
 const getCustomFunctions = async ({
   setCustomFunctions,
   uid,
+  projectId,
 }: {
   setCustomFunctions: Function;
   uid: string;
+  projectId: string;
 }) => {
   try {
     const result = await customFunctionService.getAll({
@@ -393,7 +403,13 @@ const getCustomFunctions = async ({
     console.log('🚀 ~ getCustomFunctions ~ error:', error);
   }
 };
-const getAuthSettings = async ({ resetAuthSettings }: { resetAuthSettings: Function }) => {
+const getAuthSettings = async ({
+  resetAuthSettings,
+  projectId,
+}: {
+  resetAuthSettings: Function;
+  projectId: string;
+}) => {
   try {
     const result = await authSettingService.get({ projectId });
     resetAuthSettings(result?.data);

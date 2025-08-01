@@ -208,6 +208,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     params?: THandleDataParams
   ): Promise<void> => {
     const apiCall = getApiMember(action?.data?.apiId ?? '');
+    console.log('🚀 ~ handleApiCallAction ~ apiCall:', apiCall);
 
     if (!apiCall) return;
     const variables = await convertActionVariables(action?.data?.variables ?? [], apiCall, params);
