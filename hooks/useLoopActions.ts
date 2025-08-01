@@ -4,7 +4,7 @@ import {
 } from '@/types';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 // Hằng số cấu hình
 const DEFAULT_TIMEOUT_MS = 5000;
@@ -93,7 +93,7 @@ export const useLoopActions = () => {
   const findAction = actionHookSliceStore((state) => state.findAction);
   // const { handleCompareCondition } = useConditionAction();
 
-  const executeLoopOverList = async (action: TAction<TActionLoop>) => {
+  const executeLoopOverList = async (action: TAction<TActionLoop>, params?: THandleDataParams) => {
     const option = action.data?.option;
 
     if (option === 'while') {
@@ -117,9 +117,9 @@ export const useLoopActions = () => {
 
       await handleListLoop(variable.value || [], {
         reverseOrder: reserverOrder,
-        startIndex: getData(startIndex),
-        endIndex: getData(endIndex),
-        stepSize: getData(stepSize),
+        startIndex: await getData(startIndex, params),
+        endIndex: await getData(endIndex, params),
+        stepSize: await getData(stepSize, params),
       });
     }
   };

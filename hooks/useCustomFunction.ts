@@ -6,10 +6,13 @@ import { transformVariable } from '@/uitls/tranformVariable';
 
 import { handleCustomFunction as handleFunction } from './handleCustomFunction';
 import { TActionsProps } from './useActions';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  handleCustomFunction: (action: TAction<TActionCustomFunction>) => Promise<void>;
+  handleCustomFunction: (
+    action: TAction<TActionCustomFunction>,
+    params?: THandleDataParams
+  ) => Promise<void>;
 };
 
 export const useCustomFunction = (props: TActionsProps): TUseActions => {
@@ -17,7 +20,10 @@ export const useCustomFunction = (props: TActionsProps): TUseActions => {
   const findVariable = stateManagementStore((state) => state.findVariable);
   const { getData } = useHandleData({ ...props });
   const findCustomFunction = customFunctionStore((state) => state.findCustomFunction);
-  const handleCustomFunction = async (action: TAction<TActionCustomFunction>): Promise<void> => {
+  const handleCustomFunction = async (
+    action: TAction<TActionCustomFunction>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     console.log('🚀 ~ handleCustomFunction ~ action:', action);
     try {
       const { customFunctionId, output, isList, outputType } = action?.data || {};
@@ -27,6 +33,7 @@ export const useCustomFunction = (props: TActionsProps): TUseActions => {
           data: action?.data as TActionCustomFunction,
           findCustomFunction,
           getData,
+          params,
         });
         const resultStander = transformVariable({
           isList: !!isList,

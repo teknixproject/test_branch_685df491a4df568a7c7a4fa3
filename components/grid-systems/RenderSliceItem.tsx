@@ -1,17 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Upload, UploadFile } from 'antd';
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
 import {
-  Controller,
-  FieldValues,
-  FormProvider,
-  useForm,
-  useFormContext,
-  UseFormReturn,
+    Controller, FieldValues, FormProvider, useForm, useFormContext, UseFormReturn
 } from 'react-hook-form';
 
-import { actionHookSliceStore } from '@/hooks/store/actionSliceStore';
 import { useActions } from '@/hooks/useActions';
 import { useHandleData } from '@/hooks/useHandleData';
 import { useHandleProps } from '@/hooks/useHandleProps';
@@ -25,9 +20,38 @@ import { css } from '@emotion/react';
 
 import { componentRegistry, convertProps } from './ListComponent';
 import LoadingPage from './loadingPage';
-import dayjs from 'dayjs';
-import { Upload, UploadFile } from 'antd';
 
+function extractVariableIdsWithLodash(obj: any): string[] {
+  const variableIds: string[] = [];
+
+  function collectVariableIds(value: any, key: string) {
+    if (key === 'variableId' && typeof value === 'string') {
+      variableIds.push(value);
+    }
+  }
+
+  function deepIterate(obj: any) {
+    _.forOwn(obj, (value, key) => {
+      collectVariableIds(value, key);
+
+      if (_.isObject(value)) {
+        deepIterate(value);
+      }
+    });
+
+    if (_.isArray(obj)) {
+      obj.forEach((item) => {
+        if (_.isObject(item)) {
+          deepIterate(item);
+        }
+      });
+    }
+  }
+
+  deepIterate(obj);
+
+  return _.uniq(variableIds);
+}
 type TProps = {
   data: GridItem;
   valueStream?: any;
@@ -43,22 +67,18 @@ const handleCssWithEmotion = (staticProps: Record<string, any>) => {
   let cssMultiple;
 
   if (typeof advancedCss === 'string') {
-    // If it's a CSS string, use template literal directly
     cssMultiple = css`
       ${advancedCss}
     `;
   } else if (advancedCss && typeof advancedCss === 'object') {
-    // If it's a CSS object, convert kebab-case to camelCase and use as object
     const convertedCssObj = convertCssObjectToCamelCase(advancedCss);
     cssMultiple = css(convertedCssObj);
   } else {
-    // Fallback to empty css
     cssMultiple = css``;
   }
 
   return cssMultiple;
 };
-// Custom hook to extract common logic
 const useRenderItem = ({
   data,
   valueStream,
@@ -154,7 +174,6 @@ const RenderSliceItem: FC<TProps> = (props) => {
   const { data, valueStream } = useMemo(() => props, [props]);
 
   const { isLoading, valueType, Component, propsCpn } = useRenderItem({ data, valueStream });
-  // console.log(`🚀 ~ RenderSliceItem ~ propsCpn: ${data.id}`, propsCpn);
 
   const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;
@@ -209,11 +228,9 @@ const RenderForm: FC<TProps> = (props) => {
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
 
   const { handleSubmit } = methods;
-  const setFormData = actionHookSliceStore((state) => state.setFormData);
   const formKeys = useMemo(() => data?.componentProps?.formKeys, [data?.componentProps?.formKeys]);
 
   const onSubmit = (formData: any) => {
-    // setFormData(dataSubmit);
     rest?.onFinish();
   };
 
@@ -253,6 +270,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     methods,
   });
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
+
   const { isInput } = getComponentType(data?.value || '');
 
   if (!valueType) return <div></div>;
@@ -311,7 +329,21 @@ const RenderFormItem: FC<TProps> = (props) => {
         <Controller
           control={control}
           name={inFormKeys.key}
-          render={({ field }) => <Component {...rest} {...field} key={`form-child-${data?.id}`} />}
+          render={({ field }) => {
+            return (
+              <Component
+                {...rest}
+                {...field}
+                onChange={(target: any) => {
+                  field.onChange(target);
+                  if (typeof rest?.onChange === 'function') {
+                    rest.onChange(target);
+                  }
+                }}
+                key={`form-child-${data?.id}`}
+              />
+            );
+          }}
         />
       );
     }

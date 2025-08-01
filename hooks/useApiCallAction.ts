@@ -5,25 +5,21 @@ import { useCallback } from 'react';
 
 import { stateManagementStore } from '@/stores';
 import { authSettingStore } from '@/stores/authSetting';
-import {
-  TAction,
-  TActionApiCall,
-  TActionCustomFunction,
-  TActionVariable,
-  TApiCallValue,
-  TApiCallVariable,
-} from '@/types';
+import { TAction, TActionApiCall, TActionVariable, TApiCallValue, TApiCallVariable } from '@/types';
 import { variableUtil } from '@/uitls';
 
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
 import { useCustomFunction } from './useCustomFunction';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 const { isUseVariable, extractAllValuesFromTemplate } = variableUtil;
 
 export type TUseActions = {
-  handleApiCallAction: (action: TAction<TActionApiCall>) => Promise<void>;
+  handleApiCallAction: (
+    action: TAction<TActionApiCall>,
+    params?: THandleDataParams
+  ) => Promise<void>;
 };
 const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string => {
   const baseUrl = apiCallMember?.url || fallbackUrl || '';
@@ -38,7 +34,7 @@ const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string 
 export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const router = useRouter();
   const { getApiMember } = useApiCall();
-  const { getData } = useHandleData({});
+  const { getData } = useHandleData(props);
   const refreshAction = authSettingStore((state) => state.refreshAction);
   const entryPage = authSettingStore((state) => state.entryPage);
   const forbiddenCode = authSettingStore((state) => state.forbiddenCode);
@@ -46,7 +42,11 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const updateVariables = stateManagementStore((state) => state.updateVariables);
   const { handleCustomFunction } = useCustomFunction(props);
   const convertActionVariables = useCallback(
-    async (actionVariables: TActionVariable[], apiCall: TApiCallValue): Promise<any[]> => {
+    async (
+      actionVariables: TActionVariable[],
+      apiCall: TApiCallValue,
+      params?: THandleDataParams
+    ): Promise<any[]> => {
       if (_.isEmpty(actionVariables)) return [];
 
       const result = await Promise.all(
@@ -60,7 +60,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
           if (!data) return;
 
           if (secondValue?.type) {
-            const valueInStore = await getData(secondValue);
+            const valueInStore = await getData(secondValue, params);
             return { ...data, value: valueInStore };
           }
 
@@ -124,7 +124,8 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const makeApiCall = async (
     apiCall: TApiCallValue,
     body: object,
-    variableId: string
+    variableId: string,
+    params?: THandleDataParams
   ): Promise<any> => {
     const outputVariable = findVariable({
       type: 'apiResponse',
@@ -158,7 +159,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
       console.log('🚀 ~ useApiCallAction ~ error:', error);
       if (axios.isAxiosError(error)) {
         if (error.status === forbiddenCode) {
-          // await handleRefreshToken(apiCall, body, variableId);
+          await handleRefreshToken(apiCall, body, variableId, params);
           return;
         }
         if (outputVariable) {
@@ -178,15 +179,20 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
       }
     }
   };
-  const handleRefreshToken = async (apiCall: TApiCallValue, body: object, variableId: string) => {
+  const handleRefreshToken = async (
+    apiCall: TApiCallValue,
+    body: object,
+    variableId: string,
+    params?: THandleDataParams
+  ) => {
     try {
       if (refreshAction) {
         const rootAction = Object.values(refreshAction?.onClick || {})?.find(
           (item) => item.parentId === null
         );
-        await handleCustomFunction(rootAction as TAction<TActionCustomFunction>);
+        // await handleActionExternal(refreshAction, 'onClick', params);
 
-        await makeApiCall(apiCall, body, variableId);
+        // await makeApiCall(apiCall, body, variableId);
       } else if (entryPage) router.push(entryPage);
     } catch (error) {
       console.log('🚀 ~ handleRefreshToken ~ error:', error);
@@ -197,18 +203,19 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     const formData = props.methods?.getValues();
     return formData || convertApiCallBody(apiCall?.body, variables);
   };
-  const handleApiCallAction = async (action: TAction<TActionApiCall>): Promise<void> => {
+  const handleApiCallAction = async (
+    action: TAction<TActionApiCall>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     const apiCall = getApiMember(action?.data?.apiId ?? '');
 
     if (!apiCall) return;
-    const variables = await convertActionVariables(action?.data?.variables ?? [], apiCall);
+    const variables = await convertActionVariables(action?.data?.variables ?? [], apiCall, params);
 
     const newBody = handleBody(apiCall, variables);
     _.update(apiCall, 'variables', () => variables);
 
-    await makeApiCall(apiCall, newBody, action?.data?.output?.variableId ?? '');
-
-    // handleApiResponse(result, action?.data?.output ?? {});
+    await makeApiCall(apiCall, newBody, action?.data?.output?.variableId ?? '', params);
   };
 
   return { handleApiCallAction };

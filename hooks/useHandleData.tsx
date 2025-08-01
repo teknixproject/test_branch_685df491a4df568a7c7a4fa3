@@ -5,6 +5,7 @@ import { JSONPath } from 'jsonpath-plus';
 import _ from 'lodash';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import { stateManagementStore } from '@/stores';
 import { customFunctionStore } from '@/stores/customFunction';
@@ -18,9 +19,17 @@ import { isTData } from '@/uitls/transfromProp';
 import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';
 
+enum OPTIONS_HANDLE {
+  NO_ACTION = 'noAction',
+  JSON_PATH = 'jsonPath',
+  ITEM_IN_LIST = 'itemInList',
+  FILTER = 'filter',
+  SORT = 'sort',
+}
+
 type UseHandleDataReturn = {
   dataState?: any;
-  getData: (data: TData | null | undefined, valueStream?: any) => any;
+  getData: (data: TData | null | undefined, params?: THandleDataParams) => any;
   getTrackedData: (data: TData | null | undefined, valueStream?: any) => any;
 };
 
@@ -42,6 +51,7 @@ type TUseHandleData = {
   valueStream?: any;
   valueType?: string;
   activeData?: GridItem;
+  methods?: UseFormReturn<FieldValues, any, FieldValues>;
 };
 
 const getIdInData = (data: TData) => {
@@ -55,7 +65,10 @@ const getVariableIdsFormData = (dataProps: TUseHandleData['dataProp']) => {
   const cleaned = _.compact(ids);
   return cleaned;
 };
-
+export type THandleDataParams = {
+  valueStream?: any;
+  callbackArgs?: any[];
+};
 export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   const params = useParams();
   const apiResponseState = stateManagementStore((state) => state.apiResponse);
@@ -88,7 +101,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'jsonPath':
             const valueJsonPath = JSONPath({
               json: value?.value,
-              path: (await getData(item.jsonPath as TData)) || '',
+              path: (await getData(item.jsonPath as TData, {})) || '',
             });
             return valueJsonPath?.[0];
           case 'statusCode':
@@ -142,7 +155,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'noAction':
               break;
             case 'jsonPath':
-              const jsonPathValue = await getData(optionItem.jsonPath as TData);
+              const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
               const valueJsonPath = JSONPath({
                 json: value,
                 path: jsonPathValue || '',
@@ -151,7 +164,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
               break;
 
             case 'itemAtIndex':
-              const index = await getData(optionItem?.itemAtIndex as TData);
+              const index = await getData(optionItem?.itemAtIndex as TData, {});
               let indexValid: number = 0;
               if (typeof index !== 'number') {
                 indexValid = parseInt(index);
@@ -175,7 +188,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'sort':
               if (Array.isArray(value)) {
                 const sortOption = optionItem.sortOrder || 'asc';
-                const jsonPath = await getData(optionItem.jsonPath as TData);
+                const jsonPath = await getData(optionItem.jsonPath as TData, {});
 
                 value = [...value].sort((a: any, b: any) => {
                   let aVal = a;
@@ -246,7 +259,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
       switch (optionItem.option) {
         case 'jsonPath':
-          const jsonPathValue = await getData(optionItem.jsonPath as TData);
+          const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
           const valueJsonPath = JSONPath({
             json: value,
             path: jsonPathValue || '',
@@ -255,7 +268,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           break;
 
         case 'itemAtIndex':
-          const index = await getData(optionItem?.itemAtIndex as TData);
+          const index = await getData(optionItem?.itemAtIndex as TData, {});
           let indexValid: number = 0;
           if (typeof index !== 'number') {
             indexValid = parseInt(index);
@@ -279,7 +292,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case 'sort':
           if (Array.isArray(value)) {
             const sortOption = optionItem.sortOrder || 'asc';
-            const jsonPath = await getData(optionItem.jsonPath as TData);
+            const jsonPath = await getData(optionItem.jsonPath as TData, {});
 
             value = [...value].sort((a: any, b: any) => {
               let aVal = a;
@@ -329,9 +342,192 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     const value = await executeConditionalInData(data?.condition, getData);
     return value;
   };
+
+  const handleCallBack = async (data: TData, callbackArgs?: any[]) => {
+    const state = data[data.type] as TData['callback'];
+    if (!_.isEmpty(callbackArgs)) {
+      const indexArg = state?.index;
+
+      let value = callbackArgs?.[indexArg];
+
+      for (const option of state?.options || []) {
+        const optionItem = option as NonNullable<TDataField['options']>[number];
+
+        switch (optionItem.option) {
+          case OPTIONS_HANDLE.NO_ACTION:
+            break;
+          case OPTIONS_HANDLE.JSON_PATH:
+            const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
+            const valueJsonPath = JSONPath({
+              json: value,
+              path: jsonPathValue || '',
+            });
+            value = valueJsonPath?.[0];
+            break;
+
+          case 'itemAtIndex':
+            const index = await getData(optionItem?.itemAtIndex as TData, {});
+            let indexValid: number = 0;
+            if (typeof index !== 'number') {
+              indexValid = parseInt(index);
+            }
+            value = value[indexValid];
+            break;
+
+          case OPTIONS_HANDLE.FILTER:
+            if (Array.isArray(value)) {
+              value = value.filter((item: any) => {
+                itemInList.current = item;
+                const result = handleCompareValue({
+                  conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
+                  getData,
+                });
+                return result;
+              });
+            }
+            break;
+
+          case OPTIONS_HANDLE.SORT:
+            if (Array.isArray(value)) {
+              const sortOption = optionItem.sortOrder || 'asc';
+              const jsonPath = await getData(optionItem.jsonPath as TData, {});
+
+              value = [...value].sort((a: any, b: any) => {
+                let aVal = a;
+                let bVal = b;
+
+                if (jsonPath) {
+                  const aJsonPath = JSONPath({ json: a, path: jsonPath });
+                  const bJsonPath = JSONPath({ json: b, path: jsonPath });
+                  aVal = aJsonPath[0];
+                  bVal = bJsonPath[0];
+                }
+
+                if (sortOption === 'asc') {
+                  return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                  return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
+                }
+              });
+            }
+            break;
+
+          case 'length':
+            return value?.length || 0;
+          case 'isEmpty':
+            return _.isEmpty(value);
+          case 'isNotEmpty':
+            return !_.isEmpty(value);
+          default:
+            return (
+              value ||
+              transformVariable({
+                isList: state.isList,
+                type: state.type,
+                value: data.defaultValue,
+              })
+            );
+        }
+      }
+
+      return value;
+    }
+  };
+  const handleFormData = async (data: TData) => {
+    const state = data[data.type] as TData['formData'];
+    console.log('🚀 ~ handleFormData ~ state:', state);
+    const select = state.select;
+    let value = null;
+
+    if (select === 'fieldValue') value = props.methods?.getValues(state.fieldName);
+    else if (select === 'formData') {
+      value = props.methods?.getValues();
+    }
+    console.log('🚀 ~ handleFormData ~ value:', value);
+    if (select) {
+      for (const option of state?.options || []) {
+        const optionItem = option as NonNullable<TDataField['options']>[number];
+
+        switch (optionItem.option) {
+          case 'noAction':
+            break;
+          case 'jsonPath':
+            const jsonPathValue = (await getData(optionItem.jsonPath as TData, {})) as string;
+            const valueJsonPath = JSONPath({
+              json: value,
+              path: jsonPathValue || '',
+            });
+            value = valueJsonPath?.[0];
+            break;
+
+          case 'itemAtIndex':
+            const index = await getData(optionItem?.itemAtIndex as TData, {});
+            let indexValid: number = 0;
+            if (typeof index !== 'number') {
+              indexValid = parseInt(index);
+            }
+            value = value[indexValid];
+            break;
+
+          case 'filter':
+            if (Array.isArray(value)) {
+              value = value.filter((item: any) => {
+                itemInList.current = item;
+                const result = handleCompareValue({
+                  conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
+                  getData,
+                });
+                return result;
+              });
+            }
+            break;
+
+          case 'sort':
+            if (Array.isArray(value)) {
+              const sortOption = optionItem.sortOrder || 'asc';
+              const jsonPath = await getData(optionItem.jsonPath as TData, {});
+
+              value = [...value].sort((a: any, b: any) => {
+                let aVal = a;
+                let bVal = b;
+
+                if (jsonPath) {
+                  const aJsonPath = JSONPath({ json: a, path: jsonPath });
+                  const bJsonPath = JSONPath({ json: b, path: jsonPath });
+                  aVal = aJsonPath[0];
+                  bVal = bJsonPath[0];
+                }
+
+                if (sortOption === 'asc') {
+                  return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                  return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
+                }
+              });
+            }
+            break;
+
+          case 'length':
+            return value?.length || 0;
+          case 'isEmpty':
+            return _.isEmpty(value);
+          case 'isNotEmpty':
+            return !_.isEmpty(value);
+          default:
+            return value;
+        }
+      }
+
+      return value;
+    }
+  };
   //#region getData
   const getData = useCallback(
-    async (data: TData | null | undefined, valueStream?: any): Promise<any> => {
+    async (
+      data: TData | null | undefined,
+      { valueStream, callbackArgs }: THandleDataParams = {} as THandleDataParams
+    ): Promise<any> => {
+      console.log('🚀 ~ useHandleData ~ data:', data);
       if (_.isEmpty(data) && valueStream) return valueStream;
       if (_.isEmpty(data) && props.valueStream) return props.valueStream;
       if (_.isEmpty(data) || !data.type) return data?.defaultValue || data?.valueInput;
@@ -363,6 +559,10 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           });
         case 'condition':
           return await handleCondition(data);
+        case 'callback':
+          return await handleCallBack(data, callbackArgs);
+        case 'formData':
+          return await handleFormData(data);
         default:
           return data?.defaultValue || data.valueInput;
       }
@@ -409,7 +609,9 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
       if (props?.dataProp?.length) {
         const dataPromises = props.dataProp.map(async (item) => {
-          const value = await getData(item.data, props.valueStream);
+          const value = await getData(item.data, {
+            valueStream: props.valueStream,
+          });
           return { name: item.name, value };
         });
 
@@ -427,7 +629,9 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
               [value.type]: value[value.type],
             } as TData;
 
-            let valueConvert = await getData(data, props.valueStream);
+            let valueConvert = await getData(data, {
+              valueStream: props.valueStream,
+            });
             if (props.valueType?.toLowerCase() === 'datepicker') {
               if (key === 'value' || key === 'defaultValue') {
                 valueConvert = valueConvert ? dayjs(valueConvert) : dayjs();

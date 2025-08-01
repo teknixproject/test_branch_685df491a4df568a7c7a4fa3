@@ -1,5 +1,7 @@
 // utils/routeUtils.ts
 
+import { THandleDataParams } from '@/hooks/useHandleData';
+
 // Hàm lấy tất cả route patterns (giữ nguyên từ code bạn cung cấp)
 function normalizePath(path: string): string {
   return '/' + path.replace(/^\/+|\/+$/g, '');
@@ -29,12 +31,12 @@ export async function buildPathFromPattern(
   pattern: string,
   params: { key: string; value: string | number }[],
   getData: any,
-  valueStream: any
+  paramsStream?: THandleDataParams
 ) {
   let path = pattern;
 
   for (const { key, value } of params) {
-    const valueStr = await getData(value, valueStream);
+    const valueStr = await getData(value, paramsStream);
     path = path.replace(`[${key}]`, encodeURIComponent(valueStr));
   }
 

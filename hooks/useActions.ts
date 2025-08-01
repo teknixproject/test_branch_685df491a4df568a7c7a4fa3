@@ -4,17 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
-  TAction,
-  TActionApiCall,
-  TActionCustomFunction,
-  TActionLoop,
-  TActionNavigate,
-  TActionUpdateFormState,
-  TActionUpdateState,
-  TConditional,
-  TConditionChildMap,
-  TTriggerActions,
-  TTriggerValue,
+    TAction, TActionApiCall, TActionCustomFunction, TActionLoop, TActionNavigate,
+    TActionUpdateFormState, TActionUpdateState, TConditional, TConditionChildMap, TTriggerActions,
+    TTriggerValue
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 import { transformVariable } from '@/uitls/tranformVariable';
@@ -23,6 +15,7 @@ import { actionHookSliceStore } from './store/actionSliceStore';
 import { useApiCallAction } from './useApiCallAction';
 import { useConditionChildAction } from './useConditionChildAction';
 import { useCustomFunction } from './useCustomFunction';
+import { THandleDataParams } from './useHandleData';
 import { useLoopActions } from './useLoopActions';
 import { useNavigateAction } from './useNavigateAction';
 import { useUpdateFormStateAction } from './useUpdateFormStateAction';
@@ -32,7 +25,7 @@ export type TUseActions = {
   handleAction: (
     triggerType: TTriggerValue,
     action?: TTriggerActions,
-    formData?: Record<string, any>
+    params?: THandleDataParams
   ) => Promise<void>;
   isLoading: boolean;
   executeActionFCType: (action?: TAction) => Promise<void>;
@@ -61,29 +54,35 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const { executeLoopOverList } = useLoopActions();
   const [isLoading, setIsLoading] = useState(false);
 
-  const executeConditional = async (action: TAction<TConditional>) => {
+  const executeConditional = async (action: TAction<TConditional>, params?: THandleDataParams) => {
     const conditions = action?.data?.conditions as string[];
     if (_.isEmpty(conditions)) return;
     for (const conditionId of conditions) {
       const condition = findAction(conditionId) as TAction<TConditionChildMap>;
 
       if (condition) {
-        await executeActionFCType(condition);
+        await executeActionFCType(condition, params);
       }
     }
   };
-  const executeActionFCType = async (action?: TAction): Promise<void> => {
+  const executeActionFCType = async (
+    action?: TAction,
+    params?: THandleDataParams
+  ): Promise<void> => {
     if (!action?.fcType) return;
 
     switch (action.fcType) {
       case 'action':
-        await executeAction(action as TAction<TActionApiCall>);
+        await executeAction(action as TAction<TActionApiCall>, params);
         break;
       case 'conditional':
-        await executeConditional(action as TAction<TConditional>);
+        await executeConditional(action as TAction<TConditional>, params);
         break;
       case 'conditionalChild':
-        const isMatch = await executeConditionalChild(action as TAction<TConditionChildMap>);
+        const isMatch = await executeConditionalChild(
+          action as TAction<TConditionChildMap>,
+          params
+        );
 
         const conditionChildData = action?.data as TConditionChildMap;
         const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
@@ -93,14 +92,14 @@ export const useActions = (props: TActionsProps): TUseActions => {
         if (!isMatch) return;
         break;
       case 'loop':
-        await executeLoopOverList(action as TAction<TActionLoop>);
+        await executeLoopOverList(action as TAction<TActionLoop>, params);
         break;
 
       default:
         console.error(`Unknown fcType: ${action.fcType}`);
     }
     if (action.next) {
-      await executeActionFCType(findAction(action.next));
+      await executeActionFCType(findAction(action.next), params);
     }
   };
 
@@ -113,21 +112,24 @@ export const useActions = (props: TActionsProps): TUseActions => {
     };
   }, []);
 
-  const executeAction = async (action: TAction): Promise<void> => {
+  const executeAction = async (action: TAction, params?: THandleDataParams): Promise<void> => {
     if (!action) return;
 
     try {
       switch (action.type) {
         case 'navigate':
-          return await handleNavigateAction(action as TAction<TActionNavigate>);
+          return await handleNavigateAction(action as TAction<TActionNavigate>, params);
         case 'apiCall':
-          return await handleApiCallAction(action as TAction<TActionApiCall>);
+          return await handleApiCallAction(action as TAction<TActionApiCall>, params);
         case 'updateStateManagement':
-          return await handleUpdateStateAction(action as TAction<TActionUpdateState>);
+          return await handleUpdateStateAction(action as TAction<TActionUpdateState>, params);
         case 'customFunction':
-          return await handleCustomFunction(action as TAction<TActionCustomFunction>);
+          return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'updateFormState':
-          return await handleUpdateFormStateAction(action as TAction<TActionUpdateFormState>);
+          return await handleUpdateFormStateAction(
+            action as TAction<TActionUpdateFormState>,
+            params
+          );
         default:
           console.error(`Unknown action type: ${action.type}`);
       }
@@ -139,7 +141,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const executeTriggerActions = async (
     triggerActions: TTriggerActions,
     triggerType: TTriggerValue,
-    formData?: Record<string, any>
+    params?: THandleDataParams
   ): Promise<void> => {
     const triggerValues = triggerActions || data?.action;
     const actionsToExecute = triggerValues[triggerType];
@@ -147,7 +149,6 @@ export const useActions = (props: TActionsProps): TUseActions => {
     await setMultipleActions({
       actions: triggerActions,
       triggerName: triggerType,
-      formData,
     });
     if (!actionsToExecute) return;
 
@@ -158,7 +159,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
       if (rootAction.delay) {
         await new Promise((resolve) => setTimeout(resolve, rootAction.delay));
       }
-      await executeActionFCType(rootAction);
+      await executeActionFCType(rootAction, params);
     }
   };
 
@@ -166,11 +167,11 @@ export const useActions = (props: TActionsProps): TUseActions => {
     async (
       triggerType: TTriggerValue,
       action?: TTriggerActions,
-      formData?: Record<string, any>
+      params?: THandleDataParams
     ): Promise<void> => {
       setIsLoading(true);
       try {
-        await executeTriggerActions(action || data?.actions || {}, triggerType, formData);
+        await executeTriggerActions(action || data?.actions || {}, triggerType, params);
       } finally {
         setIsLoading(false);
       }
@@ -197,11 +198,11 @@ export const useActions = (props: TActionsProps): TUseActions => {
 export const handleActionExternal = async (
   triggerType: TTriggerValue,
   actions: TTriggerActions = {},
-  formData?: Record<string, any>,
-  executeTriggerActions?: (
+  params: THandleDataParams,
+  executeTriggerActions: (
     triggerActions: TTriggerActions,
     triggerType: TTriggerValue,
-    formData?: Record<string, any>
+    params?: THandleDataParams
   ) => Promise<void>
 ): Promise<void> => {
   if (typeof executeTriggerActions !== 'function') {
@@ -210,7 +211,7 @@ export const handleActionExternal = async (
   }
 
   try {
-    await executeTriggerActions(actions, triggerType, formData);
+    await executeTriggerActions(actions, triggerType, params);
   } catch (error) {
     console.error('Error while executing trigger actions:', error);
   }

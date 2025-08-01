@@ -3,18 +3,14 @@ import { useEffect, useMemo, useRef } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
-  TAction,
-  TActionApiCall,
-  TActionNavigate,
-  TActionUpdateState,
-  TTriggerActions,
-  TTriggerValue,
+    TAction, TActionApiCall, TActionNavigate, TActionUpdateState, TTriggerActions, TTriggerValue
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
 import { useActions } from './useActions';
 import { useApiCallAction } from './useApiCallAction';
+import { THandleDataParams } from './useHandleData';
 import { useNavigateAction } from './useNavigateAction';
 import { useUpdateStateAction } from './useUpdateStateAction';
 
@@ -104,9 +100,13 @@ const createActionExecutor = (actionHandlers: {
 
 export const createTriggerActionsExecutor = (
   setMultipleActions: (payload: { actions: TTriggerActions; triggerName: TTriggerValue }) => void,
-  executeActionFCType: (action?: TAction) => Promise<void>
+  executeActionFCType: (action?: TAction, params?: THandleDataParams) => Promise<void>
 ) => {
-  return async (actions: TTriggerActions, triggerType: TTriggerValue): Promise<void> => {
+  return async (
+    actions: TTriggerActions,
+    triggerType: TTriggerValue,
+    params?: THandleDataParams
+  ): Promise<void> => {
     const actionsToExecute = actions[triggerType];
 
     setMultipleActions({ actions, triggerName: triggerType });
@@ -115,29 +115,37 @@ export const createTriggerActionsExecutor = (
 
     const rootAction = findRootAction(actionsToExecute);
     if (rootAction) {
-      await executeActionFCType(rootAction);
+      await executeActionFCType(rootAction, params);
     }
   };
 };
 
 export const createActionHandlerFactory = (
   actionsMap: Record<string, TTriggerActions>,
-  executeTriggerActions: (actions: TTriggerActions, triggerType: TTriggerValue) => Promise<void>
+
+  executeTriggerActions: (
+    actions: TTriggerActions,
+    triggerType: TTriggerValue,
+    params?: THandleDataParams
+  ) => Promise<void>
 ) => {
-  return (actionName: string) =>
+  return (actionName: string, params?: THandleDataParams) =>
     async (triggerType: TTriggerValue = DEFAULT_TRIGGER): Promise<void> => {
       const actionMap = actionsMap[actionName];
       if (!validateActionMap(actionMap, actionName)) {
         return;
       }
 
-      await executeTriggerActions(actionMap, triggerType);
+      await executeTriggerActions(actionMap, triggerType, params);
     };
 };
 
 export const createMouseEventHandlers = (
   dataProps: TDataProps[],
-  createActionHandler: (actionName: string) => (triggerType?: TTriggerValue) => Promise<void>
+  createActionHandler: (
+    actionName: string,
+    params?: THandleDataParams
+  ) => (triggerType?: TTriggerValue) => Promise<void>
 ): Record<string, React.MouseEventHandler<HTMLButtonElement>> => {
   const validActions = dataProps?.filter((item) => !_.isEmpty(item.data?.onClick));
   const result: Record<string, React.MouseEventHandler<HTMLButtonElement>> = {};
@@ -145,9 +153,8 @@ export const createMouseEventHandlers = (
   if (!_.isArray(validActions)) return {};
 
   for (const item of validActions) {
-    result[item.name] = async (e) => {
-      e?.preventDefault?.();
-      const handler = await createActionHandler(item.name);
+    result[item.name] = async (...callbackArgs) => {
+      const handler = await createActionHandler(item.name, { callbackArgs });
       await handler();
     };
   }

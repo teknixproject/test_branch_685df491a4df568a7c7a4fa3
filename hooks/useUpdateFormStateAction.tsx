@@ -3,13 +3,19 @@ import _ from 'lodash';
 import { TAction, TActionUpdateFormState } from '@/types';
 
 import { TActionsProps } from './useActions';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  handleUpdateFormStateAction: (action: TAction<TActionUpdateFormState>) => Promise<void>;
+  handleUpdateFormStateAction: (
+    action: TAction<TActionUpdateFormState>,
+    params?: THandleDataParams
+  ) => Promise<void>;
 };
 
-export const useUpdateFormStateAction = (props: TActionsProps): TUseActions => {
+export const useUpdateFormStateAction = (
+  props: TActionsProps,
+  params?: THandleDataParams
+): TUseActions => {
   const { getData } = useHandleData(props);
 
   const handleUpdateFormStateAction = async (
@@ -24,7 +30,7 @@ export const useUpdateFormStateAction = (props: TActionsProps): TUseActions => {
 
     for (const item of updates || []) {
       const { name, value } = item;
-      const valueState = await getData(value);
+      const valueState = await getData(value, params);
 
       setValue(name, valueState);
     }

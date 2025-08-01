@@ -4,10 +4,13 @@ import { TAction, TActionNavigate } from '@/types';
 import { buildPathFromPattern } from '@/uitls/pathname';
 
 import { TActionsProps } from './useActions';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  handleNavigateAction: (action: TAction<TActionNavigate>) => Promise<void>;
+  handleNavigateAction: (
+    action: TAction<TActionNavigate>,
+    params?: THandleDataParams
+  ) => Promise<void>;
 };
 
 export const normalizeUrl = (url: string): string => {
@@ -39,9 +42,9 @@ export const normalizeUrl = (url: string): string => {
   }
 };
 type TProps = TActionsProps;
-export const useNavigateAction = ({ data, valueStream }: TProps): TUseActions => {
+export const useNavigateAction = ({ data, valueStream, methods }: TProps): TUseActions => {
   const router = useRouter();
-  const { getData } = useHandleData({ activeData: data, valueStream: valueStream });
+  const { getData } = useHandleData({ activeData: data, valueStream: valueStream, methods });
 
   const isValidUrl = (url: string): boolean => {
     try {
@@ -56,12 +59,15 @@ export const useNavigateAction = ({ data, valueStream }: TProps): TUseActions =>
     }
   };
 
-  const handleNavigateAction = async (action: TAction<TActionNavigate>): Promise<void> => {
+  const handleNavigateAction = async (
+    action: TAction<TActionNavigate>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     try {
       const { url, isExternal, isNewTab, parameters = [] } = action?.data || {};
       if (!url) return;
 
-      const urlConverted = await buildPathFromPattern(url, parameters, getData, valueStream);
+      const urlConverted = await buildPathFromPattern(url, parameters, getData, params);
 
       if (!isValidUrl(urlConverted)) {
         return;

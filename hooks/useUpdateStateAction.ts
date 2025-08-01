@@ -5,10 +5,13 @@ import { stateManagementStore } from '@/stores';
 import { TAction, TActionUpdateState, TTypeSelectState } from '@/types';
 
 import { TActionsProps } from './useActions';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  handleUpdateStateAction: (action: TAction<TActionUpdateState>) => Promise<void>;
+  handleUpdateStateAction: (
+    action: TAction<TActionUpdateState>,
+    params?: THandleDataParams
+  ) => Promise<void>;
 };
 
 export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
@@ -31,8 +34,12 @@ export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
 
   //#region Action Handlers
 
-  const handleUpdateStateAction = async (action: TAction<TActionUpdateState>): Promise<void> => {
+  const handleUpdateStateAction = async (
+    action: TAction<TActionUpdateState>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     const updates = action?.data?.update;
+    console.log('🚀 ~ handleUpdateStateAction ~ updates:', updates);
 
     if (_.isEmpty(updates)) return;
 
@@ -45,7 +52,8 @@ export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
         id: (item.firstState[type] as any).variableId || '',
       });
 
-      const variableSecond = await getData(item.secondState);
+      const variableSecond = await getData(item.secondState, params);
+      console.log('🚀 ~ handleUpdateStateAction ~ variableSecond:', variableSecond);
 
       if (!variableFirst) return;
 

@@ -35,7 +35,11 @@ export type TData = {
     paramName: string;
   };
   itemInList: { jsonPath?: string };
-  formData: { jsonPath?: string };
+  formData: {
+    select: 'formData' | 'fieldValue';
+    fieldName: string;
+    options: TDataField['options'];
+  };
   combineText?: TCombineText;
   dynamicGenerate?: TDataField;
   apiResponse?: TDataField;
@@ -48,6 +52,13 @@ export type TData = {
   customFunction: {
     customFunctionId: string;
     props: { key: string; type: TTypeVariable; isList: boolean; value: TData }[];
+  };
+  callback: {
+    name: string;
+    type: TTypeVariable;
+    index: number;
+    isList: boolean;
+    options: TDataField['options'];
   };
   valueInput?: string;
   defaultValue?: string;

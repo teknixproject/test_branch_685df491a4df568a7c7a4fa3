@@ -1,5 +1,6 @@
 import { findRootConditionChild, handleCompareCondition } from '@/hooks/useConditionAction';
-import { TAction, TConditionChildMap } from '@/types';
+import { THandleDataParams } from '@/hooks/useHandleData';
+import { TAction, TConditionChildMap, TData } from '@/types';
 
 import { TConditional, TTriggerActions } from '../types/actions';
 import { transformVariable } from './tranformVariable';
@@ -44,7 +45,7 @@ const isElseCondition = (condition: TAction<TConditionChildMap>): boolean => {
 
 export const executeConditionalInData = async (
   triggerFull: TTriggerActions,
-  getData: (value: any) => any
+  getData: (data: TData, params?: THandleDataParams) => any
 ): Promise<void> => {
   const onClick = triggerFull.onClick || {};
   const conditionAction = Object.values(onClick).find(

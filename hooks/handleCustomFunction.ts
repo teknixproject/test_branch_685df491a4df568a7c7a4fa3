@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { TCustomFunction, TTypeVariable } from '@/types';
 import { TData } from '@/types/dataItem';
 
+import { THandleDataParams } from './useHandleData';
+
 function convertValueByType(value: any, type: TTypeVariable, isList = false): any {
   if (value == null) return null;
 
@@ -43,13 +45,15 @@ function convertValueByType(value: any, type: TTypeVariable, isList = false): an
 
 type THandleCustomData = {
   data: TData['customFunction'];
-  getData: (data: TData | null) => any;
+  getData: (data: TData | null, params?: THandleDataParams) => any;
   findCustomFunction: (id: string) => TCustomFunction;
+  params?: THandleDataParams;
 };
 export const handleCustomFunction = async ({
   data,
   getData,
   findCustomFunction,
+  params,
 }: THandleCustomData): Promise<any> => {
   async function buildArgsFromDefinedProps(
     props: TCustomFunction['props'],
@@ -62,7 +66,7 @@ export const handleCustomFunction = async ({
 
       const input = inputs?.find((item) => item.key === prop.key);
 
-      const rawData = await getData(input?.value || null);
+      const rawData = await getData(input?.value || null, params);
 
       args[prop.key] = convertValueByType(rawData, prop.type, prop.isList);
     }
@@ -70,11 +74,9 @@ export const handleCustomFunction = async ({
     return args;
   }
   const customFunction = findCustomFunction(data.customFunctionId);
-  console.log('🚀 ~ handleCustomFunction ~ customFunction:', customFunction);
 
   if (_.isEmpty(customFunction)) return;
   const args = await buildArgsFromDefinedProps(customFunction?.props, data?.props);
-  console.log('🚀 ~ handleCustomFunction ~ args:', args);
 
   const runFunction = async () => {
     try {
@@ -82,7 +84,6 @@ export const handleCustomFunction = async ({
 
       if (typeof fn === 'function') {
         const result = await fn(args);
-        console.log('🚀 ~ runFunction ~ result:', result);
 
         return result;
       } else {

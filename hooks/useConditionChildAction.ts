@@ -2,10 +2,13 @@ import { TAction, TConditionalChild, TConditionChildMap } from '@/types';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
 import { TActionsProps } from './useActions';
-import { useHandleData } from './useHandleData';
+import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  executeConditionalChild: (action: TAction<TConditionChildMap>) => Promise<boolean>;
+  executeConditionalChild: (
+    action: TAction<TConditionChildMap>,
+    params?: THandleDataParams
+  ) => Promise<boolean>;
   handleCompareCondition: (
     conditionChildId: string,
     condition: TConditionChildMap
@@ -127,7 +130,8 @@ export const getConditionChildById = (
  */
 export const evaluateCompareCondition = async (
   compare: TConditionalChild['compare'],
-  getData: (value: any) => any
+  getData: (value: any, params?: THandleDataParams) => any,
+  params?: THandleDataParams
 ): Promise<boolean> => {
   console.log('🚀 ~ evaluateCompareCondition ~ compare:', compare);
   if (!compare?.firstValue || !compare?.secondValue) {
@@ -135,9 +139,9 @@ export const evaluateCompareCondition = async (
     return false;
   }
 
-  const firstValue = await getData(compare.firstValue);
+  const firstValue = await getData(compare.firstValue, params);
   console.log('🚀 ~ evaluateCompareCondition ~ firstValue:', firstValue);
-  const secondValue = await getData(compare.secondValue);
+  const secondValue = await getData(compare.secondValue, params);
   console.log('🚀 ~ evaluateCompareCondition ~ secondValue:', secondValue);
 
   // Check for null/undefined values
@@ -168,7 +172,8 @@ export const evaluateCompareCondition = async (
 export const handleCompareCondition = async (
   conditionChildId: string,
   condition: TConditionChildMap,
-  getData: (value: any) => any
+  getData: (value: any) => any,
+  params?: THandleDataParams
 ): Promise<boolean> => {
   const conditionChild = getConditionChildById(conditionChildId, condition);
 
@@ -179,18 +184,22 @@ export const handleCompareCondition = async (
 
   // Handle simple comparison condition
   if (conditionChild.type === ConditionType.COMPARE) {
-    const valueCompareSignle = await evaluateCompareCondition(conditionChild.compare, getData);
+    const valueCompareSignle = await evaluateCompareCondition(
+      conditionChild.compare,
+      getData,
+      params
+    );
 
     return valueCompareSignle;
   }
 
   // Handle complex logic condition
   const firstValue = conditionChild.fistCondition
-    ? await handleCompareCondition(conditionChild.fistCondition, condition, getData)
+    ? await handleCompareCondition(conditionChild.fistCondition, condition, getData, params)
     : undefined;
 
   const secondValue = conditionChild.secondCondition
-    ? await handleCompareCondition(conditionChild.secondCondition, condition, getData)
+    ? await handleCompareCondition(conditionChild.secondCondition, condition, getData, params)
     : undefined;
 
   const valueComparasion = evaluateLogicOperation(
@@ -212,7 +221,8 @@ export const handleCompareCondition = async (
 export const processCondition = async (
   conditionChild: TAction<TConditionChildMap>,
   findAction: (id: string) => TAction | undefined,
-  getData: (value: any) => any
+  getData: (value: any) => any,
+  params?: THandleDataParams
 ): Promise<boolean> => {
   if (!conditionChild?.data) {
     console.warn(`Condition data not found: ${conditionChild.id}`);
@@ -229,7 +239,8 @@ export const processCondition = async (
   const isConditionMet = await handleCompareCondition(
     rootCondition.id,
     conditionChild.data,
-    getData
+    getData,
+    params
   );
 
   return isConditionMet;
@@ -259,8 +270,11 @@ export const useConditionChildAction = (props: TActionsProps): TUseActions => {
     return await handleCompareCondition(conditionChildId, condition, getData);
   };
 
-  const executeConditionalChild = async (action: TAction<TConditionChildMap>): Promise<boolean> => {
-    return await processCondition(action, findAction, getData);
+  const executeConditionalChild = async (
+    action: TAction<TConditionChildMap>,
+    params?: THandleDataParams
+  ): Promise<boolean> => {
+    return await processCondition(action, findAction, getData, params);
   };
 
   return {
