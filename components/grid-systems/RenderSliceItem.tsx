@@ -352,6 +352,9 @@ const RenderFormItem: FC<TProps> = (props) => {
     return <Component {...rest} />;
   }
   if (!valueType) return <div></div>;
+  if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
+    return null;
+  }
   if (isLoading) return <LoadingPage />;
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
