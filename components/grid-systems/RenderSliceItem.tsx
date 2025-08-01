@@ -179,7 +179,9 @@ const RenderSliceItem: FC<TProps> = (props) => {
   if (!valueType) return <div></div>;
   if (isLoading) return <LoadingPage />;
   if (isForm) return <RenderForm {...props} />;
-
+  if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
+    return null;
+  }
   if (isNoChildren || isChart) return <Component key={data?.id} {...propsCpn} />;
   if (isMap)
     return (
