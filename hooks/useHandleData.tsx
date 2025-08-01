@@ -456,7 +456,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             const valueJsonPath = JSONPath({
               json: value,
               path: jsonPathValue || '',
-            });
+            }) as any[];
             value = valueJsonPath?.[0];
             break;
 
@@ -527,7 +527,6 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
       data: TData | null | undefined,
       { valueStream, callbackArgs }: THandleDataParams = {} as THandleDataParams
     ): Promise<any> => {
-      console.log('🚀 ~ useHandleData ~ data:', data);
       if (_.isEmpty(data) && valueStream) return valueStream;
       if (_.isEmpty(data) && props.valueStream) return props.valueStream;
       if (_.isEmpty(data) || !data.type) return data?.defaultValue || data?.valueInput;
