@@ -61,14 +61,14 @@ export const useFormStateAction = (
     const option = action?.data?.option;
     switch (option) {
       case 'update':
-        handleUpdate(action, params);
+        await handleUpdate(action, params);
         break;
 
       case 'unregister':
-        handleUsregister(action, params);
+        await handleUsregister(action, params);
         break;
       case 'reset':
-        handleReset(action, params);
+        await handleReset(action, params);
         break;
     }
   };
