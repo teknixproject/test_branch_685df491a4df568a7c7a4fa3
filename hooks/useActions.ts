@@ -127,7 +127,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
         case 'customFunction':
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'formState':
-          return await handleFormState(action as TAction<TActionFormState>);
+          return await handleFormState(action as TAction<TActionFormState>, params);
         default:
           console.error(`Unknown action type: ${action.type}`);
       }

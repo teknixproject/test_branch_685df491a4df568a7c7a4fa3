@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import _ from 'lodash';
 
 import { TAction, TActionFormState } from '@/types';
@@ -6,7 +7,7 @@ import { TActionsProps } from './useActions';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
-  handleFormState: (action: TAction<TActionFormState>) => Promise<void>;
+  handleFormState: (action: TAction<TActionFormState>, params?: THandleDataParams) => Promise<void>;
 };
 
 export const useFormStateAction = (
@@ -15,7 +16,10 @@ export const useFormStateAction = (
 ): TUseActions => {
   const { getData } = useHandleData(props);
 
-  const handleUpdate = async (action: TAction<TActionFormState>): Promise<void> => {
+  const handleUpdate = async (
+    action: TAction<TActionFormState>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     const { methods } = props;
     if (!methods) return;
     const { setValue } = methods;
@@ -30,7 +34,10 @@ export const useFormStateAction = (
       setValue(name, valueState);
     }
   };
-  const handleUsregister = async (action: TAction<TActionFormState>): Promise<void> => {
+  const handleUsregister = async (
+    action: TAction<TActionFormState>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     const { methods } = props;
     if (!methods) return;
     const { unregister } = methods;
@@ -40,24 +47,28 @@ export const useFormStateAction = (
       unregister(name);
     }
   };
-  const handleReset = async (action: TAction<TActionFormState>): Promise<void> => {
+  const handleReset = async (
+    action: TAction<TActionFormState>,
+    params?: THandleDataParams
+  ): Promise<void> => {
     const { methods } = props;
     if (!methods) return;
     const { reset } = methods;
     const resetValue = await getData(action?.data?.reset?.value, params);
     reset(resetValue);
   };
-  const handleFormState = async (action: TAction<TActionFormState>) => {
+  const handleFormState = async (action: TAction<TActionFormState>, params?: THandleDataParams) => {
     const option = action?.data?.option;
     switch (option) {
       case 'update':
-        handleUpdate(action);
+        handleUpdate(action, params);
         break;
+
       case 'unregister':
-        handleUsregister(action);
+        handleUsregister(action, params);
         break;
       case 'reset':
-        handleReset(action);
+        handleReset(action, params);
         break;
     }
   };
