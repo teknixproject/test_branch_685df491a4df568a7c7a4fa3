@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Upload, UploadFile } from 'antd';
+import dayjs from 'dayjs';
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
 import {
-    Controller, FieldValues, FormProvider, useForm, useFormContext, UseFormReturn
+  Controller,
+  FieldValues,
+  FormProvider,
+  useForm,
+  useFormContext,
+  UseFormReturn,
 } from 'react-hook-form';
 
 import { useActions } from '@/hooks/useActions';
@@ -327,6 +333,31 @@ const RenderFormItem: FC<TProps> = (props) => {
     const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
 
     if (inFormKeys) {
+      if (valueType === 'datepicker') {
+        return (
+          <Controller
+            control={control}
+            name={inFormKeys.key}
+            render={({ field }) => {
+              return (
+                <Component
+                  {...rest}
+                  {...field}
+                  value={dayjs(field.value)}
+                  defaultValue={dayjs(field.value)}
+                  onChange={(target: any) => {
+                    field.onChange(target);
+                    if (typeof rest?.onChange === 'function') {
+                      rest.onChange(target);
+                    }
+                  }}
+                  key={`form-child-${data?.id}`}
+                />
+              );
+            }}
+          />
+        );
+      }
       return (
         <Controller
           control={control}
