@@ -32,7 +32,7 @@ export type TActionSelect =
   | 'loopOverList'
   | 'loop'
   | 'customFunction'
-  | 'updateFormState';
+  | 'formState';
 export type TActionFCType = 'action' | 'conditional' | 'conditionalChild' | 'loopOverList' | 'loop';
 export type TStatusResponse = 'success' | 'error';
 export type TOperatorCompare =
@@ -114,9 +114,16 @@ export type TActionUpdateStateVariable = {
 export type TActionUpdateState = {
   update: TActionUpdateStateVariable[];
 };
-export type TActionUpdateFormState = {
+export type TActionFormState = {
   update: { name: string; value: TData }[];
+  unregister: { name: string }[];
+  reset: {
+    value: TData;
+    type: 'object';
+  };
+  option: 'update' | 'unregister' | 'reset';
 };
+
 export type TActionNavigate = {
   isExternal: boolean;
   isNewTab: boolean;

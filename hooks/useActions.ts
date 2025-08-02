@@ -4,9 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
-  TAction, TActionApiCall, TActionCustomFunction, TActionLoop, TActionNavigate,
-  TActionUpdateFormState, TActionUpdateState, TConditional, TConditionChildMap, TTriggerActions,
-  TTriggerValue
+  TAction, TActionApiCall, TActionCustomFunction, TActionFormState, TActionLoop, TActionNavigate,
+  TActionUpdateState, TConditional, TConditionChildMap, TTriggerActions, TTriggerValue
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 import { transformVariable } from '@/uitls/tranformVariable';
@@ -15,10 +14,10 @@ import { actionHookSliceStore } from './store/actionSliceStore';
 import { useApiCallAction } from './useApiCallAction';
 import { useConditionChildAction } from './useConditionChildAction';
 import { useCustomFunction } from './useCustomFunction';
+import { useFormStateAction } from './useFormStateAction';
 import { THandleDataParams } from './useHandleData';
 import { useLoopActions } from './useLoopActions';
 import { useNavigateAction } from './useNavigateAction';
-import { useUpdateFormStateAction } from './useUpdateFormStateAction';
 import { useUpdateStateAction } from './useUpdateStateAction';
 
 export type TUseActions = {
@@ -49,7 +48,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const { executeConditionalChild } = useConditionChildAction(props);
   const { handleUpdateStateAction } = useUpdateStateAction(props);
   const { handleCustomFunction } = useCustomFunction(props);
-  const { handleUpdateFormStateAction } = useUpdateFormStateAction(props);
+  const { handleFormState } = useFormStateAction(props);
   const { handleNavigateAction } = useNavigateAction(props);
   const { executeLoopOverList } = useLoopActions();
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +68,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     action?: TAction,
     params?: THandleDataParams
   ): Promise<void> => {
+    console.log('🚀 ~ executeActionFCType ~ action:', action);
     if (!action?.fcType) return;
 
     switch (action.fcType) {
@@ -114,8 +114,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   }, []);
 
   const executeAction = async (action: TAction, params?: THandleDataParams): Promise<void> => {
-    console.log(">>> ACTION:", action)
-    console.log(">>> ACTION NEXT:", action?.next)
+    console.log('🚀 ~ executeAction ~ action:', action);
     if (!action) return;
 
 
@@ -129,11 +128,8 @@ export const useActions = (props: TActionsProps): TUseActions => {
           return await handleUpdateStateAction(action as TAction<TActionUpdateState>, params);
         case 'customFunction':
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
-        case 'updateFormState':
-          return await handleUpdateFormStateAction(
-            action as TAction<TActionUpdateFormState>,
-            params
-          );
+        case 'formState':
+          return await handleFormState(action as TAction<TActionFormState>);
         default:
           console.error(`Unknown action type: ${action.type}`);
       }
