@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import _ from 'lodash';
@@ -27,7 +26,7 @@ export function useConstructorDataAPI(uid?: string) {
     setSidebarPosition,
   } = useLayoutContext();
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error } = useSWR(
     uid ? `${API_URL}/api/client/getLayout?pId=${projectId}&uid=${uid}` : null,
     fetcher,
     { revalidateOnFocus: false, refreshInterval: 60000 }
@@ -57,7 +56,7 @@ export function useConstructorDataAPI(uid?: string) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newHeaderId, newFooterId, newSidebarPosition, uid]);
+  }, [newHeaderId, newFooterId, newSidebarPosition, uid, data]);
 
   if (error) {
     console.error('❌ Error fetching constructor:', error);
