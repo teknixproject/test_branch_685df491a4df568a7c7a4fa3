@@ -4,8 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
-  TAction, TActionApiCall, TActionCustomFunction, TActionFormState, TActionLoop, TActionNavigate,
-  TActionUpdateState, TConditional, TConditionChildMap, TTriggerActions, TTriggerValue
+  TAction,
+  TActionApiCall,
+  TActionCustomFunction,
+  TActionFormState,
+  TActionLoop,
+  TActionNavigate,
+  TActionUpdateState,
+  TConditional,
+  TConditionChildMap,
+  TTriggerActions,
+  TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 import { transformVariable } from '@/uitls/tranformVariable';
@@ -68,12 +77,10 @@ export const useActions = (props: TActionsProps): TUseActions => {
     action?: TAction,
     params?: THandleDataParams
   ): Promise<void> => {
-    console.log('🚀 ~ executeActionFCType ~ action:', action);
     if (!action?.fcType) return;
 
     switch (action.fcType) {
       case 'action':
-
         await executeAction(action as TAction<TActionApiCall>, params);
         break;
       case 'conditional':
@@ -86,6 +93,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
         );
 
         const conditionChildData = action?.data as TConditionChildMap;
+
         const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
         if (isReturnValue && isMatch) {
           return transformVariable(conditionChildData.valueReturn!);
@@ -114,9 +122,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   }, []);
 
   const executeAction = async (action: TAction, params?: THandleDataParams): Promise<void> => {
-    console.log('🚀 ~ executeAction ~ action:', action);
     if (!action) return;
-
 
     try {
       switch (action.type) {

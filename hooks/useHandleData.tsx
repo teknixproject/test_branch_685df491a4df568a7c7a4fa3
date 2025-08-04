@@ -97,12 +97,14 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         item: NonNullable<TDataField<TOptionApiResponse>['options']>[number],
         value?: TVariable
       ) => {
-        switch (item.option) {
+        switch (item?.option) {
+          case OPTIONS_HANDLE.NO_ACTION:
+            return value;
           case 'jsonPath':
             const valueJsonPath = JSONPath({
               json: value?.value,
               path: (await getData(item.jsonPath as TData, {})) || '',
-            });
+            }) as any[];
             return valueJsonPath?.[0];
           case 'statusCode':
             return value?.statusCode;
@@ -125,14 +127,13 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         }
       };
 
-      let value = variable as TVariable;
+      let value = variable;
       for (const option of apiResponse?.options || []) {
         value = await handleOption(
           option as NonNullable<TDataField<TOptionApiResponse>['options']>[number],
           value
         );
       }
-      if (_.isEmpty(variable)) return data.defaultValue;
       return value;
     },
     [findVariable]
@@ -258,6 +259,8 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
       const optionItem = option as NonNullable<TDataField['options']>[number];
 
       switch (optionItem.option) {
+        case OPTIONS_HANDLE.NO_ACTION:
+          break;
         case 'jsonPath':
           const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
           const valueJsonPath = JSONPath({
@@ -539,7 +542,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case 'dynamicGenerate':
           return await handleDynamicGenerate(data);
         case 'apiResponse':
-          return await handleState(data);
+          return await handleApiResponse(data);
         case 'appState':
           return await handleState(data);
         case 'componentState':

@@ -278,6 +278,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     methods,
   });
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
+  console.log(`🚀 ~ RenderFormItem ~ rest: ${data?.id}`, rest);
 
   const { isInput } = getComponentType(data?.value || '');
 
@@ -343,8 +344,7 @@ const RenderFormItem: FC<TProps> = (props) => {
                 <Component
                   {...rest}
                   {...field}
-                  value={dayjs(field.value)}
-                  defaultValue={dayjs(field.value)}
+                  value={field.value ? dayjs(field.value) : null}
                   onChange={(target: any) => {
                     field.onChange(target);
                     if (typeof rest?.onChange === 'function') {

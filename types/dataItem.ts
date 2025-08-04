@@ -2,6 +2,7 @@ import { TAction, TConditionChildMap, TTriggerActions } from './actions';
 import { TTypeVariable } from './variable';
 
 export type TOptionApiResponse =
+  | 'noAction'
   | 'jsonPath'
   | 'succeeded'
   | 'statusCode'
