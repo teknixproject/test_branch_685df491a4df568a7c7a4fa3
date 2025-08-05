@@ -1,4 +1,5 @@
 'use client';
+import { App } from 'antd';
 import React from 'react';
 
 import { StyleProvider } from '@ant-design/cssinjs';
@@ -11,7 +12,9 @@ type Props = {
 const AntdProvider: React.FC<Props> = ({ children }) => {
   return (
     <AntdRegistry>
-      <StyleProvider layer>{children}</StyleProvider>
+      <StyleProvider>
+        <App>{children}</App>
+      </StyleProvider>
     </AntdRegistry>
   );
 };

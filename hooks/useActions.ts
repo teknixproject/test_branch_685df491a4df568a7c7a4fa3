@@ -4,8 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import {
-  TAction, TActionApiCall, TActionCustomFunction, TActionFormState, TActionLoop, TActionNavigate,
-  TActionUpdateState, TConditional, TConditionChildMap, TTriggerActions, TTriggerValue
+  TAction,
+  TActionApiCall,
+  TActionCustomFunction,
+  TActionFormState,
+  TActionLoop,
+  TActionMessage,
+  TActionNavigate,
+  TActionUpdateState,
+  TConditional,
+  TConditionChildMap,
+  TTriggerActions,
+  TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 import { transformVariable } from '@/uitls/tranformVariable';
@@ -17,6 +27,7 @@ import { useCustomFunction } from './useCustomFunction';
 import { useFormStateAction } from './useFormStateAction';
 import { THandleDataParams } from './useHandleData';
 import { useLoopActions } from './useLoopActions';
+import { useMessageAction } from './useMessageAction';
 import { useNavigateAction } from './useNavigateAction';
 import { useUpdateStateAction } from './useUpdateStateAction';
 
@@ -51,6 +62,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const { handleFormState } = useFormStateAction(props);
   const { handleNavigateAction } = useNavigateAction(props);
   const { executeLoopOverList } = useLoopActions();
+  const { executeMessageAction } = useMessageAction(props);
   const [isLoading, setIsLoading] = useState(false);
 
   const executeConditional = async (action: TAction<TConditional>, params?: THandleDataParams) => {
@@ -73,7 +85,6 @@ export const useActions = (props: TActionsProps): TUseActions => {
 
     switch (action.fcType) {
       case 'action':
-
         await executeAction(action as TAction<TActionApiCall>, params);
         break;
       case 'conditional':
@@ -117,7 +128,6 @@ export const useActions = (props: TActionsProps): TUseActions => {
     console.log('🚀 ~ executeAction ~ action:', action);
     if (!action) return;
 
-
     try {
       switch (action.type) {
         case 'navigate':
@@ -130,6 +140,8 @@ export const useActions = (props: TActionsProps): TUseActions => {
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'formState':
           return await handleFormState(action as TAction<TActionFormState>, params);
+        case 'message':
+          return await executeMessageAction(action as TAction<TActionMessage>, params);
         default:
           console.error(`Unknown action type: ${action.type}`);
       }

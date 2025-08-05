@@ -347,8 +347,13 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     const state = data[data.type] as TData['callback'];
     if (!_.isEmpty(callbackArgs)) {
       const indexArg = state?.index;
-
       let value = callbackArgs?.[indexArg];
+
+      if (value?.target?.value !== undefined) {
+        value = value.target.value;
+      } else if (value?.target?.checked !== undefined) {
+        value = value.target.checked;
+      }
 
       for (const option of state?.options || []) {
         const optionItem = option as NonNullable<TDataField['options']>[number];
@@ -419,14 +424,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'isNotEmpty':
             return !_.isEmpty(value);
           default:
-            return (
-              value ||
-              transformVariable({
-                isList: state.isList,
-                type: state.type,
-                value: data.defaultValue,
-              })
-            );
+            return value;
         }
       }
 

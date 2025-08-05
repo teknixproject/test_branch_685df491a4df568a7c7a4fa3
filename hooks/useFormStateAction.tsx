@@ -10,10 +10,7 @@ export type TUseActions = {
   handleFormState: (action: TAction<TActionFormState>, params?: THandleDataParams) => Promise<void>;
 };
 
-export const useFormStateAction = (
-  props: TActionsProps,
-  params?: THandleDataParams
-): TUseActions => {
+export const useFormStateAction = (props: TActionsProps): TUseActions => {
   const { getData } = useHandleData(props);
 
   const handleUpdate = async (
