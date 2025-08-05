@@ -4,7 +4,12 @@ import { Upload, UploadFile } from 'antd';
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
 import {
-    Controller, FieldValues, FormProvider, useForm, useFormContext, UseFormReturn
+  Controller,
+  FieldValues,
+  FormProvider,
+  useForm,
+  useFormContext,
+  UseFormReturn,
 } from 'react-hook-form';
 
 import { useActions } from '@/hooks/useActions';

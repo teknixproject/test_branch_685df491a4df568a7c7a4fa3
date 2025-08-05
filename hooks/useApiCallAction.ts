@@ -5,7 +5,15 @@ import { useCallback } from 'react';
 
 import { stateManagementStore } from '@/stores';
 import { authSettingStore } from '@/stores/authSetting';
-import { TAction, TActionApiCall, TActionVariable, TApiCallValue, TApiCallVariable } from '@/types';
+import {
+  TAction,
+  TActionApiCall,
+  TActionVariable,
+  TApiCallValue,
+  TApiCallVariable,
+  TData,
+  TTypeSelect,
+} from '@/types';
 import { variableUtil } from '@/uitls';
 
 import { TActionsProps } from './useActions';
@@ -30,6 +38,11 @@ const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string 
     (url, { key, value }) => url.replace(`[${key}]`, String(value)),
     baseUrl
   );
+};
+const getOldOutput = (output: TActionApiCall['output']) => {
+  const variableId = (output as any).variableId;
+  if (variableId) return variableId;
+  return output[output?.type]?.variableId;
 };
 export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const router = useRouter();
@@ -124,12 +137,13 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const makeApiCall = async (
     apiCall: TApiCallValue,
     body: object,
-    variableId: string,
+    ouptut: TData,
     params?: THandleDataParams
   ): Promise<any> => {
+    const typeStore = (ouptut.type || 'apiResponse') as TTypeSelect;
     const outputVariable = findVariable({
-      type: 'apiResponse',
-      id: variableId,
+      type: typeStore,
+      id: getOldOutput(ouptut as any),
     });
     try {
       const response = await axios.request({
@@ -143,7 +157,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
 
       if (outputVariable?.id) {
         updateVariables({
-          type: 'apiResponse',
+          type: typeStore,
           dataUpdate: {
             ...outputVariable,
             value: response.data,
@@ -159,12 +173,12 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
       console.log('🚀 ~ useApiCallAction ~ error:', error);
       if (axios.isAxiosError(error)) {
         if (error.status === forbiddenCode) {
-          await handleRefreshToken(apiCall, body, variableId, params);
+          await handleRefreshToken(apiCall, body, getOldOutput(ouptut as any), params);
           return;
         }
         if (outputVariable) {
           updateVariables({
-            type: 'apiResponse',
+            type: typeStore,
             dataUpdate: {
               ...outputVariable,
 
@@ -216,7 +230,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     const newBody = handleBody(apiCall, variables);
     _.update(apiCall, 'variables', () => variables);
 
-    await makeApiCall(apiCall, newBody, action?.data?.output?.variableId ?? '', params);
+    await makeApiCall(apiCall, newBody, action?.data?.output as any, params);
   };
 
   return { handleApiCallAction };
