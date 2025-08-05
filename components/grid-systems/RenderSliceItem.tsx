@@ -105,7 +105,6 @@ const useRenderItem = ({
     valueType,
     activeData: data,
   });
-  // console.log(`🚀 ~ useRenderItem ~ dataState: ${data.id}`, dataState);
 
   const { actions } = useHandleProps({
     dataProps: getPropActions(data),
@@ -130,10 +129,10 @@ const useRenderItem = ({
       valueType === 'menu'
         ? { ...staticProps, ...actions }
         : {
-            ...dataState,
-            ...staticProps,
-            ...actions,
-          };
+          ...dataState,
+          ...staticProps,
+          ...actions,
+        };
 
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
