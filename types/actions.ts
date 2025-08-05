@@ -32,7 +32,8 @@ export type TActionSelect =
   | 'loopOverList'
   | 'loop'
   | 'customFunction'
-  | 'formState';
+  | 'formState'
+  | 'message';
 export type TActionFCType = 'action' | 'conditional' | 'conditionalChild' | 'loopOverList' | 'loop';
 export type TStatusResponse = 'success' | 'error';
 export type TOperatorCompare =
@@ -207,6 +208,12 @@ export type TActionCustomFunction = TData['customFunction'] & {
   output: { variableId: string; typeStore: TTypeSelect };
   isList: boolean;
   outputType: TTypeVariable;
+};
+export type TActionMessage = {
+  option: 'show' | 'destroy';
+  content: TData;
+  duration?: number;
+  status: 'success' | 'error' | 'info' | 'warning';
 };
 export type TAction<T = unknown> = {
   id: string;

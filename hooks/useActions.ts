@@ -9,6 +9,7 @@ import {
   TActionCustomFunction,
   TActionFormState,
   TActionLoop,
+  TActionMessage,
   TActionNavigate,
   TActionUpdateState,
   TConditional,
@@ -26,6 +27,7 @@ import { useCustomFunction } from './useCustomFunction';
 import { useFormStateAction } from './useFormStateAction';
 import { THandleDataParams } from './useHandleData';
 import { useLoopActions } from './useLoopActions';
+import { useMessageAction } from './useMessageAction';
 import { useNavigateAction } from './useNavigateAction';
 import { useUpdateStateAction } from './useUpdateStateAction';
 
@@ -60,6 +62,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const { handleFormState } = useFormStateAction(props);
   const { handleNavigateAction } = useNavigateAction(props);
   const { executeLoopOverList } = useLoopActions();
+  const { executeMessageAction } = useMessageAction(props);
   const [isLoading, setIsLoading] = useState(false);
 
   const executeConditional = async (action: TAction<TConditional>, params?: THandleDataParams) => {
@@ -136,6 +139,8 @@ export const useActions = (props: TActionsProps): TUseActions => {
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'formState':
           return await handleFormState(action as TAction<TActionFormState>, params);
+        case 'message':
+          return await executeMessageAction(action as TAction<TActionMessage>, params);
         default:
           console.error(`Unknown action type: ${action.type}`);
       }
