@@ -14,6 +14,13 @@ import ReactQueryProvider from '@/providers/QueryClient';
 
 import { fetchMetadata } from './actions/server';
 import './globals.css';
+import { MetadataIcon } from '@/types/seo';
+
+const DEFAULT_ICONS = {
+  icon: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
+  shortcut: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
+  apple: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
+};
 
 export const fetchSEOData = async (path: string) => {
   try {
@@ -21,8 +28,13 @@ export const fetchSEOData = async (path: string) => {
       headers: {
         Authorization: process.env.NEXT_AUTHORIZATION as string,
       },
-      cache: 'force-cache', // Sử dụng cache để giảm tải
+      cache: 'no-store',
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const data = await response.json();
     return _.find(_.get(data, 'docs'), {
       projectID: process.env.NEXT_SEO_PROJECTID as string,
@@ -45,45 +57,56 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Get pathname from headers
-  const headersList = await headers();
-  const pathname = headersList.get('x-path-name') || 'NextJS';
+  let pathname = 'NextJS';
 
-  const metadata = await fetchMetadata(pathname);
-  const formMetadata = _.get(metadata, 'data.form');
-
-  if (!formMetadata) {
-    return {
-      title: 'NextJS',
-      description: 'NextJS 15',
-      icons: {
-        icon: '',
-        shortcut: '',
-        apple: '',
-      },
-    };
+  try {
+    // Safer way to get pathname
+    const headersList = await headers();
+    pathname = headersList.get('x-path-name') ||
+      headersList.get('x-pathname') ||
+      headersList.get('pathname') ||
+      'NextJS';
+  } catch (error) {
+    console.warn('Could not get pathname from headers:', error);
   }
 
-  const iconConfig = {
-    icon: _.get(formMetadata, 'icon.icon') || '',
-    shortcut: _.get(formMetadata, 'icon.shortcut') || '',
-    apple: _.get(formMetadata, 'icon.apple') || '',
+  let metadata;
+  try {
+    metadata = await fetchMetadata(pathname);
+  } catch (error) {
+    console.error('Failed to fetch metadata:', error);
+    metadata = null;
+  }
+
+  const formMetadata = _.get(metadata, 'data.form');
+
+  const baseMetadata: Metadata = {
+    title: {
+      default: 'NextJS PAGE',
+      template: '%s | NextJS PAGE',
+    },
+    description: 'NextJS 15',
+    icons: DEFAULT_ICONS,
   };
+
+  if (!formMetadata) {
+    return baseMetadata;
+  }
 
   return {
     title: {
-      default: formMetadata?.title?.default || 'NextJS PAGE',
-      template: formMetadata?.title?.template || '%s | NextJS PAGE',
+      default: formMetadata?.title?.default || baseMetadata.title.default,
+      template: formMetadata?.title?.template || baseMetadata.title.template,
     },
-    description: formMetadata?.description || 'Default NextJS Page.',
+    description: formMetadata?.description || baseMetadata.description,
     keywords: formMetadata?.keywords,
     authors: formMetadata?.authors?.map((author: any) => ({
       name: author.name,
       url: author.url,
     })),
     openGraph: {
-      title: formMetadata?.openGraph?.title || formMetadata?.title?.default || 'NEXTJS PAGE',
-      description: formMetadata?.openGraph?.description || formMetadata?.description || 'Default NextJS page.',
+      title: formMetadata?.openGraph?.title || formMetadata?.title?.default || baseMetadata.title.default,
+      description: formMetadata?.openGraph?.description || formMetadata?.description || baseMetadata.description,
       url: formMetadata?.openGraph?.url,
       siteName: formMetadata?.openGraph?.siteName,
       images: formMetadata?.openGraph?.images?.map((image: any) => ({
@@ -119,11 +142,6 @@ export async function generateMetadata(): Promise<Metadata> {
         }
         : undefined,
     },
-    icons: {
-      icon: iconConfig.icon,
-      shortcut: iconConfig.shortcut,
-      apple: iconConfig.apple,
-    },
     alternates: {
       canonical: formMetadata?.alternates?.canonical,
     },
@@ -135,13 +153,29 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const pathname = headerList.get('x-path-name');
+  const metadata: MetadataIcon = await fetchMetadata(pathname || '');
+
+  // Safely access metadata
+  const formMetadata = metadata?.data?.form || {};
+  const iconUrl = formMetadata?.icon?.icon || '/favicon.ico';
+  const appleIcon = formMetadata?.icon?.apple || '/apple-icon.png';
+  const shortcutIcon = formMetadata?.icon?.shortcut || '/shortcut-icon.png';
+
   return (
     <html lang="en">
+      <head>
+        {/* Fallback icons trong trường hợp metadata không load được */}
+        <link rel="icon" href={iconUrl || DEFAULT_ICONS.icon} />
+        <link rel="shortcut icon" href={appleIcon || DEFAULT_ICONS.shortcut} />
+        <link rel="apple-touch-icon" href={shortcutIcon || DEFAULT_ICONS.apple} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReactQueryProvider>
           <ApiStoreProvider>
             <LayoutProvider>
-              <Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
                 <LayoutContent>
                   <AntdProvider>{children}</AntdProvider>
                 </LayoutContent>
