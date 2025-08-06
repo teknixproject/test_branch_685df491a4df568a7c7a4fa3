@@ -104,7 +104,7 @@ export const PreviewUI: FC = () => {
   );
 
   return (
-    <div className="relative !z-0 h-screen">
+    <div className="relative !z-0">
       {!_.isEmpty(selectedHeaderLayout) && (
         <div id="header" ref={headerRef} className="sticky top-0 z-10 max-h-screen overflow-hidden">
           <GridSystemContainer
@@ -120,7 +120,7 @@ export const PreviewUI: FC = () => {
         {isPreviewSidebar && renderSidebar}
         {isSidebarLeft && !_.isEmpty(selectedSidebarLayout) && renderSidebar}
         <main style={{ flex: 1, overflow: 'hidden' }}>
-          <div className="relative h-screen overflow-y-auto">
+          <div className="relative overflow-y-auto">
             {!_.isEmpty(selectedBodyLayout) && (
               <GridSystemContainer page={selectedBodyLayout} deviceType={deviceType} isBody />
             )}
