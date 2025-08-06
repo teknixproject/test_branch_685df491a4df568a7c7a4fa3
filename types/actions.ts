@@ -100,10 +100,7 @@ export type TActionApiCall = {
   apiId: string;
   apiName: string;
   variables: TActionVariable[];
-  output: {
-    variableId: string;
-    jsonPath?: string;
-  };
+  output: TData;
   status: TStatusResponse;
 };
 
