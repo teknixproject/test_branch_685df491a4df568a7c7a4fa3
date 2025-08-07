@@ -30,9 +30,8 @@ export const useFormStateAction = (props: TActionsProps): TUseActions => {
         if (_.isEmpty(item)) continue;
         const name = item?.name;
         const value = item?.value;
-        if (!name || !value) continue;
+        if (!name) continue;
         const valueState = await getData(value, params);
-        console.log('🚀 ~ handleUpdate ~ valueState:', valueState);
 
         setValue(name, valueState);
       } catch (error) {
