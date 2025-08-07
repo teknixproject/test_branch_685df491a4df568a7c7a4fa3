@@ -366,6 +366,7 @@ const RenderFormItem: FC<TProps> = (props) => {
               <Component
                 {...rest}
                 {...field}
+                {...(valueType === 'datepicker' ? { value: dayjs(field.value) } : null)}
                 onChange={(target: any) => {
                   field.onChange(target);
                   if (typeof rest?.onChange === 'function') {
