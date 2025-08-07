@@ -241,7 +241,10 @@ export const useInitStateRender = () => {
   const { isLoading: isLoadingPageNames } = useQuery({
     queryKey: [],
     queryFn: async () => {
-      const result = await documentService.getAllPageNames(projectId || '');
+      const result = await documentService.getAllPageNames(
+        projectId || '',
+        process.env.NEXT_PUBLIC_BRANCH || 'main'
+      );
       const uids = result?.data?.map((item: any) => item.uid) || [];
 
       const matched = getMatchingRoutePattern(pathname, uids);
@@ -338,11 +341,13 @@ const getStates = async ({
           type === 'globalState'
             ? {
                 projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+                branch: process.env.NEXT_PUBLIC_BRANCH || 'main',
                 type,
               }
             : {
                 uid: uid ?? '/',
                 projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+                branch: process.env.NEXT_PUBLIC_BRANCH || 'main',
                 type,
               }
         );
@@ -378,6 +383,7 @@ const getApiCall = async ({
   try {
     const result = await apiCallService.getAll({
       projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+      branch: process.env.NEXT_PUBLIC_BRANCH || 'main',
     });
     addAndUpdateApiResource({ apis: result?.data?.apis });
   } catch (error) {
@@ -397,6 +403,7 @@ const getCustomFunctions = async ({
     const result = await customFunctionService.getAll({
       uid: uid || '',
       projectId: projectId || process.env.NEXT_PUBLIC_PROJECT_ID || '',
+      branch: process.env.NEXT_PUBLIC_BRANCH || 'main',
     });
     setCustomFunctions(result.data);
   } catch (error) {
@@ -411,7 +418,10 @@ const getAuthSettings = async ({
   projectId: string;
 }) => {
   try {
-    const result = await authSettingService.get({ projectId });
+    const result = await authSettingService.get({
+      projectId,
+      branch: process.env.NEXT_PUBLIC_BRANCH || 'main',
+    });
     resetAuthSettings(result?.data);
   } catch (error) {
     console.log('🚀 ~ getAuthSettings ~ error:', error);

@@ -15,6 +15,8 @@ const fetcher = async (url: string) => {
 export function useConstructorDataAPI(uid?: string) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+  const branch = process.env.NEXT_PUBLIC_BRANCH;
+
   const {
     headerLayout,
     sidebarLayout,
@@ -27,7 +29,7 @@ export function useConstructorDataAPI(uid?: string) {
   } = useLayoutContext();
 
   const { data, error } = useSWR(
-    uid ? `${API_URL}/api/client/getLayout?pId=${projectId}&uid=${uid}` : null,
+    uid ? `${API_URL}/api/client/getLayout?pId=${projectId}&uid=${uid}&branch=${branch}` : null,
     fetcher,
     { revalidateOnFocus: false, refreshInterval: 60000 }
   );
@@ -88,21 +90,6 @@ export function useConstructorDataAPI(uid?: string) {
     footerLayout: _.get(data, 'data.footerLayout.layoutJson', {}),
     isLoading: false,
     error: false,
-  };
-}
-
-export function useGetModalUI() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-
-  const { data, isLoading } = useSWR(
-    `${API_URL}/api/client/getModalLayout?projectId=${projectId}`,
-    fetcher,
-    { revalidateOnFocus: false, refreshInterval: 60000 }
-  );
-  return {
-    isLoading,
-    data: data?.data || [],
   };
 }
 
