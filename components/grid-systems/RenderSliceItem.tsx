@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Upload, UploadFile } from 'antd';
+import dayjs from 'dayjs';
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
@@ -341,6 +342,7 @@ const RenderFormItem: FC<TProps> = (props) => {
               <Component
                 {...rest}
                 {...field}
+                {...(valueType === 'datepicker' ? { value: dayjs(field.value) } : null)}
                 onChange={(target: any) => {
                   field.onChange(target);
                   if (typeof rest?.onChange === 'function') {
