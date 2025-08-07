@@ -2,7 +2,8 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
-      "stage_1": true
+      "stage_1": true,
+      "stage_2": true
     }
   },
   "github": {
