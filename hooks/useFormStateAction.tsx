@@ -21,14 +21,24 @@ export const useFormStateAction = (props: TActionsProps): TUseActions => {
     if (!methods) return;
     const { setValue } = methods;
     const updates = action?.data?.update;
+    console.log('🚀 ~ handleUpdate ~ updates:', updates);
 
     if (_.isEmpty(updates)) return;
 
     for (const item of updates || []) {
-      const { name, value } = item;
-      const valueState = await getData(value, params);
+      try {
+        if (_.isEmpty(item)) continue;
+        const name = item?.name;
+        const value = item?.value;
+        if (!name || !value) continue;
+        const valueState = await getData(value, params);
+        console.log('🚀 ~ handleUpdate ~ valueState:', valueState);
 
-      setValue(name, valueState);
+        setValue(name, valueState);
+      } catch (error) {
+        console.error('Error in handleUpdate:', error);
+        continue;
+      }
     }
   };
   const handleUsregister = async (
@@ -41,6 +51,7 @@ export const useFormStateAction = (props: TActionsProps): TUseActions => {
     const unregisters = action?.data?.unregister;
     for (const item of unregisters || []) {
       const { name } = item;
+
       unregister(name);
     }
   };
