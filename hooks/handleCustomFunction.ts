@@ -1,10 +1,17 @@
 import _ from 'lodash';
+import * as ts from 'typescript';
 
 import { TCustomFunction, TTypeVariable } from '@/types';
 import { TData } from '@/types/dataItem';
 
 import { THandleDataParams } from './useHandleData';
 
+const transpileTs = (code: string): string => {
+  const result = ts.transpileModule(code, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+  });
+  return result.outputText;
+};
 function convertValueByType(value: any, type: TTypeVariable, isList = false): any {
   if (value == null) return null;
 
@@ -80,7 +87,8 @@ export const handleCustomFunction = async ({
 
   const runFunction = async () => {
     try {
-      const fn = new Function(`return ${customFunction.code}`)() as (args: any) => any;
+      const jsCode = transpileTs(customFunction.code);
+      const fn = new Function(`return ${jsCode}`)() as (args: any) => any;
 
       if (typeof fn === 'function') {
         const result = await fn(args);

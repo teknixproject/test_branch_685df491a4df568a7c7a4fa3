@@ -138,6 +138,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
         case 'customFunction':
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'formState':
+          console.log('🚀 ~ executeAction ~ action: form', action);
           return await handleFormState(action as TAction<TActionFormState>, params);
         case 'message':
           return await executeMessageAction(action as TAction<TActionMessage>, params);
