@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 import _ from 'lodash';
 import { useRouter } from 'next/navigation';
@@ -18,7 +19,7 @@ import { variableUtil } from '@/uitls';
 
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
-import { useCustomFunction } from './useCustomFunction';
+// import { useCustomFunction } from './useCustomFunction';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
 const { isUseVariable, extractAllValuesFromTemplate } = variableUtil;
@@ -53,7 +54,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const forbiddenCode = authSettingStore((state) => state.forbiddenCode);
   const findVariable = stateManagementStore((state) => state.findVariable);
   const updateVariables = stateManagementStore((state) => state.updateVariables);
-  const { handleCustomFunction } = useCustomFunction(props);
+  // const { handleCustomFunction } = useCustomFunction(props);
   const convertActionVariables = useCallback(
     async (
       actionVariables: TActionVariable[],
@@ -196,23 +197,27 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const handleRefreshToken = async (
     apiCall: TApiCallValue,
     body: object,
-    variableId: string,
-    params?: THandleDataParams
-  ) => {
-    try {
-      if (refreshAction) {
-        const rootAction = Object.values(refreshAction?.onClick || {})?.find(
-          (item) => item.parentId === null
-        );
-        // await handleActionExternal(refreshAction, 'onClick', params);
-
-        // await makeApiCall(apiCall, body, variableId);
-      } else if (entryPage) router.push(entryPage);
-    } catch (error) {
-      console.log('🚀 ~ handleRefreshToken ~ error:', error);
-      if (entryPage) router.push(entryPage);
-    }
-  };
+    p0: any,
+    params: THandleDataParams | undefined
+  ) =>
+    // apiCall: TApiCallValue,
+    // body: object,
+    // variableId: string,
+    // params?: THandleDataParams
+    {
+      try {
+        if (refreshAction) {
+          // const rootAction = Object.values(refreshAction?.onClick || {})?.find(
+          //   (item) => item.parentId === null
+          // );
+          // await handleActionExternal(refreshAction, 'onClick', params);
+          // await makeApiCall(apiCall, body, variableId);
+        } else if (entryPage) router.push(entryPage);
+      } catch (error) {
+        console.log('🚀 ~ handleRefreshToken ~ error:', error);
+        if (entryPage) router.push(entryPage);
+      }
+    };
   const handleBody = (apiCall: TApiCallValue, variables: Record<string, any>) => {
     const formData = props.methods?.getValues();
     return formData || convertApiCallBody(apiCall?.body, variables);
