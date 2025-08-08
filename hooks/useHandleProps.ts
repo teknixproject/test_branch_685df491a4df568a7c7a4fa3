@@ -1,9 +1,14 @@
 import _ from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { FieldValues, UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
 
 import {
-    TAction, TActionApiCall, TActionNavigate, TActionUpdateState, TTriggerActions, TTriggerValue
+  TAction,
+  TActionApiCall,
+  TActionNavigate,
+  TActionUpdateState,
+  TTriggerActions,
+  TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
 
@@ -32,6 +37,7 @@ interface UseHandlePropsProps {
   valueStream: any;
   data?: GridItem;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
+  methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
 }
 
 // Constants

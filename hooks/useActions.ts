@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { FieldValues, UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
 
 import {
   TAction,
@@ -45,6 +45,7 @@ export type TActionsProps = {
   data?: GridItem;
   valueStream: any;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
+  methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
 };
 export const useActions = (props: TActionsProps): TUseActions => {
   const { data } = useMemo(() => {

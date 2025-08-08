@@ -663,10 +663,6 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     props?.componentProps,
     props?.valueStream,
     props?.valueType,
-    appState,
-    globalState,
-    componentState,
-    apiResponseState,
     // isProcessing,
   ]);
   const [hasProcessed, setHasProcessed] = useState(false);
@@ -682,57 +678,6 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     run();
   }, [appState, globalState, componentState, apiResponseState]);
 
-  // const dataState = useMemo(() => {
-  //   const dataMultiple = props?.dataProp?.reduce(async (obj, item) => {
-  //     return {
-  //       ...obj,
-  //       [item.name]: await getData(item.data, props.valueStream),
-  //     };
-  //   }, {});
-
-  //   const componentConverted = Object.entries(props?.componentProps || {}).reduce(
-  //     async (obj, [key, value]) => {
-  //       if (isTData(value)) {
-  //         const data = {
-  //           type: value.type,
-  //           [value.type]: value[value.type],
-  //         } as TData;
-
-  //         let valueConvert = await getData(data, props.valueStream);
-  //         console.log('🚀 ~ useHandleData ~ valueConvert:', valueConvert);
-
-  //         if (props.valueType?.toLowerCase() === 'datepicker') {
-  //           if (key === 'value' || key === 'defaultValue') {
-  //             valueConvert = dayjs(valueConvert);
-  //           }
-  //         }
-  //         return {
-  //           ...obj,
-  //           [key]: valueConvert,
-  //         };
-  //       }
-  //       return {
-  //         ...obj,
-  //         [key]: value,
-  //       };
-  //     },
-  //     {}
-  //   );
-  //   const reslt = {
-  //     ...dataMultiple,
-  //     ...componentConverted,
-  //   };
-
-  //   return reslt;
-  // }, [
-  //   appState,
-  //   globalState,
-  //   componentState,
-  //   apiResponseState,
-  //   props?.componentProps,
-  //   props?.valueStream,
-  //   props?.dataProp,
-  // ]);
   return {
     getData,
     dataState,
