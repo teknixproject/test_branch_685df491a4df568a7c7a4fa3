@@ -27,6 +27,7 @@ export const fetchSEOData = async (path: string) => {
     const response = await fetch(process.env.NEXT_SEO_URL as string, {
       headers: {
         Authorization: process.env.NEXT_AUTHORIZATION as string,
+        'X-Branch': process.env.NEXT_PUBLIC_BRANCH as string,
       },
       cache: 'no-store',
     });

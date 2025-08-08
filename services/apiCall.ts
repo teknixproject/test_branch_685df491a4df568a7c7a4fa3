@@ -10,9 +10,9 @@ const update = async (data: Pick<TApiCall, '_id' | 'apis'>): Promise<TApiRespons
   return res.data;
 };
 const getAll = async (
-  query: Partial<Pick<TApiCall, 'projectId'>>
+  query: Partial<Pick<TApiCall, 'projectId' | 'branch'>> = {}
 ): Promise<TApiResponse<TApiCall>> => {
-  const res = await axiosInstance.get(`/apiCall/all/${query.projectId}`);
+  const res = await axiosInstance.get(`/apiCall/all/${query.projectId}?branch=${query.branch}`);
   return res.data;
 };
 export const apiCallService = {

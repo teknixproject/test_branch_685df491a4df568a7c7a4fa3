@@ -24,6 +24,7 @@ export type TPageVariable = {
   uid?: string;
   state: TVariable[];
   type: TTypeSelectState;
+  branch?: string;
 };
 export type TPageVariableResponse = {
   message: string;

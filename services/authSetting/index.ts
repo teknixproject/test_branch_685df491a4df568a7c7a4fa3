@@ -9,7 +9,10 @@ const update = async (data: TAuthSettingUpdate): Promise<TApiResponse<TAuthSetti
   const res = await axiosInstance.put(`/authSetting`, data);
   return res.data;
 };
-const get = async (data: { projectId?: string }): Promise<TApiResponse<TAuthSetting>> => {
+const get = async (data: {
+  projectId?: string;
+  branch: string;
+}): Promise<TApiResponse<TAuthSetting>> => {
   const res = await axiosInstance.get(`/authSetting`, { params: data });
   return res.data;
 };

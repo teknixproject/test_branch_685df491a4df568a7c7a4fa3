@@ -3,6 +3,7 @@ import { TTypeVariable } from './variable';
 export type TCustomFunction = {
   _id: string;
   projectId: string;
+  branch?: string;
   documentId: string;
   uid: string;
   name: string;
