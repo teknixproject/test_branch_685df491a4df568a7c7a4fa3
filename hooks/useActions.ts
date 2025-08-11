@@ -38,6 +38,11 @@ export type TUseActions = {
     params?: THandleDataParams
   ) => Promise<void>;
   isLoading: boolean;
+  executeTriggerActions: (
+    triggerActions: TTriggerActions,
+    triggerType: TTriggerValue,
+    params?: THandleDataParams
+  ) => Promise<void>;
   executeActionFCType: (action?: TAction) => Promise<void>;
 };
 
@@ -47,6 +52,7 @@ export type TActionsProps = {
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
   methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
 };
+
 export const useActions = (props: TActionsProps): TUseActions => {
   const { data } = useMemo(() => {
     return props;
@@ -127,6 +133,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
 
   const executeAction = async (action: TAction, params?: THandleDataParams): Promise<void> => {
     if (!action) return;
+    if (!action.type) return;
 
     try {
       switch (action.type) {
@@ -169,9 +176,9 @@ export const useActions = (props: TActionsProps): TUseActions => {
     const rootAction = Object.values(actionsToExecute).find((action) => !action.parentId);
 
     if (rootAction) {
-      if (rootAction.delay) {
-        await new Promise((resolve) => setTimeout(resolve, rootAction.delay));
-      }
+      // if (rootAction?.delay && rootAction?.delay > 0) {
+      //   await new Promise((resolve) => setTimeout(resolve, rootAction?.delay));
+      // }
       await executeActionFCType(rootAction, params);
     }
   };
@@ -206,7 +213,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     }
   }, [data?.id, actions]);
 
-  return { handleAction, isLoading, executeActionFCType };
+  return { handleAction, isLoading, executeTriggerActions, executeActionFCType };
 };
 export const handleActionExternal = async (
   triggerType: TTriggerValue,

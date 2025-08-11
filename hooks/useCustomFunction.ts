@@ -1,11 +1,11 @@
 'use client';
 import { stateManagementStore } from '@/stores';
 import { customFunctionStore } from '@/stores/customFunction';
-import { TAction, TActionCustomFunction } from '@/types';
-import { transformVariable } from '@/uitls/tranformVariable';
+import { TAction, TActionCustomFunction, TTypeSelect } from '@/types';
 
 import { handleCustomFunction as handleFunction } from './handleCustomFunction';
 import { TActionsProps } from './useActions';
+import { getOldOutput } from './useApiCallAction';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
 export type TUseActions = {
@@ -24,10 +24,8 @@ export const useCustomFunction = (props: TActionsProps): TUseActions => {
     action: TAction<TActionCustomFunction>,
     params?: THandleDataParams
   ): Promise<void> => {
-    console.log('🚀 ~ handleCustomFunction ~ action:', action);
     try {
-      const { customFunctionId, output, isList, outputType } = action?.data || {};
-      const typeStore = output?.typeStore || 'appState';
+      const { customFunctionId, output } = action?.data || {};
       if (customFunctionId) {
         const result = await handleFunction({
           data: action?.data as TActionCustomFunction,
@@ -35,26 +33,19 @@ export const useCustomFunction = (props: TActionsProps): TUseActions => {
           getData,
           params,
         });
-        const resultStander = transformVariable({
-          isList: !!isList,
-          type: outputType!,
-          value: result,
+        const typeStore = (output?.type || 'appState') as TTypeSelect;
+        const outputVariable = findVariable({
+          type: typeStore,
+          id: getOldOutput(output as any),
         });
-        console.log('🚀 ~ handleCustomFunction ~ resultStander:', resultStander);
-
-        console.log('🚀 ~ handleCustomFunction ~ output:', output);
-        if (output?.variableId) {
-          const variable = findVariable({ type: typeStore, id: output.variableId });
-          updateVariables({
-            type: typeStore,
-            dataUpdate: {
-              ...variable!,
-              type: outputType!,
-              isList: !!isList,
-              value: resultStander,
-            },
-          });
-        }
+        if (!outputVariable) return;
+        updateVariables({
+          type: typeStore,
+          dataUpdate: {
+            ...outputVariable,
+            value: result,
+          },
+        });
       }
     } catch (error) {
       throw error;

@@ -1,3 +1,4 @@
+import { TActionApiCall } from './actions';
 import { TTypeVariable } from './variable';
 
 export type TCustomFunction = {
@@ -15,4 +16,5 @@ export type TCustomFunction = {
     isList: boolean;
   }[];
   description?: string;
+  output: TActionApiCall['output'];
 };

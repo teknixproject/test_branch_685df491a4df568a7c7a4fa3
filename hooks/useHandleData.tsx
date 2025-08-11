@@ -19,6 +19,37 @@ import { isTData } from '@/uitls/transfromProp';
 import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';
 
+function extractVariableIdsWithLodash(obj: any): string[] {
+  const variableIds: string[] = [];
+
+  function collectVariableIds(value: any, key: string) {
+    if (key === 'variableId' && typeof value === 'string') {
+      variableIds.push(value);
+    }
+  }
+
+  function deepIterate(obj: any) {
+    _.forOwn(obj, (value, key) => {
+      collectVariableIds(value, key);
+
+      if (_.isObject(value)) {
+        deepIterate(value);
+      }
+    });
+
+    if (_.isArray(obj)) {
+      obj.forEach((item) => {
+        if (_.isObject(item)) {
+          deepIterate(item);
+        }
+      });
+    }
+  }
+
+  deepIterate(obj);
+
+  return _.uniq(variableIds);
+}
 enum OPTIONS_HANDLE {
   NO_ACTION = 'noAction',
   JSON_PATH = 'jsonPath',
@@ -665,7 +696,6 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     props?.valueType,
     // isProcessing,
   ]);
-  const [hasProcessed, setHasProcessed] = useState(false);
 
   useEffect(() => {
     // if (hasProcessed) return;
@@ -676,7 +706,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     };
 
     run();
-  }, [appState, globalState, componentState, apiResponseState]);
+  }, []);
 
   return {
     getData,

@@ -40,10 +40,10 @@ const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string 
     baseUrl
   );
 };
-const getOldOutput = (output: TActionApiCall['output']) => {
-  const variableId = (output as any).variableId;
+export const getOldOutput = (output: TActionApiCall['output']) => {
+  const variableId = (output as any)?.variableId;
   if (variableId) return variableId;
-  return output[output?.type]?.variableId;
+  return output?.[output?.type]?.variableId;
 };
 export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const router = useRouter();
@@ -120,6 +120,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
         }),
         {}
       );
+    console.log('🚀 ~ convertQuery ~ queryConvert:', queryConvert);
     return queryConvert;
   };
 
@@ -141,7 +142,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     ouptut: TData,
     params?: THandleDataParams
   ): Promise<any> => {
-    const typeStore = (ouptut.type || 'apiResponse') as TTypeSelect;
+    const typeStore = (ouptut?.type || 'apiResponse') as TTypeSelect;
     const outputVariable = findVariable({
       type: typeStore,
       id: getOldOutput(ouptut as any),
@@ -153,7 +154,8 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
         url: convertUrl(apiCall),
         headers: convertHeader(apiCall),
         data: ['POST', 'PUT', 'PATCH'].includes(apiCall?.method?.toUpperCase() || '') && body,
-        params: ['GET'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),
+        params:
+          ['GET', 'DELETE'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),
       });
 
       if (outputVariable?.id) {

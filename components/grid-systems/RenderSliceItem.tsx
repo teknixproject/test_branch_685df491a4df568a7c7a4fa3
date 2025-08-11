@@ -31,37 +31,6 @@ import { css } from '@emotion/react';
 import { componentRegistry, convertProps } from './ListComponent';
 import LoadingPage from './loadingPage';
 
-function extractVariableIdsWithLodash(obj: any): string[] {
-  const variableIds: string[] = [];
-
-  function collectVariableIds(value: any, key: string) {
-    if (key === 'variableId' && typeof value === 'string') {
-      variableIds.push(value);
-    }
-  }
-
-  function deepIterate(obj: any) {
-    _.forOwn(obj, (value, key) => {
-      collectVariableIds(value, key);
-
-      if (_.isObject(value)) {
-        deepIterate(value);
-      }
-    });
-
-    if (_.isArray(obj)) {
-      obj.forEach((item) => {
-        if (_.isObject(item)) {
-          deepIterate(item);
-        }
-      });
-    }
-  }
-
-  deepIterate(obj);
-
-  return _.uniq(variableIds);
-}
 type TProps = {
   data: GridItem;
   valueStream?: any;
@@ -182,12 +151,15 @@ const ComponentRenderer: FC<{
   children?: React.ReactNode;
 }> = ({ Component, propsCpn, data, children }) => {
   const { style, ...newPropsCpn } = propsCpn;
-
-  return (
-    <Component key={data?.id} {...newPropsCpn}>
-      {!_.isEmpty(data?.childs) ? children : propsCpn.children}
-    </Component>
-  );
+  try {
+    return (
+      <Component key={data?.id} {...newPropsCpn}>
+        {!_.isEmpty(data?.childs) ? children : propsCpn.children}
+      </Component>
+    );
+  } catch (error) {
+    return <div css={newPropsCpn.css}>❌ Error rendering component</div>;
+  }
 };
 
 const RenderSliceItem: FC<TProps> = (props) => {

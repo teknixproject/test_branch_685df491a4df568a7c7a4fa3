@@ -1,6 +1,5 @@
 import { TData } from './dataItem';
 import { TVariable } from './stateManagement';
-import { TTypeVariable } from './variable';
 
 export type TApiResponseOption = 'jsonBody' | 'statusCode' | 'succeeded';
 
@@ -202,9 +201,7 @@ export type TActionLoopOverList = {
   reserverOrder: boolean;
 };
 export type TActionCustomFunction = TData['customFunction'] & {
-  output: { variableId: string; typeStore: TTypeSelect };
-  isList: boolean;
-  outputType: TTypeVariable;
+  output: TActionApiCall['output'];
 };
 export type TActionMessage = {
   option: 'show' | 'destroy';

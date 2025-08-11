@@ -1,23 +1,13 @@
 import _ from 'lodash';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { FieldValues, UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
-import {
-  TAction,
-  TActionApiCall,
-  TActionNavigate,
-  TActionUpdateState,
-  TTriggerActions,
-  TTriggerValue,
-} from '@/types';
+import { TAction, TTriggerActions, TTriggerValue } from '@/types';
 import { GridItem } from '@/types/gridItem';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
 import { useActions } from './useActions';
-import { useApiCallAction } from './useApiCallAction';
-import { THandleDataParams } from './useHandleData';
-import { useNavigateAction } from './useNavigateAction';
-import { useUpdateStateAction } from './useUpdateStateAction';
 
 interface TDataProps {
   name: string;
@@ -27,9 +17,6 @@ interface TDataProps {
 
 interface UseHandlePropsResult {
   actions: Record<string, React.MouseEventHandler<HTMLButtonElement>>;
-  executeAction: (action: TAction) => Promise<void>;
-  executeTriggerActions: (actions: TTriggerActions, triggerType: TTriggerValue) => Promise<void>;
-  createActionHandler: (actionName: string) => (triggerType?: TTriggerValue) => Promise<void>;
 }
 
 interface UseHandlePropsProps {
@@ -67,7 +54,7 @@ const createActionsMap = (dataProps: TDataProps[]): Record<string, TTriggerActio
   return map;
 };
 
-export const findRootAction = (actionsToExecute: Record<string, TAction>): TAction | undefined => {
+const findRootAction = (actionsToExecute: Record<string, TAction>): TAction | undefined => {
   return Object.values(actionsToExecute).find((action) => !action.parentId);
 };
 
@@ -79,159 +66,107 @@ const validateActionMap = (actionMap: TTriggerActions | undefined, actionName: s
   return true;
 };
 
-const createActionExecutor = (actionHandlers: {
-  handleNavigateAction: (action: TAction<TActionNavigate>) => Promise<void>;
-  handleApiCallAction: (action: TAction<TActionApiCall>) => Promise<void>;
-  handleUpdateStateAction: (action: TAction<TActionUpdateState>) => Promise<void>;
-}) => {
-  return async (action: TAction): Promise<void> => {
-    if (!action) return;
-
-    try {
-      switch (action.type) {
-        case ACTION_TYPES.NAVIGATE:
-          return actionHandlers.handleNavigateAction(action as TAction<TActionNavigate>);
-        case ACTION_TYPES.API_CALL:
-          return actionHandlers.handleApiCallAction(action as TAction<TActionApiCall>);
-        case ACTION_TYPES.UPDATE_STATE:
-          return actionHandlers.handleUpdateStateAction(action as TAction<TActionUpdateState>);
-        default:
-          console.warn(`Unknown action type: ${action.type}`);
-      }
-    } catch (error) {
-      console.error(`Error executing action ${action.id}:`, error);
-    }
-  };
-};
-
-export const createTriggerActionsExecutor = (
-  setMultipleActions: (payload: { actions: TTriggerActions; triggerName: TTriggerValue }) => void,
-  executeActionFCType: (action?: TAction, params?: THandleDataParams) => Promise<void>
-) => {
-  return async (
-    actions: TTriggerActions,
-    triggerType: TTriggerValue,
-    params?: THandleDataParams
-  ): Promise<void> => {
-    const actionsToExecute = actions[triggerType];
-
-    setMultipleActions({ actions, triggerName: triggerType });
-
-    if (!actionsToExecute) return;
-
-    const rootAction = findRootAction(actionsToExecute);
-    if (rootAction) {
-      await executeActionFCType(rootAction, params);
-    }
-  };
-};
-
-export const createActionHandlerFactory = (
-  actionsMap: Record<string, TTriggerActions>,
-
-  executeTriggerActions: (
-    actions: TTriggerActions,
-    triggerType: TTriggerValue,
-    params?: THandleDataParams
-  ) => Promise<void>
-) => {
-  return (actionName: string, params?: THandleDataParams) =>
-    async (triggerType: TTriggerValue = DEFAULT_TRIGGER): Promise<void> => {
-      const actionMap = actionsMap[actionName];
-      if (!validateActionMap(actionMap, actionName)) {
-        return;
-      }
-
-      await executeTriggerActions(actionMap, triggerType, params);
-    };
-};
-
-export const createMouseEventHandlers = (
-  dataProps: TDataProps[],
-  createActionHandler: (
-    actionName: string,
-    params?: THandleDataParams
-  ) => (triggerType?: TTriggerValue) => Promise<void>
-): Record<string, React.MouseEventHandler<HTMLButtonElement>> => {
-  const validActions = dataProps?.filter((item) => !_.isEmpty(item.data?.onClick));
-  const result: Record<string, React.MouseEventHandler<HTMLButtonElement>> = {};
-
-  if (!_.isArray(validActions)) return {};
-
-  for (const item of validActions) {
-    result[item.name] = async (...callbackArgs) => {
-      const handler = await createActionHandler(item.name, { callbackArgs });
-      await handler();
-    };
-  }
-
-  return result;
-};
-
-export const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
+const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   const { dataProps } = props;
+
+  // Store references for debounced functions
+  const debouncedFunctionsRef = useRef<Record<string, any>>({});
   const triggerNameRef = useRef<TTriggerValue>(DEFAULT_TRIGGER);
   const previousActionsMapRef = useRef<Record<string, TTriggerActions>>({});
+
+  // Zustand store actions
   const setMultipleActions = actionHookSliceStore((state) => state.setMultipleActions);
 
-  const actionsMap = useMemo(() => createActionsMap(dataProps), [dataProps]);
+  // Step 1: Tạo actions map từ dataProps
+  const actionsMap = useMemo(() => {
+    return createActionsMap(dataProps);
+  }, [dataProps]);
 
-  const { handleApiCallAction } = useApiCallAction(props);
-  const { executeActionFCType } = useActions(props);
+  // Step 2: Lấy executeTriggerActions từ useActions hook
+  const { executeTriggerActions } = useActions(props);
 
-  // const { executeConditional } = useConditionAction();
+  // Step 3: Tạo stable execute function với useCallback
+  const createExecuteHandler = useCallback(
+    (actionMap: TTriggerActions, itemName: string) => {
+      return async (...callbackArgs: any[]) => {
+        // Persist tất cả React SyntheticEvent trong args
+        // callbackArgs.forEach((arg) => {
+        //   if (
+        //     arg &&
+        //     typeof arg === 'object' &&
+        //     'persist' in arg &&
+        //     typeof arg.persist === 'function'
+        //   ) {
+        //     arg.persist();
+        //   }
+        // });
 
-  const { handleUpdateStateAction } = useUpdateStateAction(props);
+        // Validate action map
+        if (!validateActionMap(actionMap, itemName)) {
+          return;
+        }
 
-  const { handleNavigateAction } = useNavigateAction(props);
-
-  const executeAction = useMemo(
-    () =>
-      createActionExecutor({
-        handleNavigateAction,
-        handleApiCallAction,
-        handleUpdateStateAction,
-      }),
-    [handleApiCallAction, handleNavigateAction, handleUpdateStateAction]
+        // Execute trigger actions directly
+        await executeTriggerActions(actionMap, DEFAULT_TRIGGER, { callbackArgs });
+      };
+    },
+    [executeTriggerActions]
   );
 
-  // const executeActionFCType = useMemo(() => createFCTypeExecutor(executeAction), [executeAction]);
+  // Step 4: Tạo mouse event handlers với stable debounce
+  const mouseEventHandlers = useDeepCompareMemo(() => {
+    if (!Array.isArray(dataProps)) return {};
 
-  const executeTriggerActions = useMemo(
-    () => createTriggerActionsExecutor(setMultipleActions, executeActionFCType),
-    [setMultipleActions, executeActionFCType]
-  );
+    const validActions = dataProps.filter((item) => !_.isEmpty(item.data?.onClick));
+    const result: Record<string, React.MouseEventHandler<HTMLButtonElement>> = {};
 
-  const createActionHandler = useMemo(
-    () => createActionHandlerFactory(actionsMap, executeTriggerActions),
-    [actionsMap, executeTriggerActions]
-  );
+    for (const item of validActions) {
+      const rootAction = findRootAction(item.data?.onClick || {});
+      const actionMap = actionsMap[item.name];
 
-  const actions = useMemo(
-    () => createMouseEventHandlers(dataProps, createActionHandler),
-    [dataProps, createActionHandler]
-  );
+      if (!actionMap) continue;
 
-  useEffect(() => {
-    const currentActionsMap = actionsMap[triggerNameRef.current];
-    const previousActionsMap = previousActionsMapRef.current[triggerNameRef.current];
+      // Tạo execute handler
+      const executeHandler = createExecuteHandler(actionMap, item.name);
 
-    if (currentActionsMap && !_.isEqual(currentActionsMap, previousActionsMap)) {
-      setMultipleActions({
-        actions: currentActionsMap,
-        triggerName: triggerNameRef.current,
-      });
+      // Kiểm tra xem có cần debounce không
+      if (rootAction?.delay && rootAction.delay > 0) {
+        // Kiểm tra xem đã có debounced function cho item này chưa
+        const cacheKey = `${item.name}_${rootAction.delay}`;
 
-      previousActionsMapRef.current[triggerNameRef.current] = currentActionsMap;
+        if (!debouncedFunctionsRef.current[cacheKey]) {
+          // Tạo debounced function mới và cache lại
+          debouncedFunctionsRef.current[cacheKey] = _.debounce(executeHandler, rootAction.delay);
+        }
+
+        result[item.name] = debouncedFunctionsRef.current[cacheKey];
+      } else {
+        result[item.name] = executeHandler;
+      }
+      result[item.name] = executeHandler;
     }
-  }, [actionsMap, setMultipleActions]);
+
+    return result;
+  }, [dataProps, actionsMap, createExecuteHandler]);
+
+  // Cleanup debounced functions when component unmounts or when actions change
+  const cleanupDebouncedFunctions = useCallback(() => {
+    Object.values(debouncedFunctionsRef.current).forEach((debouncedFn: any) => {
+      if (debouncedFn && typeof debouncedFn.cancel === 'function') {
+        debouncedFn.cancel();
+      }
+    });
+    debouncedFunctionsRef.current = {};
+  }, []);
+
+  // Cleanup khi component unmount hoặc khi actions thay đổi
+  useMemo(() => {
+    return () => cleanupDebouncedFunctions();
+  }, [actionsMap, cleanupDebouncedFunctions]);
 
   return {
-    actions,
-    executeAction,
-    executeTriggerActions,
-    createActionHandler,
+    actions: mouseEventHandlers,
   };
 };
 
-export { ACTION_TYPES, DEFAULT_TRIGGER, FC_TYPES };
+export { ACTION_TYPES, DEFAULT_TRIGGER, FC_TYPES, useHandleProps };
