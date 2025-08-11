@@ -131,7 +131,6 @@ export const convertProps = ({
       return {
         ...initialProps,
         renderItem: (item: any) => {
-
           return (
             <List.Item>
               <RenderSliceItem data={initialProps.box} valueStream={item} />
@@ -175,14 +174,6 @@ export const convertProps = ({
         }),
         summary,
       } as TableProps;
-    case 'modal': {
-      return {
-        ...initialProps,
-      };
-    }
-    case 'drawer': {
-      return { ...initialProps };
-    }
 
     case 'button': {
       const buttonProps = _.cloneDeep(initialProps) || {};
@@ -217,26 +208,9 @@ export const convertProps = ({
     default:
       break;
   }
-  if (isUseOptionsData) {
-    return {
-      ...initialProps,
-    };
-  }
-  if (isInput) {
-    return {
-      ...initialProps,
-      // style: { ...getStyleOfDevice(data), ...data?.componentProps?.style },
-    };
-  }
-  if (isChart) {
-    return {
-      ...initialProps,
-      // style: { ...getStyleOfDevice(data), ...data?.componentProps?.style },
-    };
-  }
+
   return {
     ...initialProps,
-    // style: { ...getStyleOfDevice(data), ...data?.componentProps?.style },
   };
 };
 export const getName = (id: string) => id.split('$')[0];

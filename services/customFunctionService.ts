@@ -19,7 +19,7 @@ const deleteOne = async ({ id }: { id: string }): Promise<TApiResponse<TCustomFu
   return res.data;
 };
 const getAll = async (
-  query: Pick<TCustomFunction, 'uid' | 'projectId'>
+  query: Pick<TCustomFunction, 'uid' | 'projectId' | 'branch'>
 ): Promise<TApiResponse<TCustomFunction[]>> => {
   const res = await axiosInstance.get(`/customFunction`, { params: query });
   return res.data;

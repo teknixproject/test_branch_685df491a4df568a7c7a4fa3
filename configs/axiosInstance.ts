@@ -4,6 +4,7 @@ const axiosInstance: AxiosInstance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
+    'X-Branch': process.env.NEXT_PUBLIC_BRANCH || 'main',
   },
 });
 

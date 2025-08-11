@@ -31,6 +31,7 @@ export const fetchMetadata = async (path: string) => {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
+        'X-Branch': process.env.NEXT_PUBLIC_BRANCH as string,
       },
       // Add timeout
       signal: AbortSignal.timeout(10000), // 10 seconds timeout

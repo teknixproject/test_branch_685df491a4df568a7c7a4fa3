@@ -16,6 +16,7 @@ export type TApiCall = {
   _id: string;
   projectId: string;
   apis: TApiCallValue[];
+  branch: string;
 };
 export type TApiCallValue = {
   type?: TypeApiCall;

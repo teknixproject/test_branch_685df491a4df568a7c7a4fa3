@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Upload, UploadFile } from 'antd';
+import { List, Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
@@ -8,10 +8,14 @@ import {
   Controller,
   FieldValues,
   FormProvider,
+  useFieldArray,
+  UseFieldArrayReturn,
   useForm,
   useFormContext,
   UseFormReturn,
+  useWatch,
 } from 'react-hook-form';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
 import { useActions } from '@/hooks/useActions';
 import { useHandleData } from '@/hooks/useHandleData';
@@ -27,41 +31,18 @@ import { css } from '@emotion/react';
 import { componentRegistry, convertProps } from './ListComponent';
 import LoadingPage from './loadingPage';
 
-function extractVariableIdsWithLodash(obj: any): string[] {
-  const variableIds: string[] = [];
-
-  function collectVariableIds(value: any, key: string) {
-    if (key === 'variableId' && typeof value === 'string') {
-      variableIds.push(value);
-    }
-  }
-
-  function deepIterate(obj: any) {
-    _.forOwn(obj, (value, key) => {
-      collectVariableIds(value, key);
-
-      if (_.isObject(value)) {
-        deepIterate(value);
-      }
-    });
-
-    if (_.isArray(obj)) {
-      obj.forEach((item) => {
-        if (_.isObject(item)) {
-          deepIterate(item);
-        }
-      });
-    }
-  }
-
-  deepIterate(obj);
-
-  return _.uniq(variableIds);
-}
 type TProps = {
   data: GridItem;
   valueStream?: any;
-  formKeys?: { key: string; value: string }[];
+  formKeys?: {
+    key: string;
+    value: string;
+    isList: boolean;
+    formKeys?: TProps['formKeys'];
+  }[];
+  formKeysArray?: TProps['formKeys'];
+  index?: number;
+  parentPath?: string;
 };
 const getPropData = (data: GridItem) =>
   data?.componentProps?.dataProps?.filter((item: any) => item.type === 'data');
@@ -89,14 +70,16 @@ const useRenderItem = ({
   data,
   valueStream,
   methods,
+  methodsArray,
 }: {
   data: GridItem;
   valueStream?: any;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
+  methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
 }) => {
   const valueType = useMemo(() => data?.value?.toLowerCase() || '', [data?.value]);
   const { isNoChildren } = getComponentType(data?.value || '');
-  const { isLoading } = useActions({ data, valueStream, methods: methods });
+  const { isLoading } = useActions({ data, valueStream, methods: methods, methodsArray });
   const findVariable = stateManagementStore((state) => state.findVariable);
   const { dataState } = useHandleData({
     dataProp: getPropData(data),
@@ -111,6 +94,7 @@ const useRenderItem = ({
     data,
     valueStream,
     methods,
+    methodsArray,
   });
 
   const Component = useMemo(
@@ -118,7 +102,7 @@ const useRenderItem = ({
     [valueType]
   );
 
-  const propsCpn = useMemo(() => {
+  const propsCpn = useDeepCompareMemo(() => {
     const staticProps: Record<string, any> = {
       ...convertProps({ initialProps: dataState, valueType }),
     };
@@ -129,10 +113,10 @@ const useRenderItem = ({
       valueType === 'menu'
         ? { ...staticProps, ...actions }
         : {
-          ...dataState,
-          ...staticProps,
-          ...actions,
-        };
+            ...dataState,
+            ...staticProps,
+            ...actions,
+          };
 
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
@@ -167,12 +151,15 @@ const ComponentRenderer: FC<{
   children?: React.ReactNode;
 }> = ({ Component, propsCpn, data, children }) => {
   const { style, ...newPropsCpn } = propsCpn;
-
-  return (
-    <Component key={data?.id} {...newPropsCpn}>
-      {!_.isEmpty(data?.childs) ? children : propsCpn.children}
-    </Component>
-  );
+  try {
+    return (
+      <Component key={data?.id} {...newPropsCpn}>
+        {!_.isEmpty(data?.childs) ? children : propsCpn.children}
+      </Component>
+    );
+  } catch (error) {
+    return <div css={newPropsCpn.css}>❌ Error rendering component</div>;
+  }
 };
 
 const RenderSliceItem: FC<TProps> = (props) => {
@@ -232,6 +219,10 @@ const RenderForm: FC<TProps> = (props) => {
     valueStream,
     methods,
   });
+  const formData = useWatch({
+    control: methods.control,
+  });
+  console.log('🚀 ~ RenderForm ~ formData:', formData);
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
 
   const { handleSubmit } = methods;
@@ -268,7 +259,7 @@ const RenderForm: FC<TProps> = (props) => {
 };
 
 const RenderFormItem: FC<TProps> = (props) => {
-  const { data, formKeys, valueStream } = props;
+  const { data, formKeys, valueStream, formKeysArray, index, parentPath = '' } = props;
   const methods = useFormContext();
   const { control } = methods;
   const { isLoading, valueType, Component, propsCpn } = useRenderItem({
@@ -277,20 +268,44 @@ const RenderFormItem: FC<TProps> = (props) => {
     methods,
   });
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
-  console.log(`🚀 ~ RenderFormItem ~ rest: ${data?.id}`, rest);
+
+  const currentFormKeys = formKeysArray || formKeys;
+  const inFormKeys = currentFormKeys?.find((item) => item?.value === data?.name);
+
+  const getFieldName = () => {
+    if (!inFormKeys) return '';
+
+    if (parentPath && typeof index === 'number') {
+      return `${parentPath}.${index}.${inFormKeys.key}`;
+    } else {
+      return inFormKeys.key;
+    }
+  };
+
+  const nameField = getFieldName();
 
   const { isInput } = getComponentType(data?.value || '');
 
   if (!valueType) return <div></div>;
 
-  if (valueType === 'upload') {
-    const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
+  if (inFormKeys?.isList) {
+    return (
+      <RenderFormArrayItem
+        {...props}
+        data={data}
+        formKeys={formKeys}
+        valueStream={valueStream}
+        parentPath={parentPath}
+      />
+    );
+  }
 
-    if (inFormKeys) {
+  if (valueType === 'upload') {
+    if (inFormKeys && nameField) {
       return (
         <Controller
           control={control}
-          name={inFormKeys.key}
+          name={nameField}
           render={({ field }) => (
             <Component
               {...rest}
@@ -301,7 +316,6 @@ const RenderFormItem: FC<TProps> = (props) => {
                 url: base64,
               }))}
               onChange={async ({ fileList }: any) => {
-                // Chuyển đổi file thành Base64
                 const base64Files = await Promise.all(
                   fileList.map(async (file: UploadFile) => {
                     if (file.originFileObj) {
@@ -315,10 +329,9 @@ const RenderFormItem: FC<TProps> = (props) => {
                     return file.url || '';
                   })
                 );
-                // Lưu mảng chuỗi Base64 vào form
                 field.onChange(base64Files.filter((base64) => base64 !== ''));
               }}
-              beforeUpload={() => false} // Ngăn upload lên server
+              beforeUpload={() => false}
             >
               {rest.children || <button>Upload</button>}
             </Component>
@@ -329,69 +342,126 @@ const RenderFormItem: FC<TProps> = (props) => {
     return <Upload {...rest} />;
   }
 
-  if (isInput) {
-    const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
-
-    if (inFormKeys) {
-      if (valueType === 'datepicker') {
-        return (
-          <Controller
-            control={control}
-            name={inFormKeys.key}
-            render={({ field }) => {
-              return (
-                <Component
-                  {...rest}
-                  {...field}
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(target: any) => {
-                    field.onChange(target);
-                    if (typeof rest?.onChange === 'function') {
-                      rest.onChange(target);
-                    }
-                  }}
-                  key={`form-child-${data?.id}`}
-                />
-              );
-            }}
-          />
-        );
-      }
+  if (isInput && inFormKeys && nameField) {
+    if (valueType === 'datepicker') {
       return (
         <Controller
           control={control}
-          name={inFormKeys.key}
-          render={({ field }) => {
-            return (
-              <Component
-                {...rest}
-                {...field}
-                onChange={(target: any) => {
-                  field.onChange(target);
-                  if (typeof rest?.onChange === 'function') {
-                    rest.onChange(target);
-                  }
-                }}
-                key={`form-child-${data?.id}`}
-              />
-            );
-          }}
+          name={nameField}
+          render={({ field }) => (
+            <Component
+              {...rest}
+              {...field}
+              value={field.value ? dayjs(field.value) : null}
+              onChange={(target: any) => {
+                field.onChange(target);
+                if (typeof rest?.onChange === 'function') {
+                  rest.onChange(target);
+                }
+              }}
+              key={`form-child-${data?.id}`}
+            />
+          )}
         />
       );
     }
+
+    return (
+      <Controller
+        control={control}
+        name={nameField}
+        render={({ field }) => (
+          <Component
+            {...rest}
+            {...field}
+            onChange={(target: any) => {
+              field.onChange(target);
+              if (typeof rest?.onChange === 'function') {
+                rest.onChange(target);
+              }
+            }}
+            key={`form-child-${data?.id}`}
+          />
+        )}
+      />
+    );
+  }
+
+  if (isInput && !inFormKeys) {
     return <Component {...rest} />;
   }
-  if (!valueType) return <div></div>;
+
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
   }
+
   if (isLoading) return <LoadingPage />;
+
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
       {data?.childs?.map((child) => (
-        <RenderFormItem {...props} data={child} key={`form-child-${child.id}`} />
+        <RenderFormItem
+          {...props}
+          data={child}
+          key={`form-child-${child.id}`}
+          parentPath={parentPath}
+          index={index}
+          formKeysArray={formKeysArray}
+        />
       ))}
     </ComponentRenderer>
+  );
+};
+
+const RenderFormArrayItem: FC<TProps> = (props) => {
+  const { data, formKeys, valueStream, parentPath = '' } = props;
+  const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
+  const methods = useFormContext();
+
+  // The field name for this array
+  const arrayFieldName = parentPath ? `${parentPath}.${inFormKeys?.key}` : inFormKeys?.key || '';
+
+  const methodsArray = useFieldArray({
+    control: methods.control,
+    name: arrayFieldName,
+  });
+
+  const { isLoading, valueType, Component, propsCpn } = useRenderItem({
+    data,
+    valueStream,
+    methods,
+    methodsArray,
+  });
+
+  const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
+
+  if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
+    return null;
+  }
+
+  if (valueType !== 'list') return <div></div>;
+  if (isLoading) return <LoadingPage />;
+
+  return (
+    <List
+      {...rest}
+      dataSource={methodsArray.fields}
+      renderItem={(item: any, index: number) => (
+        <List.Item key={item.id}>
+          {propsCpn?.box?.childs?.map((child: any) => (
+            <RenderFormItem
+              key={`${arrayFieldName}-${index}-${child.id}`}
+              data={child}
+              valueStream={item}
+              formKeysArray={inFormKeys?.formKeys}
+              index={index}
+              parentPath={arrayFieldName}
+              formKeys={formKeys}
+            />
+          ))}
+        </List.Item>
+      )}
+    />
   );
 };
 

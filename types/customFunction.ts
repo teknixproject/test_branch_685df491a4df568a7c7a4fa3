@@ -1,8 +1,10 @@
+import { TActionApiCall } from './actions';
 import { TTypeVariable } from './variable';
 
 export type TCustomFunction = {
   _id: string;
   projectId: string;
+  branch?: string;
   documentId: string;
   uid: string;
   name: string;
@@ -14,4 +16,5 @@ export type TCustomFunction = {
     isList: boolean;
   }[];
   description?: string;
+  output: TActionApiCall['output'];
 };

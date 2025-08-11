@@ -6,7 +6,7 @@ const create = async (data: TPageVariable): Promise<TPageVariableResponse> => {
   return res.data;
 };
 const getData = async (
-  query: Pick<TPageVariable, 'uid' | 'projectId' | 'type'>
+  query: Pick<TPageVariable, 'uid' | 'projectId' | 'type' | 'branch'>
 ): Promise<TPageVariableResponse> => {
   const res = await axiosInstance.get(`/state`, { params: query });
   return res.data;
