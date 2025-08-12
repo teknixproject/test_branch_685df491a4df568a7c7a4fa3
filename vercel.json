@@ -2,11 +2,7 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
-      "validate/*": true,
-      "dev": true
+      "validate/*": true
     }
-  },
-  "github": {
-    "autoAlias": false
   }
 }
