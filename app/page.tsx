@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function Home() {
-  console.log('Hihihaha 9999');
+  console.log('Hihihaha 123456789');
 
   return <EntryPage />;
 }
