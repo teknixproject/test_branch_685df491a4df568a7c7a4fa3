@@ -32,8 +32,6 @@ interface ComponentProps {
 
 //#region Grid System
 const GridSystemContainer: FC<GridSystemProps> = ({ page }) => {
-  console.log('GridSystemContainer');
-
   if (!page?.childs) return;
   return <RenderSliceItem data={page} key={page.id} />;
 };
