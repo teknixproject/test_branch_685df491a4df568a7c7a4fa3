@@ -738,6 +738,9 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         ...Object.values(state.globalState || {}).filter(
           (item) => item.id && variableids.includes(item.id)
         ),
+        ...Object.values(state.appState || {}).filter(
+          (item) => item.id && variableids.includes(item.id)
+        ),
       ],
       (value, prev) => {
         if (isEqual(value, prev)) {
