@@ -2,10 +2,11 @@
 import dayjs from 'dayjs';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { JSONPath } from 'jsonpath-plus';
-import _ from 'lodash';
+import _, { isEqual } from 'lodash';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
 import { stateManagementStore } from '@/stores';
 import { customFunctionStore } from '@/stores/customFunction';
@@ -50,6 +51,7 @@ function extractVariableIdsWithLodash(obj: any): string[] {
 
   return _.uniq(variableIds);
 }
+
 enum OPTIONS_HANDLE {
   NO_ACTION = 'noAction',
   JSON_PATH = 'jsonPath',
@@ -76,6 +78,7 @@ const handleCompareValue = ({
 
   return handleCompareCondition(rootCondition?.id || '', conditionChildMap, getData);
 };
+
 type TUseHandleData = {
   dataProp?: { name: string; data: TData }[];
   componentProps?: Record<string, TData>;
@@ -91,38 +94,343 @@ const getIdInData = (data: TData) => {
     return data[type].variableId;
   }
 };
+
 const getVariableIdsFormData = (dataProps: TUseHandleData['dataProp']) => {
   const ids = dataProps?.map((item) => getIdInData(item.data));
   const cleaned = _.compact(ids);
   return cleaned;
 };
+
 export type THandleDataParams = {
   valueStream?: any;
   callbackArgs?: any[];
 };
+
 export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   const params = useParams();
-  const apiResponseState = stateManagementStore((state) => state.apiResponse);
   const findCustomFunction = customFunctionStore((state) => state.findCustomFunction);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const appState = stateManagementStore((state) => state.appState);
-  const componentState = stateManagementStore((state) => state.componentState);
-  const globalState = stateManagementStore((state) => state.globalState);
   const [dataState, setDataState] = useState<any>();
   const itemInList = useRef(null);
   const findVariable = stateManagementStore((state) => state.findVariable);
+
+  // FIX: Use ref to prevent infinite re-renders
+  const getDataRef = useRef<any>(null);
+
+  const variableids = useDeepCompareMemo(
+    () => extractVariableIdsWithLodash(props.activeData),
+    [props.activeData]
+  );
+
+  // FIX: Stabilize dependencies with useMemo
+  const stableDeps = useDeepCompareMemo(
+    () => ({
+      valueStream: props.valueStream,
+      methods: props.methods,
+      params,
+      findVariable,
+      findCustomFunction,
+    }),
+    [props.valueStream, props.methods, params, findVariable, findCustomFunction]
+  );
 
   const handleInputValue = async (data: TData['valueInput']): Promise<any> => {
     return data;
   };
 
-  //#region handle api
+  const handleItemInList = (data: TData, valueStream: any) => {
+    const { jsonPath } = data.itemInList;
+    if (jsonPath) {
+      const result = JSONPath({
+        json: valueStream || stableDeps.valueStream,
+        path: jsonPath || '',
+      })?.[0];
+      return result;
+    }
+    return valueStream || stableDeps.valueStream;
+  };
+
+  const handleDynamicGenerate = async (data: TData) => {
+    const state = data[data.type] as TDataField;
+    const dynamicItem = data.temp;
+
+    let value = dynamicItem;
+
+    for (const option of state?.options || []) {
+      const optionItem = option as NonNullable<TDataField['options']>[number];
+
+      switch (optionItem.option) {
+        case OPTIONS_HANDLE.NO_ACTION:
+          break;
+        case 'jsonPath':
+          const jsonPathValue = await getDataRef.current(optionItem.jsonPath as TData, {});
+          const valueJsonPath = JSONPath({
+            json: value,
+            path: jsonPathValue || '',
+          });
+          value = valueJsonPath?.[0];
+          break;
+
+        case 'itemAtIndex':
+          const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+          let indexValid: number = 0;
+          if (typeof index !== 'number') {
+            indexValid = parseInt(index);
+          }
+          value = value[indexValid];
+          break;
+
+        case 'filter':
+          if (Array.isArray(value)) {
+            value = value.filter((item: any) => {
+              itemInList.current = item;
+              const result = handleCompareValue({
+                conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
+                getData: getDataRef.current,
+              });
+              return result;
+            });
+          }
+          break;
+
+        case 'sort':
+          if (Array.isArray(value)) {
+            const sortOption = optionItem.sortOrder || 'asc';
+            const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+
+            value = [...value].sort((a: any, b: any) => {
+              let aVal = a;
+              let bVal = b;
+
+              if (jsonPath) {
+                const aJsonPath = JSONPath({ json: a, path: jsonPath });
+                const bJsonPath = JSONPath({ json: b, path: jsonPath });
+                aVal = aJsonPath[0];
+                bVal = bJsonPath[0];
+              }
+
+              if (sortOption === 'asc') {
+                return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+              } else {
+                return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
+              }
+            });
+          }
+          break;
+
+        case 'length':
+          return value?.length || 0;
+        case 'isEmpty':
+          return _.isEmpty(value);
+        case 'isNotEmpty':
+          return !_.isEmpty(value);
+        default:
+          return value || data?.defaultValue;
+      }
+    }
+
+    return value;
+  };
+
+  const handleParemeters = (data: TData) => {
+    const paramName = data?.parameters?.paramName;
+
+    if (!paramName) return '';
+    const result = stableDeps.params[paramName];
+    return result;
+  };
+
+  const handleCondition = async (data: TData) => {
+    if (!data?.condition) return;
+    const value = await executeConditionalInData(data?.condition, getDataRef.current);
+    return value;
+  };
+
+  const handleCallBack = async (data: TData, callbackArgs?: any[]) => {
+    const state = data[data.type] as TData['callback'];
+    if (!_.isEmpty(callbackArgs)) {
+      const indexArg = state?.index;
+      let value = callbackArgs?.[indexArg];
+
+      if (value?.target?.value !== undefined) {
+        value = value.target.value;
+      } else if (value?.target?.checked !== undefined) {
+        value = value.target.checked;
+      }
+
+      for (const option of state?.options || []) {
+        const optionItem = option as NonNullable<TDataField['options']>[number];
+
+        switch (optionItem.option) {
+          case OPTIONS_HANDLE.NO_ACTION:
+            break;
+          case OPTIONS_HANDLE.JSON_PATH:
+            const jsonPathValue = await getDataRef.current(optionItem.jsonPath as TData, {});
+            const valueJsonPath = JSONPath({
+              json: value,
+              path: jsonPathValue || '',
+            });
+            value = valueJsonPath?.[0];
+            break;
+
+          case 'itemAtIndex':
+            const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+            let indexValid: number = 0;
+            if (typeof index !== 'number') {
+              indexValid = parseInt(index);
+            }
+            value = value[indexValid];
+            break;
+
+          case OPTIONS_HANDLE.FILTER:
+            if (Array.isArray(value)) {
+              value = value.filter((item: any) => {
+                itemInList.current = item;
+                const result = handleCompareValue({
+                  conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
+                  getData: getDataRef.current,
+                });
+                return result;
+              });
+            }
+            break;
+
+          case OPTIONS_HANDLE.SORT:
+            if (Array.isArray(value)) {
+              const sortOption = optionItem.sortOrder || 'asc';
+              const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+
+              value = [...value].sort((a: any, b: any) => {
+                let aVal = a;
+                let bVal = b;
+
+                if (jsonPath) {
+                  const aJsonPath = JSONPath({ json: a, path: jsonPath });
+                  const bJsonPath = JSONPath({ json: b, path: jsonPath });
+                  aVal = aJsonPath[0];
+                  bVal = bJsonPath[0];
+                }
+
+                if (sortOption === 'asc') {
+                  return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                  return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
+                }
+              });
+            }
+            break;
+
+          case 'length':
+            return value?.length || 0;
+          case 'isEmpty':
+            return _.isEmpty(value);
+          case 'isNotEmpty':
+            return !_.isEmpty(value);
+          default:
+            return value;
+        }
+      }
+
+      return value;
+    }
+  };
+
+  const handleFormData = async (data: TData) => {
+    const state = data[data.type] as TData['formData'];
+    const select = state.select;
+    let value = null;
+
+    if (select === 'fieldValue') value = stableDeps.methods?.getValues(state.fieldName);
+    else if (select === 'formData') {
+      value = stableDeps.methods?.getValues();
+    }
+    if (select) {
+      for (const option of state?.options || []) {
+        const optionItem = option as NonNullable<TDataField['options']>[number];
+
+        switch (optionItem.option) {
+          case 'noAction':
+            break;
+          case 'jsonPath':
+            const jsonPathValue = (await getDataRef.current(
+              optionItem.jsonPath as TData,
+              {}
+            )) as string;
+            const valueJsonPath = JSONPath({
+              json: value,
+              path: jsonPathValue || '',
+            }) as any[];
+            value = valueJsonPath?.[0];
+            break;
+
+          case 'itemAtIndex':
+            const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+            let indexValid: number = 0;
+            if (typeof index !== 'number') {
+              indexValid = parseInt(index);
+            }
+            value = value[indexValid];
+            break;
+
+          case 'filter':
+            if (Array.isArray(value)) {
+              value = value.filter((item: any) => {
+                itemInList.current = item;
+                const result = handleCompareValue({
+                  conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
+                  getData: getDataRef.current,
+                });
+                return result;
+              });
+            }
+            break;
+
+          case 'sort':
+            if (Array.isArray(value)) {
+              const sortOption = optionItem.sortOrder || 'asc';
+              const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+
+              value = [...value].sort((a: any, b: any) => {
+                let aVal = a;
+                let bVal = b;
+
+                if (jsonPath) {
+                  const aJsonPath = JSONPath({ json: a, path: jsonPath });
+                  const bJsonPath = JSONPath({ json: b, path: jsonPath });
+                  aVal = aJsonPath[0];
+                  bVal = bJsonPath[0];
+                }
+
+                if (sortOption === 'asc') {
+                  return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                  return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
+                }
+              });
+            }
+            break;
+
+          case 'length':
+            return value?.length || 0;
+          case 'isEmpty':
+            return _.isEmpty(value);
+          case 'isNotEmpty':
+            return !_.isEmpty(value);
+          default:
+            return value;
+        }
+      }
+
+      return value;
+    }
+  };
+
+  // Handle API Response
   const handleApiResponse = useCallback(
     async (data: TData) => {
       if (_.isEmpty(data)) return;
       const apiResponse = data.apiResponse;
       const variableId = apiResponse?.variableId || '';
-      const variable = findVariable({ id: variableId, type: 'apiResponse' });
+      const variable = stableDeps.findVariable({ id: variableId, type: 'apiResponse' });
 
       const handleOption = async (
         item: NonNullable<TDataField<TOptionApiResponse>['options']>[number],
@@ -134,7 +442,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'jsonPath':
             const valueJsonPath = JSONPath({
               json: value?.value,
-              path: (await getData(item.jsonPath as TData, {})) || '',
+              path: (await getDataRef.current(item.jsonPath as TData, {})) || '',
             }) as any[];
             return valueJsonPath?.[0];
           case 'statusCode':
@@ -167,16 +475,19 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
       }
       return value;
     },
-    [findVariable]
+    [stableDeps]
   );
 
-  //#region  handle state
+  // Handle State
   const handleState = useCallback(
     async (data: TData) => {
       const state = data[data.type] as TDataField;
       if ('variableId' in state || {}) {
         const variableId = state?.variableId || '';
-        const variable = findVariable({ id: variableId, type: data.type as TTypeSelect });
+        const variable = stableDeps.findVariable({
+          id: variableId,
+          type: data.type as TTypeSelect,
+        });
 
         let value = variable?.value;
 
@@ -187,7 +498,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'noAction':
               break;
             case 'jsonPath':
-              const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
+              const jsonPathValue = await getDataRef.current(optionItem.jsonPath as TData, {});
               const valueJsonPath = JSONPath({
                 json: value,
                 path: jsonPathValue || '',
@@ -196,7 +507,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
               break;
 
             case 'itemAtIndex':
-              const index = await getData(optionItem?.itemAtIndex as TData, {});
+              const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
               let indexValid: number = 0;
               if (typeof index !== 'number') {
                 indexValid = parseInt(index);
@@ -210,7 +521,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
                   itemInList.current = item;
                   const result = handleCompareValue({
                     conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                    getData,
+                    getData: getDataRef.current,
                   });
                   return result;
                 });
@@ -220,7 +531,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'sort':
               if (Array.isArray(value)) {
                 const sortOption = optionItem.sortOrder || 'asc';
-                const jsonPath = await getData(optionItem.jsonPath as TData, {});
+                const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
 
                 value = [...value].sort((a: any, b: any) => {
                   let aVal = a;
@@ -262,305 +573,17 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         return value;
       }
     },
-    [findVariable]
+    [stableDeps]
   );
 
-  //#region handle item list
-  const handleItemInList = (data: TData, valueStream: any) => {
-    const { jsonPath } = data.itemInList;
-    if (jsonPath) {
-      const result = JSONPath({
-        json: valueStream || props.valueStream,
-        path: jsonPath || '',
-      })?.[0];
-      return result;
-    }
-    return valueStream || props.valueStream;
-  };
-
-  //#region handle custom function
-  //#region handle dynamic generate
-  const handleDynamicGenerate = async (data: TData) => {
-    const state = data[data.type] as TDataField;
-    const dynamicItem = data.temp;
-
-    let value = dynamicItem;
-
-    for (const option of state?.options || []) {
-      const optionItem = option as NonNullable<TDataField['options']>[number];
-
-      switch (optionItem.option) {
-        case OPTIONS_HANDLE.NO_ACTION:
-          break;
-        case 'jsonPath':
-          const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
-          const valueJsonPath = JSONPath({
-            json: value,
-            path: jsonPathValue || '',
-          });
-          value = valueJsonPath?.[0];
-          break;
-
-        case 'itemAtIndex':
-          const index = await getData(optionItem?.itemAtIndex as TData, {});
-          let indexValid: number = 0;
-          if (typeof index !== 'number') {
-            indexValid = parseInt(index);
-          }
-          value = value[indexValid];
-          break;
-
-        case 'filter':
-          if (Array.isArray(value)) {
-            value = value.filter((item: any) => {
-              itemInList.current = item;
-              const result = handleCompareValue({
-                conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                getData,
-              });
-              return result;
-            });
-          }
-          break;
-
-        case 'sort':
-          if (Array.isArray(value)) {
-            const sortOption = optionItem.sortOrder || 'asc';
-            const jsonPath = await getData(optionItem.jsonPath as TData, {});
-
-            value = [...value].sort((a: any, b: any) => {
-              let aVal = a;
-              let bVal = b;
-
-              if (jsonPath) {
-                const aJsonPath = JSONPath({ json: a, path: jsonPath });
-                const bJsonPath = JSONPath({ json: b, path: jsonPath });
-                aVal = aJsonPath[0];
-                bVal = bJsonPath[0];
-              }
-
-              if (sortOption === 'asc') {
-                return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-              } else {
-                return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
-              }
-            });
-          }
-          break;
-
-        case 'length':
-          return value?.length || 0;
-        case 'isEmpty':
-          return _.isEmpty(value);
-        case 'isNotEmpty':
-          return !_.isEmpty(value);
-        default:
-          return value || data?.defaultValue;
-      }
-    }
-
-    return value;
-  };
-
-  const handleParemeters = (data: TData) => {
-    const paramName = data?.parameters?.paramName;
-    console.log('🚀 ~ handleParemeters ~ paramName:', paramName);
-
-    if (!paramName) return '';
-    const result = params[paramName];
-    return result;
-  };
-
-  const handleCondition = async (data: TData) => {
-    if (!data?.condition) return;
-    const value = await executeConditionalInData(data?.condition, getData);
-    return value;
-  };
-
-  const handleCallBack = async (data: TData, callbackArgs?: any[]) => {
-    const state = data[data.type] as TData['callback'];
-    if (!_.isEmpty(callbackArgs)) {
-      const indexArg = state?.index;
-      let value = callbackArgs?.[indexArg];
-
-      if (value?.target?.value !== undefined) {
-        value = value.target.value;
-      } else if (value?.target?.checked !== undefined) {
-        value = value.target.checked;
-      }
-
-      for (const option of state?.options || []) {
-        const optionItem = option as NonNullable<TDataField['options']>[number];
-
-        switch (optionItem.option) {
-          case OPTIONS_HANDLE.NO_ACTION:
-            break;
-          case OPTIONS_HANDLE.JSON_PATH:
-            const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
-            const valueJsonPath = JSONPath({
-              json: value,
-              path: jsonPathValue || '',
-            });
-            value = valueJsonPath?.[0];
-            break;
-
-          case 'itemAtIndex':
-            const index = await getData(optionItem?.itemAtIndex as TData, {});
-            let indexValid: number = 0;
-            if (typeof index !== 'number') {
-              indexValid = parseInt(index);
-            }
-            value = value[indexValid];
-            break;
-
-          case OPTIONS_HANDLE.FILTER:
-            if (Array.isArray(value)) {
-              value = value.filter((item: any) => {
-                itemInList.current = item;
-                const result = handleCompareValue({
-                  conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                  getData,
-                });
-                return result;
-              });
-            }
-            break;
-
-          case OPTIONS_HANDLE.SORT:
-            if (Array.isArray(value)) {
-              const sortOption = optionItem.sortOrder || 'asc';
-              const jsonPath = await getData(optionItem.jsonPath as TData, {});
-
-              value = [...value].sort((a: any, b: any) => {
-                let aVal = a;
-                let bVal = b;
-
-                if (jsonPath) {
-                  const aJsonPath = JSONPath({ json: a, path: jsonPath });
-                  const bJsonPath = JSONPath({ json: b, path: jsonPath });
-                  aVal = aJsonPath[0];
-                  bVal = bJsonPath[0];
-                }
-
-                if (sortOption === 'asc') {
-                  return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-                } else {
-                  return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
-                }
-              });
-            }
-            break;
-
-          case 'length':
-            return value?.length || 0;
-          case 'isEmpty':
-            return _.isEmpty(value);
-          case 'isNotEmpty':
-            return !_.isEmpty(value);
-          default:
-            return value;
-        }
-      }
-
-      return value;
-    }
-  };
-  const handleFormData = async (data: TData) => {
-    const state = data[data.type] as TData['formData'];
-    console.log('🚀 ~ handleFormData ~ state:', state);
-    const select = state.select;
-    let value = null;
-
-    if (select === 'fieldValue') value = props.methods?.getValues(state.fieldName);
-    else if (select === 'formData') {
-      value = props.methods?.getValues();
-    }
-    console.log('🚀 ~ handleFormData ~ value:', value);
-    if (select) {
-      for (const option of state?.options || []) {
-        const optionItem = option as NonNullable<TDataField['options']>[number];
-
-        switch (optionItem.option) {
-          case 'noAction':
-            break;
-          case 'jsonPath':
-            const jsonPathValue = (await getData(optionItem.jsonPath as TData, {})) as string;
-            const valueJsonPath = JSONPath({
-              json: value,
-              path: jsonPathValue || '',
-            }) as any[];
-            value = valueJsonPath?.[0];
-            break;
-
-          case 'itemAtIndex':
-            const index = await getData(optionItem?.itemAtIndex as TData, {});
-            let indexValid: number = 0;
-            if (typeof index !== 'number') {
-              indexValid = parseInt(index);
-            }
-            value = value[indexValid];
-            break;
-
-          case 'filter':
-            if (Array.isArray(value)) {
-              value = value.filter((item: any) => {
-                itemInList.current = item;
-                const result = handleCompareValue({
-                  conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                  getData,
-                });
-                return result;
-              });
-            }
-            break;
-
-          case 'sort':
-            if (Array.isArray(value)) {
-              const sortOption = optionItem.sortOrder || 'asc';
-              const jsonPath = await getData(optionItem.jsonPath as TData, {});
-
-              value = [...value].sort((a: any, b: any) => {
-                let aVal = a;
-                let bVal = b;
-
-                if (jsonPath) {
-                  const aJsonPath = JSONPath({ json: a, path: jsonPath });
-                  const bJsonPath = JSONPath({ json: b, path: jsonPath });
-                  aVal = aJsonPath[0];
-                  bVal = bJsonPath[0];
-                }
-
-                if (sortOption === 'asc') {
-                  return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-                } else {
-                  return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
-                }
-              });
-            }
-            break;
-
-          case 'length':
-            return value?.length || 0;
-          case 'isEmpty':
-            return _.isEmpty(value);
-          case 'isNotEmpty':
-            return !_.isEmpty(value);
-          default:
-            return value;
-        }
-      }
-
-      return value;
-    }
-  };
-  //#region getData
+  // Main getData function - FIX: Use stable dependencies
   const getData = useCallback(
     async (
       data: TData | null | undefined,
       { valueStream, callbackArgs }: THandleDataParams = {} as THandleDataParams
     ): Promise<any> => {
       if (_.isEmpty(data) && valueStream) return valueStream;
-      if (_.isEmpty(data) && props.valueStream) return props.valueStream;
+      if (_.isEmpty(data) && stableDeps.valueStream) return stableDeps.valueStream;
       if (_.isEmpty(data) || !data.type) return data?.defaultValue || data?.valueInput;
 
       switch (data.type) {
@@ -585,8 +608,8 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case 'customFunction':
           return await handleCustomFunction({
             data: data.customFunction,
-            findCustomFunction,
-            getData,
+            findCustomFunction: stableDeps.findCustomFunction,
+            getData: getDataRef.current,
           });
         case 'condition':
           return await handleCondition(data);
@@ -598,50 +621,34 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           return data?.defaultValue || data.valueInput;
       }
     },
-    [
-      handleApiResponse,
-      handleState,
-      handleInputValue,
-      handleItemInList,
-      handleDynamicGenerate,
-      handleCustomFunction,
-      handleCondition,
-      findCustomFunction,
-      props,
-    ]
+    [handleApiResponse, handleState, stableDeps]
   );
-  //#region tracking
 
-  //#region handle main
-  // Fixed useEffect - only update when data actually changes
-  // useEffect(() => {
-  //   if (dataPropRef) {
-  //     const newDataState = getData(dataPropRef.current);
-  //     // Only update state if the value actually changed
-  //     setDataState((prevState: any) => {
-  //       if (!_.isEqual(prevState, newDataState)) {
-  //         return newDataState;
-  //       }
-  //       return prevState;
-  //     });
-  //   }
-  // }, [apiResponseTracking, appStateTracking, componentStateTracking, globalStateTracking]);
-  const getTrackedData = useCallback((data: TData | null | undefined, valueStream?: any) => {
-    const result = getData(data, valueStream);
-    return result;
-  }, []);
+  // FIX: Update ref when getData changes
+  useEffect(() => {
+    getDataRef.current = getData;
+  }, [getData]);
 
+  // FIX: Use deep comparison for props to prevent unnecessary re-runs
+  const stableProps = useDeepCompareMemo(
+    () => ({
+      dataProp: props?.dataProp,
+      componentProps: props?.componentProps,
+      valueStream: props?.valueStream,
+      valueType: props?.valueType,
+    }),
+    [props?.dataProp, props?.componentProps, props?.valueStream, props?.valueType]
+  );
+
+  // Process data state - FIX: Remove getData from dependencies, use stable props
   const processDataState = useCallback(async () => {
-    // if (isProcessing) return;
-    // setIsProcessing(true);
-
     try {
       const newDataState: any = {};
 
-      if (props?.dataProp?.length) {
-        const dataPromises = props.dataProp.map(async (item) => {
-          const value = await getData(item.data, {
-            valueStream: props.valueStream,
+      if (stableProps.dataProp?.length) {
+        const dataPromises = stableProps.dataProp.map(async (item) => {
+          const value = await getDataRef.current(item.data, {
+            valueStream: stableProps.valueStream,
           });
           return { name: item.name, value };
         });
@@ -652,61 +659,99 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         });
       }
 
-      if (props?.componentProps) {
-        const componentPromises = Object.entries(props.componentProps).map(async ([key, value]) => {
-          if (isTData(value)) {
-            const data = {
-              type: value.type,
-              [value.type]: value[value.type],
-            } as TData;
+      if (stableProps.componentProps) {
+        const componentPromises = Object.entries(stableProps.componentProps).map(
+          async ([key, value]) => {
+            if (isTData(value)) {
+              const data = {
+                type: value.type,
+                [value.type]: value[value.type],
+              } as TData;
 
-            let valueConvert = await getData(data, {
-              valueStream: props.valueStream,
-            });
-            if (props.valueType?.toLowerCase() === 'datepicker') {
-              if (key === 'value' || key === 'defaultValue') {
-                valueConvert = valueConvert ? dayjs(valueConvert) : dayjs();
+              let valueConvert = await getDataRef.current(data, {
+                valueStream: stableProps.valueStream,
+              });
+
+              if (stableProps.valueType?.toLowerCase() === 'datepicker') {
+                if (key === 'value' || key === 'defaultValue') {
+                  valueConvert = valueConvert ? dayjs(valueConvert) : dayjs();
+                }
               }
+              return { key, value: valueConvert };
             }
-            return { key, value: valueConvert };
+            return { key, value };
           }
-          return { key, value };
-        });
+        );
 
         const resolvedComponents = await Promise.all(componentPromises);
-
         resolvedComponents.forEach(({ key, value }) => {
           newDataState[key] = value;
         });
       }
 
       setDataState((prevState: any) => {
-        if (_.isEqual(prevState, newDataState)) return prevState;
+        if (_.isEqual(prevState, newDataState)) {
+          // console.log('Data state unchanged, skipping update');
+          return prevState;
+        }
         return newDataState;
       });
     } catch (error) {
       console.error('Error processing data state:', error);
-    } finally {
-      // setIsProcessing(false);
     }
-  }, [
-    props?.dataProp,
-    props?.componentProps,
-    props?.valueStream,
-    props?.valueType,
-    // isProcessing,
-  ]);
+  }, [stableProps]); // FIX: Only depend on stable props
 
-  useEffect(() => {
-    // if (hasProcessed) return;
-
-    const run = async () => {
-      await processDataState();
-      // setHasProcessed(true);
-    };
-
-    run();
+  const getTrackedData = useCallback((data: TData | null | undefined, valueStream?: any) => {
+    return getDataRef.current(data, { valueStream });
   }, []);
+
+  // FIX: Only run once on mount and when stableProps change significantly
+  const hasInitialized = useRef(false);
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      processDataState();
+    }
+  }, []);
+
+  // FIX: Run when stable props actually change
+  useEffect(() => {
+    if (hasInitialized.current) {
+      processDataState();
+    }
+  }, [processDataState]);
+
+  // Subscribe to state changes - FIX: Prevent multiple subscriptions
+  useEffect(() => {
+    if (!variableids.length) {
+      return;
+    }
+
+    const unsub = stateManagementStore.subscribe(
+      (state) => [
+        ...Object.values(state.apiResponse || {}).filter(
+          (item) => item.id && variableids.includes(item.id)
+        ),
+        ...Object.values(state.componentState || {}).filter(
+          (item) => item.id && variableids.includes(item.id)
+        ),
+        ...Object.values(state.globalState || {}).filter(
+          (item) => item.id && variableids.includes(item.id)
+        ),
+      ],
+      (value, prev) => {
+        if (isEqual(value, prev)) {
+          return;
+        }
+
+        processDataState();
+      }
+    );
+
+    return () => {
+      unsub();
+    };
+  }, [variableids]);
 
   return {
     getData,

@@ -5,15 +5,8 @@ import dayjs from 'dayjs';
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
 import {
-  Controller,
-  FieldValues,
-  FormProvider,
-  useFieldArray,
-  UseFieldArrayReturn,
-  useForm,
-  useFormContext,
-  UseFormReturn,
-  useWatch,
+    Controller, FieldValues, FormProvider, useFieldArray, UseFieldArrayReturn, useForm,
+    useFormContext, UseFormReturn
 } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -158,7 +151,7 @@ const ComponentRenderer: FC<{
       </Component>
     );
   } catch (error) {
-    return <div css={newPropsCpn.css}>❌ Error rendering component</div>;
+    return <div {...newPropsCpn}>❌ Error rendering component</div>;
   }
 };
 
@@ -219,10 +212,7 @@ const RenderForm: FC<TProps> = (props) => {
     valueStream,
     methods,
   });
-  const formData = useWatch({
-    control: methods.control,
-  });
-  console.log('🚀 ~ RenderForm ~ formData:', formData);
+
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
 
   const { handleSubmit } = methods;
