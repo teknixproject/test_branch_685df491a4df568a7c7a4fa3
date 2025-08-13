@@ -5,8 +5,14 @@ import dayjs from 'dayjs';
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
 import {
-    Controller, FieldValues, FormProvider, useFieldArray, UseFieldArrayReturn, useForm,
-    useFormContext, UseFormReturn
+  Controller,
+  FieldValues,
+  FormProvider,
+  useFieldArray,
+  UseFieldArrayReturn,
+  useForm,
+  useFormContext,
+  UseFormReturn,
 } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -22,6 +28,7 @@ import { convertToPlainProps } from '@/uitls/transfromProp';
 import { css } from '@emotion/react';
 
 import { componentRegistry, convertProps } from './ListComponent';
+import LoadingPage from './loadingPage';
 
 type TProps = {
   data: GridItem;
@@ -122,6 +129,7 @@ const useRenderItem = ({
     const plainProps = convertToPlainProps(result);
 
     result = cleanProps(plainProps, valueType);
+    console.log(`🚀 ~ useRenderItem ~ result: ${data.id}`, result);
 
     return result;
   }, [actions, dataState, isNoChildren, valueType]);
@@ -165,7 +173,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
 
   const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;
-  // if (isLoading) return <LoadingPage />;
+  if (isLoading) return <LoadingPage />;
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
@@ -226,7 +234,7 @@ const RenderForm: FC<TProps> = (props) => {
   };
 
   if (!valueType) return <div></div>;
-  // if (isLoading) return <LoadingPage></LoadingPage>;
+  if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
     <FormProvider {...methods}>
@@ -388,7 +396,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     return null;
   }
 
-  // if (isLoading) return <LoadingPage />;
+  if (isLoading) return <LoadingPage />;
 
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
@@ -433,7 +441,7 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
   }
 
   if (valueType !== 'list') return <div></div>;
-  // if (isLoading) return <LoadingPage />;
+  if (isLoading) return <LoadingPage />;
 
   return (
     <List
