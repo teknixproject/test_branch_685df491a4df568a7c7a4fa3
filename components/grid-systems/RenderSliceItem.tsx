@@ -22,7 +22,6 @@ import { convertToPlainProps } from '@/uitls/transfromProp';
 import { css } from '@emotion/react';
 
 import { componentRegistry, convertProps } from './ListComponent';
-import LoadingPage from './loadingPage';
 
 type TProps = {
   data: GridItem;
@@ -82,7 +81,11 @@ const useRenderItem = ({
     activeData: data,
   });
 
-  const { actions } = useHandleProps({
+  const {
+    actions,
+    isLoading: isLoadingAction,
+    loading,
+  } = useHandleProps({
     dataProps: getPropActions(data),
     data,
     valueStream,
@@ -124,12 +127,12 @@ const useRenderItem = ({
   }, [actions, dataState, isNoChildren, valueType]);
 
   return {
-    isLoading: isLoading,
+    isLoading: isLoading || isLoadingAction,
     valueType,
     Component,
     propsCpn: {
       ...propsCpn,
-      loading: isLoading,
+      loading: isLoading || isLoadingAction,
     },
     findVariable,
     dataState,
@@ -162,7 +165,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
 
   const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
   if (!valueType) return <div></div>;
-  if (isLoading) return <LoadingPage />;
+  // if (isLoading) return <LoadingPage />;
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
@@ -223,7 +226,7 @@ const RenderForm: FC<TProps> = (props) => {
   };
 
   if (!valueType) return <div></div>;
-  if (isLoading) return <LoadingPage></LoadingPage>;
+  // if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
     <FormProvider {...methods}>
@@ -385,7 +388,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     return null;
   }
 
-  if (isLoading) return <LoadingPage />;
+  // if (isLoading) return <LoadingPage />;
 
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
@@ -430,7 +433,7 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
   }
 
   if (valueType !== 'list') return <div></div>;
-  if (isLoading) return <LoadingPage />;
+  // if (isLoading) return <LoadingPage />;
 
   return (
     <List

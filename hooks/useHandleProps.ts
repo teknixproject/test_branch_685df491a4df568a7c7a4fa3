@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -17,6 +17,8 @@ interface TDataProps {
 
 interface UseHandlePropsResult {
   actions: Record<string, React.MouseEventHandler<HTMLButtonElement>>;
+  loading: Record<string, boolean>; // FIX: Thêm loading state
+  isLoading: boolean; // FIX: Global loading state
 }
 
 interface UseHandlePropsProps {
@@ -69,6 +71,9 @@ const validateActionMap = (actionMap: TTriggerActions | undefined, actionName: s
 const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   const { dataProps } = props;
 
+  // FIX: Add loading states
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+
   // Store references for debounced functions
   const debouncedFunctionsRef = useRef<Record<string, any>>({});
   const triggerNameRef = useRef<TTriggerValue>(DEFAULT_TRIGGER);
@@ -85,35 +90,63 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   // Step 2: Lấy executeTriggerActions từ useActions hook
   const { executeTriggerActions } = useActions(props);
 
-  // Step 3: Tạo stable execute function với useCallback
+  // FIX: Helper functions for loading state management
+  const setActionLoading = useCallback((actionName: string, loading: boolean) => {
+    setLoadingStates((prev) => ({
+      ...prev,
+      [actionName]: loading,
+    }));
+  }, []);
+
+  const resetAllLoadingStates = useCallback(() => {
+    setLoadingStates({});
+  }, []);
+
+  // FIX: Computed loading state
+  const isLoading = useMemo(() => {
+    return Object.values(loadingStates).some((loading) => loading);
+  }, [loadingStates]);
+
+  // Step 3: Tạo stable execute function với useCallback - FIX: Add loading handling
   const createExecuteHandler = useCallback(
     (actionMap: TTriggerActions, itemName: string) => {
       return async (...callbackArgs: any[]) => {
-        // Persist tất cả React SyntheticEvent trong args
-        // callbackArgs.forEach((arg) => {
-        //   if (
-        //     arg &&
-        //     typeof arg === 'object' &&
-        //     'persist' in arg &&
-        //     typeof arg.persist === 'function'
-        //   ) {
-        //     arg.persist();
-        //   }
-        // });
+        try {
+          // FIX: Set loading state before execution
+          setActionLoading(itemName, true);
 
-        // Validate action map
-        if (!validateActionMap(actionMap, itemName)) {
-          return;
+          // Persist tất cả React SyntheticEvent trong args
+          // callbackArgs.forEach((arg) => {
+          //   if (
+          //     arg &&
+          //     typeof arg === 'object' &&
+          //     'persist' in arg &&
+          //     typeof arg.persist === 'function'
+          //   ) {
+          //     arg.persist();
+          //   }
+          // });
+
+          // Validate action map
+          if (!validateActionMap(actionMap, itemName)) {
+            return;
+          }
+
+          // Execute trigger actions directly
+          await executeTriggerActions(actionMap, DEFAULT_TRIGGER, { callbackArgs });
+        } catch (error) {
+          console.error(`Error executing action ${itemName}:`, error);
+          // Optionally handle error state here
+        } finally {
+          // FIX: Always clear loading state after execution
+          setActionLoading(itemName, false);
         }
-
-        // Execute trigger actions directly
-        await executeTriggerActions(actionMap, DEFAULT_TRIGGER, { callbackArgs });
       };
     },
-    [executeTriggerActions]
+    [executeTriggerActions, setActionLoading]
   );
 
-  // Step 4: Tạo mouse event handlers với stable debounce
+  // Step 4: Tạo mouse event handlers với stable debounce - FIX: Enhanced with loading
   const mouseEventHandlers = useDeepCompareMemo(() => {
     if (!Array.isArray(dataProps)) return {};
 
@@ -135,19 +168,35 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
         const cacheKey = `${item.name}_${rootAction.delay}`;
 
         if (!debouncedFunctionsRef.current[cacheKey]) {
-          // Tạo debounced function mới và cache lại
-          debouncedFunctionsRef.current[cacheKey] = _.debounce(executeHandler, rootAction.delay);
+          // FIX: Enhanced debounced function with loading state
+          const debouncedHandler = _.debounce(async (...args: any[]) => {
+            await executeHandler(...args);
+          }, rootAction.delay);
+
+          // FIX: Wrap debounced function to handle loading state properly
+          debouncedFunctionsRef.current[cacheKey] = async (...args: any[]) => {
+            // Set loading immediately when debounced function is called
+            setActionLoading(item.name, true);
+
+            try {
+              await debouncedHandler(...args);
+            } catch (error) {
+              console.error(`Error in debounced action ${item.name}:`, error);
+              // Clear loading state if there's an error
+              setActionLoading(item.name, false);
+            }
+            // Note: loading state will be cleared by the actual executeHandler
+          };
         }
 
         result[item.name] = debouncedFunctionsRef.current[cacheKey];
       } else {
         result[item.name] = executeHandler;
       }
-      result[item.name] = executeHandler;
     }
 
     return result;
-  }, [dataProps, actionsMap, createExecuteHandler]);
+  }, [dataProps, actionsMap, createExecuteHandler, setActionLoading]);
 
   // Cleanup debounced functions when component unmounts or when actions change
   const cleanupDebouncedFunctions = useCallback(() => {
@@ -157,15 +206,21 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
       }
     });
     debouncedFunctionsRef.current = {};
-  }, []);
+
+    // FIX: Also reset loading states when cleaning up
+    resetAllLoadingStates();
+  }, [resetAllLoadingStates]);
 
   // Cleanup khi component unmount hoặc khi actions thay đổi
   useMemo(() => {
     return () => cleanupDebouncedFunctions();
   }, [actionsMap, cleanupDebouncedFunctions]);
 
+  // FIX: Enhanced return with loading states
   return {
     actions: mouseEventHandlers,
+    loading: loadingStates, // Individual loading states for each action
+    isLoading, // Global loading state
   };
 };
 
