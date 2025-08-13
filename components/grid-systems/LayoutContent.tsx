@@ -7,6 +7,7 @@ import { useLayoutContext } from '@/context/LayoutContext';
 import { getDeviceType } from '@/lib/utils';
 
 import LoadingPage from './loadingPage';
+import styled from 'styled-components';
 
 const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
   loading: () => <LoadingPage />,
@@ -101,7 +102,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
             />
           </div>
         )}
-        <main className='h-screen' style={{ flex: 1, overflow: 'hidden' }}>{children}</main>
+        <Csmain className='h-screen' style={{ flex: 1, overflow: 'hidden' }}>
+          {children}
+        </Csmain>
         {isSidebarRight && !_.isEmpty(selectedSidebarLayout) && (
           <div id="sidebar" style={{ ...sidebarStyle }} className="sticky top-0 z-10 max-h-screen overflow-hidden">
             <GridSystemContainer
@@ -125,3 +128,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     </div >
   );
 }
+
+const Csmain = styled.main`
+  .ant-app {
+    height: 100%;
+  }
+`
