@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
 import { FC, useMemo } from 'react';
@@ -6,7 +7,6 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useRenderItem } from '@/hooks/useRenderItem';
 import { getComponentType } from '@/uitls/component';
 
-import LoadingPage from './loadingPage';
 import RenderFormArrayItem from './RenderFormArray';
 import { ComponentRenderer, TProps } from './RenderSliceItem';
 
@@ -147,7 +147,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     return null;
   }
 
-  if (isLoading) return <LoadingPage />;
+  // if (isLoading) return <LoadingPage />;
 
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>

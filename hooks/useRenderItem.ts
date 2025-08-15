@@ -66,7 +66,13 @@ export const useRenderItem = ({
 }) => {
   const valueType = useMemo(() => data?.value?.toLowerCase() || '', [data?.value]);
   const { isNoChildren } = getComponentType(data?.value || '');
-  const { isLoading } = useActions({ data, valueStream, methods: methods, methodsArray });
+  const { isLoading } = useActions({
+    data,
+    valueStream,
+    methods: methods,
+    methodsArray,
+    isCallPageLoad: true,
+  });
   const findVariable = stateManagementStore((state) => state.findVariable);
   const { dataState } = useHandleData({
     dataProp: getPropData(data),

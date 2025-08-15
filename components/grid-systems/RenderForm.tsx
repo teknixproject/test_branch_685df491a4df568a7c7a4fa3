@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
 
-import LoadingPage from './loadingPage';
 import RenderFormItem from './RenderFormItem';
 import { ComponentRenderer, TProps } from './RenderSliceItem';
 
@@ -25,8 +25,7 @@ const RenderForm: FC<TProps> = (props) => {
     rest?.onFinish();
   };
 
-  if (!valueType) return <div></div>;
-  if (isLoading) return <LoadingPage></LoadingPage>;
+  // if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
     <FormProvider {...methods}>

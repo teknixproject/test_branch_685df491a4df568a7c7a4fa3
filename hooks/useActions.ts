@@ -52,6 +52,7 @@ export type TActionsProps = {
   valueStream: any;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
   methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
+  isCallPageLoad?: boolean;
 };
 
 export const useActions = (props: TActionsProps): TUseActions => {
@@ -203,6 +204,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
 
   useDeepCompareEffect(() => {
     if (
+      props.isCallPageLoad &&
       mounted.current &&
       data?.id &&
       !renderedIdRef.current.has(data.id) &&
@@ -212,7 +214,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
       renderedIdRef.current.add(data.id);
       handleAction('onPageLoad');
     }
-  }, [data?.id, actions]);
+  }, [data?.id, actions, props?.isCallPageLoad]);
 
   return { handleAction, isLoading, executeTriggerActions, executeActionFCType };
 };

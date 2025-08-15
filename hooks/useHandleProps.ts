@@ -82,7 +82,7 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   }, [dataProps]);
 
   // Step 2: Lấy executeTriggerActions từ useActions hook
-  const { executeTriggerActions } = useActions(props);
+  const { executeTriggerActions } = useActions({ ...props, isCallPageLoad: false });
 
   // FIX: Helper functions for loading state management
   const setActionLoading = useCallback((actionName: string, loading: boolean) => {

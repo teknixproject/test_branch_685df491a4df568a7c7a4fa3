@@ -25,13 +25,13 @@ const ignoreFieldsListen = [
   'box',
   'renderItem',
   'column',
-  'items',
-  'options',
-  'dataSource',
+  // 'items',
+  // 'options',
+  // 'dataSource',
   'childs',
   'dataProps',
   'actions',
-  'menu',
+  // 'menu',
 ];
 function extractVariableIdsWithLodash(obj: any): string[] {
   const variableIds: string[] = [];
@@ -44,10 +44,10 @@ function extractVariableIdsWithLodash(obj: any): string[] {
 
   function deepIterate(obj: any) {
     _.forOwn(obj, (value, key) => {
-      if (ignoreFieldsListen.includes(key)) return;
+      // if (ignoreFieldsListen.includes(key)) return;
       collectVariableIds(value, key);
 
-      if (_.isObject(value)) {
+      if (_.isObject(value) && !ignoreFieldsListen.includes(key)) {
         deepIterate(value);
       }
     });

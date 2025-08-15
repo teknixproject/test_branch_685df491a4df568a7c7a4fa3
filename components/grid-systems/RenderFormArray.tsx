@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { List } from 'antd';
 import { FC, useMemo } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
 
-import LoadingPage from './loadingPage';
 import RenderFormItem from './RenderFormItem';
 import { TProps } from './RenderSliceItem';
 
@@ -35,7 +35,7 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
   }
 
   if (valueType !== 'list') return <div></div>;
-  if (isLoading) return <LoadingPage />;
+  // if (isLoading) return <LoadingPage />;
 
   return (
     <List
