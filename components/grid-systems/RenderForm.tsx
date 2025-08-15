@@ -1,3 +1,4 @@
+import { Spin } from 'antd';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -21,32 +22,34 @@ const RenderForm: FC<TProps> = (props) => {
   const { handleSubmit } = methods;
   const formKeys = useMemo(() => data?.componentProps?.formKeys, [data?.componentProps?.formKeys]);
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = () => {
     rest?.onFinish();
   };
 
   // if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
-    <FormProvider {...methods}>
-      <ComponentRenderer
-        Component={Component}
-        propsCpn={{
-          ...rest,
-          onFinish: () => handleSubmit(onSubmit)(),
-        }}
-        data={data}
-      >
-        {data?.childs?.map((child, index) => (
-          <RenderFormItem
-            {...props}
-            data={child}
-            key={`form-child-${child.id}`}
-            formKeys={formKeys}
-          />
-        ))}
-      </ComponentRenderer>
-    </FormProvider>
+    <Spin spinning={isLoading}>
+      <FormProvider {...methods}>
+        <ComponentRenderer
+          Component={Component}
+          propsCpn={{
+            ...rest,
+            onFinish: () => handleSubmit(onSubmit)(),
+          }}
+          data={data}
+        >
+          {data?.childs?.map((child, index) => (
+            <RenderFormItem
+              {...props}
+              data={child}
+              key={`form-child-${child.id}`}
+              formKeys={formKeys}
+            />
+          ))}
+        </ComponentRenderer>
+      </FormProvider>
+    </Spin>
   );
 };
 export default RenderForm;
