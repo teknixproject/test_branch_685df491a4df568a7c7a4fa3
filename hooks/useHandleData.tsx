@@ -20,6 +20,19 @@ import { isTData } from '@/uitls/transfromProp';
 import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';
 
+const ignoreFieldsListen = [
+  'children',
+  'box',
+  'renderItem',
+  'column',
+  'items',
+  'options',
+  'dataSource',
+  'childs',
+  'dataProps',
+  'actions',
+  'menu',
+];
 function extractVariableIdsWithLodash(obj: any): string[] {
   const variableIds: string[] = [];
 
@@ -31,6 +44,7 @@ function extractVariableIdsWithLodash(obj: any): string[] {
 
   function deepIterate(obj: any) {
     _.forOwn(obj, (value, key) => {
+      if (ignoreFieldsListen.includes(key)) return;
       collectVariableIds(value, key);
 
       if (_.isObject(value)) {

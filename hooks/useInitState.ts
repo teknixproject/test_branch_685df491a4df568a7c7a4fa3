@@ -2,6 +2,7 @@
 import _, { isEqual } from 'lodash';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
 import { useConstructorDataAPI, usePreviewUI } from '@/app/actions/use-constructor';
 import { getDeviceType } from '@/lib/utils';
@@ -57,7 +58,7 @@ const useDeviceType = () => {
 
 // Custom hook for layout processing
 const useLayoutProcessing = (dataPreviewUI: any, deviceType: string) => {
-  return useMemo(() => {
+  return useDeepCompareMemo(() => {
     const getLayoutForDevice = (layout: any): any => {
       if (_.isEmpty(layout)) return {};
       const layoutData = layout?.layoutJson || layout;
@@ -214,8 +215,6 @@ export const useInitStateRender = () => {
   const router = useRouter();
   const [uid, setUid] = useState<string | null>(null);
   const [deviceType, setDeviceType] = useState<DeviceType>(getDeviceType());
-
-  console.log('🚀 ~ useInitStateRender ~ uid:', uid);
 
   const addAndUpdateApiResource = apiResourceStore((state) => state.addAndUpdateApiResource);
   const setStateManagement = stateManagementStore((state) => state.setStateManagement);

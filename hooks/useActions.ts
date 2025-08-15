@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
+import { useDeepCompareEffect } from 'use-deep-compare';
 
 import {
   TAction,
@@ -200,7 +201,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   );
   const renderedIdRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     if (
       mounted.current &&
       data?.id &&
