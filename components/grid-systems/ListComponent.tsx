@@ -13,7 +13,6 @@ import {
   Image,
   Input,
   InputNumber,
-  Modal,
   Popover,
   Radio,
   Select,
@@ -27,7 +26,7 @@ import {
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
 import { Icon } from '@iconify/react/dist/iconify.js';
 
-import { Button, Dropdown, List, Map, Table, Tabs, Tree } from '../special';
+import { Button, Dropdown, List, Map, Modal, Table, Tabs, Tree } from '../special';
 import ConfigMenu from './configComponent/ConfigMenu';
 
 export const componentRegistry = {
