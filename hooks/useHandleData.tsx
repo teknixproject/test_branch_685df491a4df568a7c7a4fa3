@@ -21,17 +21,14 @@ import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';
 
 const ignoreFieldsListen = [
-  'children',
+  // 'children',
   'box',
   'renderItem',
   'column',
   // 'items',
-  // 'options',
-  // 'dataSource',
   'childs',
   'dataProps',
   'actions',
-  // 'menu',
 ];
 function extractVariableIdsWithLodash(obj: any): string[] {
   const variableIds: string[] = [];

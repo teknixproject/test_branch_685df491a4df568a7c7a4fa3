@@ -29,7 +29,7 @@ const RenderForm: FC<TProps> = (props) => {
   // if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
-    <Spin spinning={isLoading}>
+    <Spin spinning={isLoading} className="!w-full">
       <FormProvider {...methods}>
         <ComponentRenderer
           Component={Component}
