@@ -15,6 +15,7 @@ import ReactQueryProvider from '@/providers/QueryClient';
 import { fetchMetadata } from './actions/server';
 import './globals.css';
 import { MetadataIcon } from '@/types/seo';
+import AppLoadingWrapper from './AppLoadingWrapper';
 
 const DEFAULT_ICONS = {
   icon: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
@@ -173,17 +174,20 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href={shortcutIcon || DEFAULT_ICONS.apple} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ReactQueryProvider>
-          <ApiStoreProvider>
-            <LayoutProvider>
-              <Suspense fallback={<div>Loading...</div>}>
-                <LayoutContent>
-                  <AntdProvider>{children}</AntdProvider>
-                </LayoutContent>
-              </Suspense>
-            </LayoutProvider>
-          </ApiStoreProvider>
-        </ReactQueryProvider>
+        <AppLoadingWrapper>
+          <ReactQueryProvider>
+            <ApiStoreProvider>
+              <LayoutProvider>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LayoutContent>
+                    <AntdProvider>{children}</AntdProvider>
+                  </LayoutContent>
+                </Suspense>
+              </LayoutProvider>
+            </ApiStoreProvider>
+          </ReactQueryProvider>
+        </AppLoadingWrapper>
+
       </body>
     </html>
   );
