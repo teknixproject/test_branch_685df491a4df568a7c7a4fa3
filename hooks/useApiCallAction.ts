@@ -2,18 +2,13 @@
 import axios from 'axios';
 import _ from 'lodash';
 import { useRouter } from 'next/navigation';
+import queryString from 'query-string';
 import { useCallback } from 'react';
 
 import { stateManagementStore } from '@/stores';
 import { authSettingStore } from '@/stores/authSetting';
 import {
-  TAction,
-  TActionApiCall,
-  TActionVariable,
-  TApiCallValue,
-  TApiCallVariable,
-  TData,
-  TTypeSelect,
+    TAction, TActionApiCall, TActionVariable, TApiCallValue, TApiCallVariable, TData, TTypeSelect
 } from '@/types';
 import { variableUtil } from '@/uitls';
 
@@ -35,10 +30,41 @@ const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string 
 
   if (!apiCallMember?.variables?.length) return baseUrl;
 
-  return apiCallMember.variables.reduce(
+  const url = apiCallMember.variables.reduce(
     (url, { key, value }) => url.replace(`[${key}]`, String(value)),
     baseUrl
   );
+  return queryString.stringifyUrl(
+    {
+      url,
+      query: convertQuery(apiCallMember),
+    },
+    {
+      // encode: false,
+    }
+  );
+};
+const convertQuery = (apiCallMember: TApiCallValue) => {
+  const queryConvert = apiCallMember?.query
+    ?.map((item) => {
+      const type = item.type;
+      if (type === 'variable') {
+        const variable = apiCallMember?.variables?.find(
+          (variable) => variable.id === item.variableId
+        );
+        item.value = variable?.value;
+      }
+      return item;
+    })
+    .reduce(
+      (acc, item) => ({
+        ...acc,
+        [item.key as string]: item.value,
+      }),
+      {}
+    );
+
+  return queryConvert;
 };
 export const getOldOutput = (output: TActionApiCall['output']) => {
   const variableId = (output as any)?.variableId;
@@ -68,7 +94,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
           const { firstValue, secondValue } = item;
 
           const data = apiCall?.variables?.find(
-            (variable) => variable.id === firstValue.variableId
+            (variable) => variable?.id === firstValue?.variableId
           );
 
           if (!data) return;
@@ -101,29 +127,6 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     }, {} as Record<string, any>);
   }, []);
 
-  const convertQuery = (apiCallMember: TApiCallValue) => {
-    const queryConvert = apiCallMember?.query
-      ?.map((item) => {
-        const type = item.type;
-        if (type === 'variable') {
-          const variable = apiCallMember?.variables?.find(
-            (variable) => variable.id === item.variableId
-          );
-          item.value = variable?.value;
-        }
-        return item;
-      })
-      .reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.key as string]: item.value,
-        }),
-        {}
-      );
-    console.log('🚀 ~ convertQuery ~ queryConvert:', queryConvert);
-    return queryConvert;
-  };
-
   const convertHeader = (apiCallMember: TApiCallValue) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
@@ -154,8 +157,8 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
         url: convertUrl(apiCall),
         headers: convertHeader(apiCall),
         data: ['POST', 'PUT', 'PATCH'].includes(apiCall?.method?.toUpperCase() || '') && body,
-        params:
-          ['GET', 'DELETE'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),
+        // params:
+        //   ['GET', 'DELETE'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),
       });
 
       if (outputVariable?.id) {
@@ -229,7 +232,6 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     params?: THandleDataParams
   ): Promise<void> => {
     const apiCall = getApiMember(action?.data?.apiId ?? '');
-    console.log('🚀 ~ handleApiCallAction ~ apiCall:', apiCall);
 
     if (!apiCall) return;
     const variables = await convertActionVariables(action?.data?.variables ?? [], apiCall, params);

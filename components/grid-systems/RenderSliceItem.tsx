@@ -13,7 +13,6 @@ import {
   useForm,
   useFormContext,
   UseFormReturn,
-  useWatch,
 } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -89,7 +88,11 @@ const useRenderItem = ({
     activeData: data,
   });
 
-  const { actions } = useHandleProps({
+  const {
+    actions,
+    isLoading: isLoadingAction,
+    loading,
+  } = useHandleProps({
     dataProps: getPropActions(data),
     data,
     valueStream,
@@ -126,17 +129,18 @@ const useRenderItem = ({
     const plainProps = convertToPlainProps(result);
 
     result = cleanProps(plainProps, valueType);
+    console.log(`🚀 ~ useRenderItem ~ result: ${data.id}`, result);
 
     return result;
   }, [actions, dataState, isNoChildren, valueType]);
 
   return {
-    isLoading: isLoading,
+    isLoading: isLoading || isLoadingAction,
     valueType,
     Component,
     propsCpn: {
       ...propsCpn,
-      loading: isLoading,
+      loading: isLoading || isLoadingAction,
     },
     findVariable,
     dataState,
@@ -158,7 +162,7 @@ const ComponentRenderer: FC<{
       </Component>
     );
   } catch (error) {
-    return <div css={newPropsCpn.css}>❌ Error rendering component</div>;
+    return <div {...newPropsCpn}>❌ Error rendering component</div>;
   }
 };
 
@@ -219,10 +223,7 @@ const RenderForm: FC<TProps> = (props) => {
     valueStream,
     methods,
   });
-  const formData = useWatch({
-    control: methods.control,
-  });
-  console.log('🚀 ~ RenderForm ~ formData:', formData);
+
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
 
   const { handleSubmit } = methods;

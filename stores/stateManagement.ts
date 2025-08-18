@@ -1,8 +1,12 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware'; // Import devtools middleware
+import { devtools, subscribeWithSelector } from 'zustand/middleware';
 
 import {
-    TDocumentState, TDocumentStateFind, TDocumentStateSet, TDocumentStateUpdate, TVariable
+  TDocumentState,
+  TDocumentStateFind,
+  TDocumentStateSet,
+  TDocumentStateUpdate,
+  TVariable,
 } from '@/types';
 import { transformVariable } from '@/uitls/tranformVariable';
 
@@ -22,61 +26,58 @@ const initValue: TDocumentState = {
   dynamicGenerate: {},
 };
 
-// Sử dụng devtools middleware
 export const stateManagementStore = create<TDocumentState & TDocumentStateActions>()(
-  devtools(
-    (set, get) => ({
-      ...initValue,
+  subscribeWithSelector(
+    devtools(
+      (set, get) => ({
+        ...initValue,
 
-      setStateManagement: ({ type, dataUpdate }) => {
-        const oldData = get()[type] || {};
+        setStateManagement: ({ type, dataUpdate }) => {
+          const oldData = get()[type] || {};
 
-        // Only include new keys from dataUpdate that don't exist in oldData
-        const newData = Object.keys(dataUpdate).reduce(
-          (acc, key) => {
-            if (!(key in oldData)) {
-              acc[key] = dataUpdate[key];
-            }
-            return acc;
-          },
-          { ...oldData }
-        );
+          const newData = Object.keys(dataUpdate).reduce(
+            (acc, key) => {
+              if (!(key in oldData)) {
+                acc[key] = dataUpdate[key];
+              }
+              return acc;
+            },
+            { ...oldData }
+          );
 
-        set(() => ({
-          [type]: newData,
-        }));
-      },
-      findVariable: ({ type, id, name }) => {
-        const data = get()[type] || {};
-        if (id)
-          return {
-            ...data[id],
-            value: transformVariable(data[id]),
-          };
-        if (name) {
-          return Object.values(data).find((item: TVariable) => item.key === name);
-        }
-      },
-      updateVariables: ({ type, dataUpdate }) => {
-        set((state) => {
-          // Reuse findVariable to check if the item exists
+          set(() => ({
+            [type]: newData,
+          }));
+        },
 
-          return {
+        findVariable: ({ type, id, name }) => {
+          const data = get()[type] || {};
+          if (id) {
+            return {
+              ...data[id],
+              value: transformVariable(data[id]),
+            };
+          }
+          if (name) {
+            return Object.values(data).find((item: TVariable) => item.key === name);
+          }
+        },
+
+        updateVariables: ({ type, dataUpdate }) => {
+          set((state) => ({
             [type]: {
               ...state[type],
               [dataUpdate.id]: dataUpdate,
             },
-          };
-        });
-        return get()[type];
-      },
+          }));
+          return get()[type];
+        },
 
-      resetState() {
-        set(initValue);
-      },
-    }),
-    {
-      name: 'stateManagementStore', // Tên của store trong Redux DevTools
-    }
+        resetState() {
+          set(initValue);
+        },
+      }),
+      { name: 'stateManagementStore' }
+    )
   )
 );
