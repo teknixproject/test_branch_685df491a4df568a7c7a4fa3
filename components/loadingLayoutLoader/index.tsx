@@ -1,11 +1,15 @@
 'use client';
 
-const component: any = {}
+import LoadingRoot from "./loadingRoot";
+
+const component: any = {
+  '/': LoadingRoot,
+}
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const Component = component[pathname]
 
-  return Component ? <Component /> : <div>Loading...</div>
+  return Component ? <Component /> : <LoadingRoot />
 }
 
 export default LoadingLayoutComponent;

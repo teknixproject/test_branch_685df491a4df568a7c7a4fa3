@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { getLoadingLayoutForRoute } from '@/utils/loadingLayoutLoader';
+import { getLoadingLayoutForRoute } from '@/components/loadingLayoutLoader';
 
 export const useLoadingLayout = () => {
   const [loadingLayout, setLoadingLayout] = useState<any>(null);

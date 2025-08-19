@@ -2,11 +2,16 @@
 
 import _ from 'lodash';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 
 import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
-import GridSystemContainer from '.';
 
 import LoadingPage from './loadingPage';
+
+const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
+  loading: () => <LoadingPage />,
+  ssr: false,
+});
 
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
