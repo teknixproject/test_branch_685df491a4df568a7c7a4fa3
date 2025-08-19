@@ -1,15 +1,13 @@
 'use client';
 
-import LoadingRoot from "./loadingRoot";
+import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 
-const component: any = {
-  '/': LoadingRoot,
-}
+const component: any = {}
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const Component = component[pathname]
 
-  return Component ? <Component /> : <LoadingRoot />
+  return Component ? <Component /> : <LoadingDefaultXstudio />
 }
 
 export default LoadingLayoutComponent;

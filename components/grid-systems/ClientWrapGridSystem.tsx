@@ -19,7 +19,7 @@ export const RenderUIClient: FC = () => {
 
   if (isLoading || !uid) {
     // return <LoadingPage />;
-    return;
+    return
   }
 
   return (
