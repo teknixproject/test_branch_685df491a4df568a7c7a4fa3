@@ -2,10 +2,12 @@
 
 import LoadingRoot from "./loadingRoot";
 import LoadingAbout from "./about";
+import LoadingStudent from "./student";
 
 const component: any = {
   "/": LoadingRoot,
-  "/about": LoadingAbout
+  "/about": LoadingAbout,
+  "/student": LoadingStudent
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
