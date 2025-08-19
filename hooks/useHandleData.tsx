@@ -26,7 +26,7 @@ const ignoreFieldsListen = [
   'renderItem',
   'column',
   // 'items',
-  'childs',
+  // 'childs',
   'dataProps',
   'actions',
 ];
