@@ -13,13 +13,23 @@ import { customFunctionStore } from '@/stores/customFunction';
 import { TConditionChildMap, TTypeSelect, TVariable } from '@/types';
 import { TData, TDataField, TOptionApiResponse } from '@/types/dataItem';
 import { GridItem } from '@/types/gridItem';
-import { executeConditionalInData } from '@/uitls/handleConditionInData';
-import { transformVariable } from '@/uitls/tranformVariable';
-import { isTData } from '@/uitls/transfromProp';
+import { executeConditionalInData } from '@/utils/handleConditionInData';
+import { transformVariable } from '@/utils/tranformVariable';
+import { isTData } from '@/utils/transfromProp';
 
 import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';
 
+const ignoreFieldsListen = [
+  // 'children',
+  'box',
+  'renderItem',
+  'column',
+  // 'items',
+  // 'childs',
+  'dataProps',
+  'actions',
+];
 function extractVariableIdsWithLodash(obj: any): string[] {
   const variableIds: string[] = [];
 
@@ -31,9 +41,10 @@ function extractVariableIdsWithLodash(obj: any): string[] {
 
   function deepIterate(obj: any) {
     _.forOwn(obj, (value, key) => {
+      // if (ignoreFieldsListen.includes(key)) return;
       collectVariableIds(value, key);
 
-      if (_.isObject(value)) {
+      if (_.isObject(value) && !ignoreFieldsListen.includes(key)) {
         deepIterate(value);
       }
     });

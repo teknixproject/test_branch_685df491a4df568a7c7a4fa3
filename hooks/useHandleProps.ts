@@ -6,7 +6,6 @@ import { useDeepCompareMemo } from 'use-deep-compare';
 import { TAction, TTriggerActions, TTriggerValue } from '@/types';
 import { GridItem } from '@/types/gridItem';
 
-import { actionHookSliceStore } from './store/actionSliceStore';
 import { useActions } from './useActions';
 
 interface TDataProps {
@@ -76,11 +75,6 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
 
   // Store references for debounced functions
   const debouncedFunctionsRef = useRef<Record<string, any>>({});
-  const triggerNameRef = useRef<TTriggerValue>(DEFAULT_TRIGGER);
-  const previousActionsMapRef = useRef<Record<string, TTriggerActions>>({});
-
-  // Zustand store actions
-  const setMultipleActions = actionHookSliceStore((state) => state.setMultipleActions);
 
   // Step 1: Tạo actions map từ dataProps
   const actionsMap = useMemo(() => {
@@ -88,7 +82,7 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   }, [dataProps]);
 
   // Step 2: Lấy executeTriggerActions từ useActions hook
-  const { executeTriggerActions } = useActions(props);
+  const { executeTriggerActions } = useActions({ ...props, isCallPageLoad: false });
 
   // FIX: Helper functions for loading state management
   const setActionLoading = useCallback((actionName: string, loading: boolean) => {

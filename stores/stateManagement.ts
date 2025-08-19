@@ -8,7 +8,7 @@ import {
   TDocumentStateUpdate,
   TVariable,
 } from '@/types';
-import { transformVariable } from '@/uitls/tranformVariable';
+import { transformVariable } from '@/utils/tranformVariable';
 
 export type TDocumentStateActions = {
   setStateManagement: (variable: TDocumentStateSet) => void;

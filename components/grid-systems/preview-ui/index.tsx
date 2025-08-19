@@ -27,7 +27,7 @@ const DynamicComponent = ({ customWidgetName }: PreviewUIProps) => {
         return ErrorComponent;
       }),
     {
-      // loading: () => <LoadingPage />,
+      loading: () => <LoadingPage />,
       ssr: false, // Disable SSR to avoid hydration issues
     }
   );

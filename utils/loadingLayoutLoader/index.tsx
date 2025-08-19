@@ -1,14 +1,11 @@
 'use client';
 
-    import LoadingAbout from "./about";
+const component: any = {}
 
-    const component: any = {
-    "/about": LoadingAbout
-    };
+const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
+  const Component = component[pathname]
 
-    const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
-    const Component = component[pathname];
-    return <Component />;
-    };
+  return Component ? <Component /> : <div>Loading...</div>
+}
 
-    export default LoadingLayoutComponent;
+export default LoadingLayoutComponent;
