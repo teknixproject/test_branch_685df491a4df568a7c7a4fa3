@@ -8,9 +8,15 @@ import { useCallback } from 'react';
 import { stateManagementStore } from '@/stores';
 import { authSettingStore } from '@/stores/authSetting';
 import {
-    TAction, TActionApiCall, TActionVariable, TApiCallValue, TApiCallVariable, TData, TTypeSelect
+  TAction,
+  TActionApiCall,
+  TActionVariable,
+  TApiCallValue,
+  TApiCallVariable,
+  TData,
+  TTypeSelect,
 } from '@/types';
-import { variableUtil } from '@/uitls';
+import { variableUtil } from '@/utils';
 
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';

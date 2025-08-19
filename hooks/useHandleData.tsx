@@ -13,9 +13,9 @@ import { customFunctionStore } from '@/stores/customFunction';
 import { TConditionChildMap, TTypeSelect, TVariable } from '@/types';
 import { TData, TDataField, TOptionApiResponse } from '@/types/dataItem';
 import { GridItem } from '@/types/gridItem';
-import { executeConditionalInData } from '@/uitls/handleConditionInData';
-import { transformVariable } from '@/uitls/tranformVariable';
-import { isTData } from '@/uitls/transfromProp';
+import { executeConditionalInData } from '@/utils/handleConditionInData';
+import { transformVariable } from '@/utils/tranformVariable';
+import { isTData } from '@/utils/transfromProp';
 
 import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';

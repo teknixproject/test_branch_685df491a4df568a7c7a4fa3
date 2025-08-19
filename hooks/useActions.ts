@@ -19,7 +19,7 @@ import {
   TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
-import { transformVariable } from '@/uitls/tranformVariable';
+import { transformVariable } from '@/utils/tranformVariable';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
 import { useApiCallAction } from './useApiCallAction';

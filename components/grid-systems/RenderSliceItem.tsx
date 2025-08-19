@@ -5,7 +5,7 @@ import { FC, useMemo } from 'react';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
 import { GridItem } from '@/types/gridItem';
-import { getComponentType } from '@/uitls/component';
+import { getComponentType } from '@/utils/component';
 
 import RenderForm from './RenderForm';
 

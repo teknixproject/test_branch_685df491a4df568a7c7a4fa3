@@ -14,7 +14,7 @@ import { apiResourceStore, stateManagementStore } from '@/stores';
 import { authSettingStore } from '@/stores/authSetting';
 import { customFunctionStore } from '@/stores/customFunction';
 import { TAuthSetting, TTypeSelect, TTypeSelectState, TVariable, TVariableMap } from '@/types';
-import { getMatchingRoutePattern } from '@/uitls/pathname';
+import { getMatchingRoutePattern } from '@/utils/pathname';
 import { useQuery } from '@tanstack/react-query';
 
 type DeviceType = 'mobile' | 'desktop';
