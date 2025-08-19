@@ -1,6 +1,8 @@
 'use client';
 
-const component: any = {}
+const component: any = {
+
+}
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const Component = component[pathname]

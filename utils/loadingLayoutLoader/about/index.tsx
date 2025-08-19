@@ -1,11 +1,79 @@
-'use client';
-  import {Skeleton, Modal, Flex } from 'antd';
+import React, { useState } from 'react';
+import type Icon from '@ant-design/icons';
+import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import { Avatar, List, Skeleton, Switch } from 'antd';
 
-  export default function LoadingAbout() {
-    return (
-         <flex  style={{"display":"flex","flexDirection":"row","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px","height":"100%","justifyContent":"center","alignItems":"center"}}>
- <Table size={"middle"} tableLayout={"auto"} bordered={false} loading={false} pagination={false} pagination-current={1} pagination-total={10} pagination-limit={1000} pagination-pageSizeOptions={[10,20,50,100]} pagination-pageSize={100} dataSource={[{"key":"1","name":"Mike","age":32,"address":"10 Downing Street"},{"key":"2","name":"Mike","age":32,"address":"10 Downing Street"},{"key":"3","name":"Mike","age":32,"address":"10 Downing Street"},{"key":"4","name":"Mike","age":32,"address":"10 Downing Street"}]} style={{"width":"100%"}}></Table>
- </flex>
-    )
-  }
-  
+interface IconTextProps {
+  icon: typeof Icon;
+  text: React.ReactNode;
+}
+
+const listData = Array.from({ length: 3 }).map((_, i) => ({
+  href: 'https://ant.design',
+  title: `ant design part ${i + 1}`,
+  avatar: `https://api.dicebear.com/7.x/miniavs/svg?seed=${i}`,
+  description:
+    'Ant Design, a design language for background applications, is refined by Ant UED Team.',
+  content:
+    'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
+}));
+
+const IconText: React.FC<IconTextProps> = ({ icon, text }) => (
+  <>
+    {React.createElement(icon, { style: { marginInlineEnd: 8 } })}
+    {text}
+  </>
+);
+
+const App: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+
+  const onChange = (checked: boolean) => {
+    setLoading(!checked);
+  };
+
+  return (
+    <>
+      <Switch checked={!loading} onChange={onChange} style={{ marginBottom: 16 }} />
+      <List
+        itemLayout="vertical"
+        size="large"
+        dataSource={listData}
+        renderItem={(item) => (
+          <List.Item
+            key={item.title}
+            actions={
+              !loading
+                ? [
+                  <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
+                  <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
+                  <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />,
+                ]
+                : undefined
+            }
+            extra={
+              !loading && (
+                <img
+                  width={272}
+                  alt="logo"
+                  src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                />
+              )
+            }
+          >
+            <Skeleton loading={loading} active avatar>
+              <List.Item.Meta
+                avatar={<Avatar src={item.avatar} />}
+                title={<a href={item.href}>{item.title}</a>}
+                description={item.description}
+              />
+              {item.content}
+            </Skeleton>
+          </List.Item>
+        )}
+      />
+    </>
+  );
+};
+
+export default App;
