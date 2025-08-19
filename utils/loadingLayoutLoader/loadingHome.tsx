@@ -1,7 +1,7 @@
 'use client';
 import { Skeleton, Modal, Flex } from 'antd';
 
-export default function LoadingRoot() {
+export default function LoadingHome() {
   return (
     <div className="relative !z-0 h-screen">
     <Flex  style={{"display":"flex","flexDirection":"column","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px","width":"100%","height":"100%"}}>
