@@ -2,7 +2,7 @@ import '@ant-design/v5-patch-for-react-19';
 
 import _ from 'lodash';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { Suspense } from 'react';
+// import { Suspense } from 'react';
 import { headers } from 'next/headers';
 import { Metadata } from 'next';
 
@@ -176,11 +176,14 @@ export default async function RootLayout({
         <ReactQueryProvider>
           <ApiStoreProvider>
             <LayoutProvider>
-              <Suspense fallback={<div>Loading...</div>}>
+              {/* <Suspense fallback={<div>Loading...</div>}>
                 <LayoutContent>
                   <AntdProvider>{children}</AntdProvider>
                 </LayoutContent>
-              </Suspense>
+              </Suspense> */}
+              <LayoutContent>
+                <AntdProvider>{children}</AntdProvider>
+              </LayoutContent>
             </LayoutProvider>
           </ApiStoreProvider>
         </ReactQueryProvider>

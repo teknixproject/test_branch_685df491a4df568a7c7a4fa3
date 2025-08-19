@@ -5,11 +5,12 @@ import dynamic from 'next/dynamic';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
+import GridSystemContainer from '.';
 
-const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
-  loading: () => <LoadingPage />,
-  ssr: false,
-});
+// const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
+//   loading: () => <LoadingPage />,
+//   ssr: false,
+// });
 
 const LoadingPage = dynamic(() => import('./loadingPage'), {
   ssr: false,

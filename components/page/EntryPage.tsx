@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { FC, Suspense } from 'react';
+import { FC } from 'react';
 import { RenderUIClient } from '../grid-systems/ClientWrapGridSystem';
 
 export const dynamic = 'force-dynamic';
@@ -14,9 +14,7 @@ const EntryPage: FC = async () => {
   }
 
   return (
-    <Suspense fallback={<div>Loading UI...</div>}>
-      <RenderUIClient />
-    </Suspense>
+    <RenderUIClient />
   );
 };
 

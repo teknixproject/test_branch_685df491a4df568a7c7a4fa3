@@ -5,8 +5,8 @@ import dayjs from 'dayjs';
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
 import {
-    Controller, FieldValues, FormProvider, useFieldArray, UseFieldArrayReturn, useForm,
-    useFormContext, UseFormReturn
+  Controller, FieldValues, FormProvider, useFieldArray, UseFieldArrayReturn, useForm,
+  useFormContext, UseFormReturn
 } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -15,10 +15,10 @@ import { useHandleData } from '@/hooks/useHandleData';
 import { useHandleProps } from '@/hooks/useHandleProps';
 import { stateManagementStore } from '@/stores';
 import { GridItem } from '@/types/gridItem';
-import { getComponentType } from '@/uitls/component';
-import { cleanProps } from '@/uitls/renderItem';
-import { convertCssObjectToCamelCase, convertToEmotionStyle } from '@/uitls/styleInline';
-import { convertToPlainProps } from '@/uitls/transfromProp';
+import { getComponentType } from '@/utils/component';
+import { cleanProps } from '@/utils/renderItem';
+import { convertCssObjectToCamelCase, convertToEmotionStyle } from '@/utils/styleInline';
+import { convertToPlainProps } from '@/utils/transfromProp';
 import { css } from '@emotion/react';
 
 import { componentRegistry, convertProps } from './ListComponent';
@@ -109,10 +109,10 @@ const useRenderItem = ({
       valueType === 'menu'
         ? { ...staticProps, ...actions }
         : {
-            ...dataState,
-            ...staticProps,
-            ...actions,
-          };
+          ...dataState,
+          ...staticProps,
+          ...actions,
+        };
 
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');

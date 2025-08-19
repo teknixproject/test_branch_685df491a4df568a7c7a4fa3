@@ -35,7 +35,7 @@ import {
 import GoogleMapReact from 'google-map-react';
 import _ from 'lodash';
 
-import { getComponentType } from '@/uitls/component';
+import { getComponentType } from '@/utils/component';
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
 import { Icon } from '@iconify/react/dist/iconify.js';
 

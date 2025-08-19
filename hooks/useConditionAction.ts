@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { TAction, TConditional, TConditionalChild, TConditionChildMap } from '@/types';
-import { transformVariable } from '@/uitls/tranformVariable';
+import { transformVariable } from '@/utils/tranformVariable';
 
 import { useHandleData } from './useHandleData';
 

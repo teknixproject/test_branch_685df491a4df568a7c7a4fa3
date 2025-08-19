@@ -1,6 +1,6 @@
 import { apiResourceStore } from '@/stores';
 import { TApiCallValue, TypeApiCall } from '@/types';
-import { getEntireApiCall } from '@/uitls/apiCall';
+import { getEntireApiCall } from '@/utils/apiCall';
 
 export const useApiCall = () => {
   const { findApiResourceValue } = apiResourceStore((state) => state);
