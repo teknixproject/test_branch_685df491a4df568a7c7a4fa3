@@ -2,8 +2,9 @@ import '@ant-design/v5-patch-for-react-19';
 import './globals.css';
 
 import _ from 'lodash';
-import { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+// import { Suspense } from 'react';
+import { Metadata } from 'next';
 import { headers } from 'next/headers';
 
 import LayoutContent from '@/components/grid-systems/LayoutContent';
@@ -144,10 +145,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'max-image-preview': formMetadata?.robots?.maxImagePreview,
       googleBot: formMetadata?.robots?.googleBot
         ? {
-            index: formMetadata?.robots?.googleBot?.index,
-            follow: formMetadata?.robots?.googleBot?.follow,
-            noimageindex: formMetadata?.robots?.googleBot?.noimageindex,
-          }
+          index: formMetadata?.robots?.googleBot?.index,
+          follow: formMetadata?.robots?.googleBot?.follow,
+          noimageindex: formMetadata?.robots?.googleBot?.noimageindex,
+        }
         : undefined,
     },
     alternates: {
@@ -183,6 +184,11 @@ export default async function RootLayout({
         <ReactQueryProvider>
           <ApiStoreProvider>
             <LayoutProvider>
+              {/* <Suspense fallback={<div>Loading...</div>}>
+                <LayoutContent>
+                  <AntdProvider>{children}</AntdProvider>
+                </LayoutContent>
+              </Suspense> */}
               <LayoutContent>
                 <AntdProvider>{children}</AntdProvider>
               </LayoutContent>

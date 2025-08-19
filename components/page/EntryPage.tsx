@@ -1,6 +1,5 @@
 import { headers } from 'next/headers';
 import { FC } from 'react';
-
 import { RenderUIClient } from '../grid-systems/ClientWrapGridSystem';
 
 export const dynamic = 'force-dynamic';

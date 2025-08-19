@@ -4,8 +4,8 @@ import _ from 'lodash';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
+import GridSystemContainer from '.';
 
-import GridSystemContainer from './';
 import LoadingPage from './loadingPage';
 
 //#region RenderUIClient

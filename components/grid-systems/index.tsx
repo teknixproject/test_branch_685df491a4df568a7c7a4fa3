@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client';
 
 import { FC } from 'react';
@@ -8,7 +8,7 @@ import { GridSystemProps } from './types';
 
 //#region Grid System
 const GridSystemContainer: FC<GridSystemProps> = ({ page }) => {
-  if (!page?.childs) return;
+  if (!page?.childs) return null;
   return <RenderSliceItem data={page} key={page.id} />;
 };
 
