@@ -4,11 +4,7 @@ import LoadingRoot from "./loadingRoot";
 import LoadingAbout from "./about";
 
 const component: any = {
-  '/': LoadingRoot,
-}
-
-
-const component: any = {
+  "/": LoadingRoot,
   "/about": LoadingAbout
 };
 
