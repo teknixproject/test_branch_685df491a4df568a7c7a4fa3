@@ -1,9 +1,11 @@
 'use client';
 
 import LoadingRoot from "./loadingRoot";
+import LoadingAbout from "./about";
 
 const component: any = {
-  "/": LoadingRoot
+  "/": LoadingRoot,
+  "/about": LoadingAbout
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
