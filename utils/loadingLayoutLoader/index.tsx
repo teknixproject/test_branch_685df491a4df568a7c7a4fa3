@@ -1,5 +1,6 @@
 'use client';
   import {Skeleton, Modal, Flex } from 'antd';
+import LoadingHome from "./loadingHome";
 
   export default function LoadingRoot() {
     return (
@@ -17,3 +18,7 @@
     )
   }
   
+
+const component: any = {
+  "/": LoadingHome
+};
