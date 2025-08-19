@@ -6,7 +6,7 @@ import { FC, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
-import { getComponentType } from '@/uitls/component';
+import { getComponentType } from '@/utils/component';
 
 import RenderFormArrayItem from './RenderFormArray';
 import { ComponentRenderer, TProps } from './RenderSliceItem';
