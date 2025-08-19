@@ -20,6 +20,16 @@ import { isTData } from '@/utils/transfromProp';
 import { handleCustomFunction } from './handleCustomFunction';
 import { findRootConditionChild, handleCompareCondition } from './useConditionAction';
 
+const ignoreFieldsListen = [
+  // 'children',
+  'box',
+  'renderItem',
+  'column',
+  // 'items',
+  // 'childs',
+  'dataProps',
+  'actions',
+];
 function extractVariableIdsWithLodash(obj: any): string[] {
   const variableIds: string[] = [];
 
@@ -31,9 +41,10 @@ function extractVariableIdsWithLodash(obj: any): string[] {
 
   function deepIterate(obj: any) {
     _.forOwn(obj, (value, key) => {
+      // if (ignoreFieldsListen.includes(key)) return;
       collectVariableIds(value, key);
 
-      if (_.isObject(value)) {
+      if (_.isObject(value) && !ignoreFieldsListen.includes(key)) {
         deepIterate(value);
       }
     });

@@ -13,9 +13,7 @@ const EntryPage: FC = async () => {
     return <div>Error: Pathname not found</div>;
   }
 
-  return (
-    <RenderUIClient />
-  );
+  return <RenderUIClient />;
 };
 
 export default EntryPage;

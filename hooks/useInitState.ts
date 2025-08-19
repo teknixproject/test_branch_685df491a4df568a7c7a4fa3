@@ -2,6 +2,7 @@
 import _, { isEqual } from 'lodash';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
 import { useConstructorDataAPI, usePreviewUI } from '@/app/actions/use-constructor';
 import { getDeviceType } from '@/lib/utils';
@@ -57,7 +58,7 @@ const useDeviceType = () => {
 
 // Custom hook for layout processing
 const useLayoutProcessing = (dataPreviewUI: any, deviceType: string) => {
-  return useMemo(() => {
+  return useDeepCompareMemo(() => {
     const getLayoutForDevice = (layout: any): any => {
       if (_.isEmpty(layout)) return {};
       const layoutData = layout?.layoutJson || layout;

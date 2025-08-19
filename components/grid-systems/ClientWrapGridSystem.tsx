@@ -1,27 +1,20 @@
 'use client';
 
 import _ from 'lodash';
-import dynamic from 'next/dynamic';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
 import GridSystemContainer from '.';
 
-// const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
-//   loading: () => <LoadingPage />,
-//   ssr: false,
-// });
-
-const LoadingPage = dynamic(() => import('./loadingPage'), {
-  ssr: false,
-});
+import LoadingPage from './loadingPage';
 
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
   const { deviceType, isLoading, selectedBodyLayout, uid } = useInitStateRender();
 
   if (isLoading || !uid) {
-    return <LoadingPage />;
+    // return <LoadingPage />;
+    return;
   }
 
   return (

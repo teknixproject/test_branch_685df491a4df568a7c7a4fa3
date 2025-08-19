@@ -1,24 +1,25 @@
 import '@ant-design/v5-patch-for-react-19';
+import './globals.css';
 
 import _ from 'lodash';
 import { Geist, Geist_Mono } from 'next/font/google';
 // import { Suspense } from 'react';
-import { headers } from 'next/headers';
 import { Metadata } from 'next';
+import { headers } from 'next/headers';
 
 import LayoutContent from '@/components/grid-systems/LayoutContent';
 import { LayoutProvider } from '@/context/LayoutContext';
 import { ApiStoreProvider } from '@/providers';
 import AntdProvider from '@/providers/AntdProvider';
 import ReactQueryProvider from '@/providers/QueryClient';
+import { MetadataIcon } from '@/types/seo';
 
 import { fetchMetadata } from './actions/server';
-import './globals.css';
-import { MetadataIcon } from '@/types/seo';
 
 const DEFAULT_ICONS = {
   icon: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
-  shortcut: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
+  shortcut:
+    'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
   apple: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
 };
 
@@ -63,7 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     // Safer way to get pathname
     const headersList = await headers();
-    pathname = headersList.get('x-path-name') ||
+    pathname =
+      headersList.get('x-path-name') ||
       headersList.get('x-pathname') ||
       headersList.get('pathname') ||
       'NextJS';
@@ -106,8 +108,14 @@ export async function generateMetadata(): Promise<Metadata> {
       url: author.url,
     })),
     openGraph: {
-      title: formMetadata?.openGraph?.title || formMetadata?.title?.default || baseMetadata.title.default,
-      description: formMetadata?.openGraph?.description || formMetadata?.description || baseMetadata.description,
+      title:
+        formMetadata?.openGraph?.title ||
+        formMetadata?.title?.default ||
+        baseMetadata.title.default,
+      description:
+        formMetadata?.openGraph?.description ||
+        formMetadata?.description ||
+        baseMetadata.description,
       url: formMetadata?.openGraph?.url,
       siteName: formMetadata?.openGraph?.siteName,
       images: formMetadata?.openGraph?.images?.map((image: any) => ({
