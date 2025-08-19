@@ -4,9 +4,21 @@ import _ from 'lodash';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
-import GridSystemContainer from '.';
 
 import LoadingPage from './loadingPage';
+import dynamic from 'next/dynamic';
+
+const GridSystemContainer = dynamic(
+  () => new Promise(resolve => {
+    setTimeout(() => {
+      resolve(import('@/components/grid-systems'));
+    }, 3000); // 10 giây delay
+  }),
+  {
+    loading: () => <LoadingPage />,
+    ssr: false,
+  }
+);
 
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
