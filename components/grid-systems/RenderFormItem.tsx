@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/** @jsxImportSource @emotion/react */
 import { Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
 import { FC, useMemo } from 'react';
