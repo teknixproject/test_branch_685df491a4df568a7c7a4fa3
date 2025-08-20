@@ -10,15 +10,15 @@ export default function LoadingStudent() {
       <Skeleton.Image active={true} avatar={true} title={true} paragraph={true}></Skeleton.Image>
       <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
       <Skeleton.Input active={true} avatar={true} title={true} paragraph={true}></Skeleton.Input>
-      <Flex style={{"display":"flex","flexDirection":"row","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}>
+      <div style={{"display":"flex","flexDirection":"row","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}>
         <Skeleton.Avatar active={true} avatar={true} title={true} paragraph={true}></Skeleton.Avatar>
         <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
-      </Flex>
-      <Row style={{"display":"grid","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}>
+      </div>
+      <div style={{"display":"grid","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}>
         <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
         <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
         <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
-      </Row>
+      </div>
     </div>
     </div>
   );
