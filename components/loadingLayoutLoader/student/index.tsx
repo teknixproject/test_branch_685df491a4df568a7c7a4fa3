@@ -19,6 +19,12 @@ export default function LoadingStudent() {
         <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
         <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
       </div>
+      <div style={{"display":"flex","flexDirection":"row","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px","justifyContent":"center","alignItems":"center","gap":"10px"}}>
+        <Skeleton.Avatar active={true} avatar={true} title={true} paragraph={true}></Skeleton.Avatar>
+        <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
+        <Skeleton.Image active={true} avatar={true} title={true} paragraph={true}></Skeleton.Image>
+        <Skeleton.Input active={true} avatar={true} title={true} paragraph={true}></Skeleton.Input>
+      </div>
     </div>
     </div>
   );
