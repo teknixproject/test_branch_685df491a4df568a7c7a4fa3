@@ -3,9 +3,6 @@
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRoot from "./loadingRoot";
 
-const component: any = {}
-
-
 const component: any = {
   "/": LoadingRoot
 };
