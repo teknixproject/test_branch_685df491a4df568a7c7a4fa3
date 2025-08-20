@@ -1,31 +1,57 @@
 /** @jsxImportSource @emotion/react */
-import { Popover } from 'antd';
-import GoogleMapReact from 'google-map-react';
-import React from 'react';
 
-import { Icon } from '@iconify/react/dist/iconify.js';
+import { useState } from 'react';
 
-type Props = GoogleMapReact.Props & {
-  dataSource?: Array<{
-    lat: number;
-    lng: number;
-    [key: string]: any; // Thêm các thuộc tính khác nếu cần
-  }>;
-};
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Maker = ({ text, lat, lng }: { text: string; lat: number; lng: number }) => (
-  <Popover title={text}>
-    <Icon icon={'healthicons:geo-location-outline-24px'} className="text-red-400 fill-cyan-50" />
-  </Popover>
-);
-const MapSpecial: React.FC<Props> = ({ ...props }) => {
-  const propsConvert = {
-    ...props,
-    children: props.dataSource?.map((item: any) => (
-      <Maker key={`${item.lat}-${item.lng}`} lat={item.lat} lng={item.lng} text="My Marker" />
-    )),
+import {
+    AdvancedMarker, APIProvider, Map, MapMouseEvent, MapProps
+} from '@vis.gl/react-google-maps';
+
+type TProps = MapProps;
+const GoogleMap: React.FC<TProps> = ({ ...props }) => {
+  console.log('🚀 ~ GoogleMap ~ props:', props);
+  const { className, ...rest } = props;
+  const [pos, setPos] = useState<{ lat: number | undefined; lng: number | undefined } | null>(null);
+  // const [pos, setPos] = useState(null);
+  // const inputRef = useRef<HTMLInputElement>(null);
+
+  // useEffect(() => {
+  //   if (!window.google || !inputRef.current) return;
+
+  //   const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+  //     fields: ['geometry', 'formatted_address', 'name'],
+  //   });
+
+  //   autocomplete.addListener('place_changed', () => {
+  //     const place = autocomplete.getPlace();
+  //     if (!place.geometry) return;
+  //     const location = place.geometry.location;
+  //     setPos({ lat: location.lat(), lng: location.lng() });
+  //   });
+  // }, []);
+
+  // const handleOnDbClick = (event) => {
+  //   console.log('🚀 ~ handleOnDbClick ~ event:', event);
+  // };
+  const handleOnClick = (event: MapMouseEvent) => {
+    console.log('🚀 ~ handleOnClick ~ event:', event);
+    setPos({ lat: event.detail.latLng?.lat, lng: event.detail.latLng?.lng });
+    rest.onClick?.(event);
   };
-  return <GoogleMapReact {...propsConvert} />;
+  return (
+    <APIProvider apiKey={process.env.NEXT_PUBLIC_MAP || ''} libraries={['places']}>
+      <div className={className}>
+        <Map
+          // defaultCenter={{ lat: 10.77, lng: 106.7 }}
+          // defaultZoom={14}
+          // onClick={handleOnDbClick}
+          {...rest}
+          onClick={handleOnClick}
+        >
+          {pos && <AdvancedMarker position={pos} />}
+        </Map>
+      </div>
+    </APIProvider>
+  );
 };
 
-export default MapSpecial;
+export default GoogleMap;
