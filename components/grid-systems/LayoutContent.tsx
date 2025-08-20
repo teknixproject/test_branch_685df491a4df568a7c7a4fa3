@@ -1,12 +1,17 @@
 'use client';
 import _ from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 
 import { useLayoutContext } from '@/context/LayoutContext';
 import { getDeviceType } from '@/lib/utils';
 
 import styled from 'styled-components';
-import GridSystemContainer from '.';
+// import LoadingPage from './loadingPage';
+
+const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
+  ssr: false,
+});
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { headerLayout, sidebarLayout, footerLayout, sidebarPosition } = useLayoutContext();
