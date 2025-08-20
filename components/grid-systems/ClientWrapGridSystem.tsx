@@ -13,6 +13,18 @@ const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
   ssr: false,
 });
 
+// const GridSystemContainer = dynamic(
+//   () => new Promise(resolve => {
+//     setTimeout(() => {
+//       resolve(import('@/components/grid-systems'));
+//     }, 3000000); // 10 giây delay
+//   }),
+//   {
+//     loading: () => <LoadingPage />,
+//     ssr: false,
+//   }
+// );
+
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
   const { deviceType, isLoading, selectedBodyLayout, uid } = useInitStateRender();
