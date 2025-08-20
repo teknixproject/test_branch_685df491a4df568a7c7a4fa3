@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import { Flex, Skeleton, Typography } from 'antd';
 import { useEffect, useState } from 'react';
@@ -9,20 +10,20 @@ export default function LoadingDefaultXstudio() {
   const [pulseIntensity, setPulseIntensity] = useState(0);
 
   // Animated dots effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots(prev => prev.length >= 3 ? '' : prev + '.');
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setDots(prev => prev.length >= 3 ? '' : prev + '.');
+  //   }, 500);
+  //   return () => clearInterval(interval);
+  // }, []);
 
-  // Pulse animation for gradient
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPulseIntensity(prev => (prev + 1) % 100);
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
+  // // Optimized pulse animation - slower update
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setPulseIntensity(prev => (prev + 2) % 100);
+  //   }, 200); // Giảm từ 50ms xuống 200ms = 5 lần/giây
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <div className="relative !z-0 h-screen overflow-hidden">
@@ -107,7 +108,7 @@ export default function LoadingDefaultXstudio() {
               </div>
             </div>
 
-            {/* Progress Bar */}
+            {/* Progress Bar - Optimized */}
             <div className="bg-white/5 rounded-xl p-4 backdrop-blur-sm border border-white/10">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-blue-200 font-medium">Tiến Trình</span>
@@ -115,8 +116,11 @@ export default function LoadingDefaultXstudio() {
               </div>
               <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-full transition-all duration-300 relative"
-                  style={{ width: `${pulseIntensity}%` }}
+                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-full transition-all duration-500 ease-out relative"
+                  style={{
+                    width: `${Math.min(pulseIntensity, 95)}%`,
+                    willChange: 'width' // Tối ưu cho animation
+                  }}
                 >
                   <div className="absolute inset-0 bg-white/30 animate-shimmer-fast"></div>
                 </div>
