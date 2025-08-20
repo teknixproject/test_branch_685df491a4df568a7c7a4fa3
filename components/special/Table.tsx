@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import { Table, TableProps } from 'antd';
 import React from 'react';
 

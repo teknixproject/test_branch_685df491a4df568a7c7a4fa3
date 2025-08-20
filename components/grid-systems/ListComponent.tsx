@@ -1,26 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {
-  Avatar,
-  Badge,
-  Card,
-  Checkbox,
-  Collapse,
-  DatePicker,
-  Descriptions,
-  Drawer,
-  Form,
-  Image,
-  Input,
-  InputNumber,
-  Popover,
-  Radio,
-  Select,
-  Statistic,
-  Switch,
-  Tag,
-  Typography,
-  Upload,
+    Avatar, Badge, Card, Checkbox, Collapse, DatePicker, Descriptions, Drawer, Form, Image, Input,
+    InputNumber, Popover, Radio, Select, Statistic, Switch, Tag, Typography, Upload
 } from 'antd';
 
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
