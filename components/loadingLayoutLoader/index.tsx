@@ -2,12 +2,15 @@
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRoot from "./loadingRoot";
+import LoadingAbout from "./about";
 
-const component: any = {}
+const component: any = {
+  }
 
 
 const component: any = {
-  "/": LoadingRoot
+  "/": LoadingRoot,
+  "/about": LoadingAbout
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
