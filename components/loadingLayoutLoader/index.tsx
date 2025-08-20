@@ -1,8 +1,11 @@
 'use client';
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
+import LoadingStudent from "./student";
 
-const component: any = {};
+const component: any = {
+  "/student": LoadingStudent
+};
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const Component = component[pathname]
