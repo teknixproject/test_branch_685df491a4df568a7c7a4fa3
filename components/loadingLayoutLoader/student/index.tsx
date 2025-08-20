@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Col, Flex, Row, Skeleton } from 'antd';
+import { Divider, Skeleton } from 'antd';
 
 export default function LoadingStudent() {
   return (
