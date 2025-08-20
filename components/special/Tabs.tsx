@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import { Tabs as TabsAntd, TabsProps } from 'antd';
 import React from 'react';
 

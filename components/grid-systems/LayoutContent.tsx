@@ -7,31 +7,17 @@ import { useLayoutContext } from '@/context/LayoutContext';
 import { getDeviceType } from '@/lib/utils';
 
 import styled from 'styled-components';
+// import LoadingPage from './loadingPage';
 
 const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
   ssr: false,
 });
 
-// const GridSystemContainer = dynamic(
-//   () => new Promise(resolve => {
-//     setTimeout(() => {
-//       resolve(import('@/components/grid-systems'));
-//     }, 30000); // 10 giây delay
-//   }),
-//   {
-//     loading: () => <LoadingPage />,
-//     ssr: false,
-//   }
-// );
-
-
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { headerLayout, sidebarLayout, footerLayout, sidebarPosition } = useLayoutContext();
   const [deviceType, setDeviceType] = useState(getDeviceType());
   const [headerHeight, setHeaderHeight] = useState(0);
-  const [footerHeight, setFooterHeight] = useState(0);
   const headerRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -72,60 +58,42 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     });
 
     resizeObserver.observe(headerRef.current);
+
+    // Set initial height
     setHeaderHeight(headerRef.current.offsetHeight);
 
     return () => resizeObserver.disconnect();
   }, [selectedHeaderLayout]);
 
-  useEffect(() => {
-    if (!footerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setFooterHeight(entry.contentRect.height);
-      }
-    });
-
-    resizeObserver.observe(footerRef.current);
-    setFooterHeight(footerRef.current.offsetHeight);
-
-    return () => resizeObserver.disconnect();
-  }, [selectedFooterLayout]);
-
-  // GIẢI PHÁP 2: Tính toán bottom position cho sidebar
   const sidebarStyle = useMemo(() => ({
     flexShrink: 0,
     position: 'sticky' as const,
     top: `${headerHeight}px`,
-    bottom: `${footerHeight}px`, // Thêm bottom constraint
     zIndex: 10,
-    maxHeight: `calc(100vh - ${headerHeight}px - ${footerHeight}px)`, // Trừ cả footer
-    overflow: 'auto',
-    alignSelf: 'flex-start', // Quan trọng: giúp sidebar không bị stretch
-  }), [headerHeight, footerHeight]);
+    maxHeight: `calc(100vh - ${headerHeight}px)`,
+    overflow: 'hidden',
+  }), [headerHeight]);
 
-  const isSidebarLeft = sidebarPosition === 'left';
-  const isSidebarRight = sidebarPosition === 'right';
+  const isSidebarLeft = sidebarPosition === 'left'
+  const isSidebarRight = sidebarPosition === 'right'
 
   return (
-    <ContainerWrapper>
-      {/* Header */}
-      {!_.isEmpty(selectedHeaderLayout) && (
-        <div id="header" ref={headerRef} className="sticky top-0 z-20">
-          <GridSystemContainer
-            page={selectedHeaderLayout}
-            deviceType={deviceType}
-            isFooter
-            style={{ width: '100%' }}
-          />
-        </div>
-      )}
-
-      {/* Main Content Area */}
-      <div className="flex flex-1 relative">
-        {/* Sidebar Left */}
+    <div className="relative !z-0 h-screen">
+      {
+        !_.isEmpty(selectedHeaderLayout) && (
+          <div id="header" ref={headerRef} className="sticky top-0 z-10 max-h-screen overflow-hidden">
+            <GridSystemContainer
+              page={selectedHeaderLayout}
+              deviceType={deviceType}
+              isFooter
+              style={{ width: '100%' }}
+            />
+          </div>
+        )
+      }
+      <div className="z-10 flex">
         {isSidebarLeft && !_.isEmpty(selectedSidebarLayout) && (
-          <div id="sidebar-left" style={sidebarStyle}>
+          <div id="sidebar" style={{ ...sidebarStyle }} className="sticky top-0 z-10 max-h-screen overflow-hidden">
             <GridSystemContainer
               page={selectedSidebarLayout}
               deviceType={deviceType}
@@ -133,21 +101,11 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
             />
           </div>
         )}
-
-        {/* Main Content */}
-        <Csmain
-          className="flex-1"
-          style={{
-            minHeight: `calc(100vh - ${headerHeight}px - ${footerHeight}px)`,
-            overflow: 'auto'
-          }}
-        >
+        <Csmain className='h-screen' style={{ flex: 1, overflow: 'hidden' }}>
           {children}
         </Csmain>
-
-        {/* Sidebar Right */}
         {isSidebarRight && !_.isEmpty(selectedSidebarLayout) && (
-          <div id="sidebar-right" style={sidebarStyle}>
+          <div id="sidebar" style={{ ...sidebarStyle }} className="sticky top-0 z-10 max-h-screen overflow-hidden">
             <GridSystemContainer
               page={selectedSidebarLayout}
               deviceType={deviceType}
@@ -156,30 +114,22 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
           </div>
         )}
       </div>
-
-      {/* Footer */}
-      {!_.isEmpty(selectedFooterLayout) && (
-        <div id="footer" ref={footerRef}>
+      {
+        !_.isEmpty(selectedFooterLayout) && (
           <GridSystemContainer
             page={selectedFooterLayout}
             deviceType={deviceType}
             isFooter
             style={{ width: '100%', height: 'fit-content' }}
           />
-        </div>
-      )}
-    </ContainerWrapper>
+        )
+      }
+    </div >
   );
 }
 
-const ContainerWrapper = styled.div`
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
 const Csmain = styled.main`
   .ant-app {
-    /* height: 100%; */
+    height: 100%;
   }
 `

@@ -1,12 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 'use client';
-import { Flex, Image, Typography, Progress } from 'antd';
+import { Flex, Image, Progress } from 'antd';
 import { useState, useEffect, useRef } from 'react';
 
 interface LoadingDefaultXstudioProps {
   onLoadingComplete?: () => void;
-  duration?: number; // milliseconds
+  duration?: number;
 }
 
 export default function LoadingDefaultXstudio({
@@ -14,19 +12,8 @@ export default function LoadingDefaultXstudio({
   duration = 10000 // default 10 seconds
 }: LoadingDefaultXstudioProps = {}) {
   const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState('Initializing');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Loading text phases
-  const loadingPhases = [
-    'Initializing...',
-    'Loading components...',
-    'Setting up workspace...',
-    'Preparing interface...',
-    'Almost ready...',
-    'Finalizing...'
-  ];
 
   useEffect(() => {
     const startTime = Date.now();
@@ -38,18 +25,11 @@ export default function LoadingDefaultXstudio({
 
       setProgress(newProgress);
 
-      // Update loading text based on progress
-      const phaseIndex = Math.floor((newProgress / 100) * loadingPhases.length);
-      if (phaseIndex < loadingPhases.length) {
-        setLoadingText(loadingPhases[phaseIndex]);
-      }
     }, incrementInterval);
 
     // Complete loading after specified duration
     timeoutRef.current = setTimeout(() => {
       setProgress(100);
-      setLoadingText('Complete!');
-
       // Small delay before calling completion callback
       setTimeout(() => {
         onLoadingComplete?.();
@@ -94,56 +74,24 @@ export default function LoadingDefaultXstudio({
             />
           </div>
 
-          {/* Loading Content */}
-          <div className="space-y-6">
-            {/* Loading Text */}
-            <div className="text-center">
-              <Typography.Text className="text-blue-200 text-lg font-medium">
-                {loadingText}
-              </Typography.Text>
-            </div>
-
-            {/* Ant Design Progress Bar */}
-            <div className="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10">
-              <Progress
-                percent={Math.floor(progress)}
-                strokeColor={{
-                  '0%': '#3b82f6',
-                  '50%': '#8b5cf6',
-                  '100%': '#6366f1',
-                }}
-                trailColor="rgba(255, 255, 255, 0.1)"
-                strokeWidth={8}
-                format={(percent) => (
-                  <span className="text-purple-300 font-bold text-sm">
-                    {percent}%
-                  </span>
-                )}
-                style={{
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center mt-8">
-            <div className="flex justify-center space-x-2 mb-4">
-              {[0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-bounce"
-                  style={{
-                    animationDelay: `${i * 0.2}s`,
-                    animationDuration: '1s'
-                  }}
-                />
-              ))}
-            </div>
-            <Typography.Text className="text-indigo-200/80 text-sm font-light">
-              Powered by X-Studio ✨
-            </Typography.Text>
-          </div>
+          <Progress
+            percent={Math.floor(progress)}
+            strokeColor={{
+              '0%': '#3b82f6',
+              '50%': '#8b5cf6',
+              '100%': '#6366f1',
+            }}
+            trailColor="rgba(255, 255, 255, 0.1)"
+            strokeWidth={8}
+            format={(percent) => (
+              <span className="text-purple-300 font-bold text-sm">
+                {percent}%
+              </span>
+            )}
+            style={{
+              fontSize: '14px'
+            }}
+          />
         </div>
       </Flex>
 

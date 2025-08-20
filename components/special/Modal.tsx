@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import { Modal as ModalAntd, ModalProps } from 'antd';
 import React from 'react';
 
