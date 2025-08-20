@@ -18,8 +18,8 @@ export const RenderUIClient: FC = () => {
   const { deviceType, isLoading, selectedBodyLayout, uid } = useInitStateRender();
 
   if (isLoading || !uid) {
-    // return <LoadingPage />;
-    return
+    return <LoadingPage />;
+    // return
   }
 
   return (
