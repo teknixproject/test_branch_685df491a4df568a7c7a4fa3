@@ -9,7 +9,7 @@ interface LoadingDefaultXstudioProps {
 
 export default function LoadingDefaultXstudio({
   onLoadingComplete,
-  duration = 10000 // default 10 seconds
+  duration = 0
 }: LoadingDefaultXstudioProps = {}) {
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);

@@ -7,7 +7,6 @@ import { useLayoutContext } from '@/context/LayoutContext';
 import { getDeviceType } from '@/lib/utils';
 
 import styled from 'styled-components';
-// import LoadingPage from './loadingPage';
 
 const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
   ssr: false,
