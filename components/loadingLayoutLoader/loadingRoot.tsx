@@ -11,15 +11,15 @@ export default function LoadingRoot() {
         <Skeleton.Input dataSource={[{"name":"label","type":"data"}]} label={"Email"} required={false} layout={"vertical"} block={true} rootClassName="!grid-column-span 6 / span 6">
           <Skeleton.Input placeholder={"Nhập email của bạn"} defaultValue={""}></Skeleton.Input>
         </Skeleton.Input>
-        <Skeleton size={"middle"} type={"primary"} iconData={null} shape={"default"} children={"Call"} block={false} ghost={false} danger={false} disabled={false} htmlType={"submit"}></Skeleton>
+        <Skeleton.Button size={"middle"} type={"primary"} iconData={null} shape={"default"} children={"Call"} block={false} ghost={false} danger={false} disabled={false} htmlType={"submit"}></Skeleton.Button>
       </Skeleton.Input>
       <Skeleton.Image data={[{"year":"1991","value":8},{"year":"1992","value":9},{"year":"1993","value":9.1},{"year":"1994","value":9.3},{"year":"1995","value":12},{"year":"1996","value":12.9},{"year":"1997","value":12.9}]} xField={"year"} yField={"value"} title={"Title chart"} style-lineWidth={2} area-style-fill={"transparent"}></Skeleton.Image>
-      <Skeleton size={"middle"} type={"primary"} shape={"default"} children={""} block={false} ghost={false} danger={false} disabled={false} htmlType={"button"}></Skeleton>
+      <Skeleton.Button size={"middle"} type={"primary"} shape={"default"} children={""} block={false} ghost={false} danger={false} disabled={false} htmlType={"button"}></Skeleton.Button>
       <Skeleton.Image data={[{"year":"1991","value":8},{"year":"1992","value":9},{"year":"1993","value":9.1},{"year":"1994","value":9.3},{"year":"1995","value":12},{"year":"1996","value":12.9},{"year":"1997","value":12.9}]} xField={"year"} yField={"value"} title={"Title chart"}></Skeleton.Image>
       <div style={{"display":"flex","flexDirection":"row","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}>
-        <Skeleton children={"ssssssssssssss"}></Skeleton>
-        <Skeleton children={"aaaaaaaaa"}></Skeleton>
-        <Skeleton size={"middle"} type={"primary"} shape={"default"} children={""} block={false} ghost={false} danger={false} disabled={false} htmlType={"button"}></Skeleton>
+        <Skeleton.Button children={"ssssssssssssss"}></Skeleton.Button>
+        <Skeleton.Button children={"aaaaaaaaa"}></Skeleton.Button>
+        <Skeleton.Button size={"middle"} type={"primary"} shape={"default"} children={""} block={false} ghost={false} danger={false} disabled={false} htmlType={"button"}></Skeleton.Button>
       </div>
       <div style={{"display":"grid","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}></div>
     </div>
