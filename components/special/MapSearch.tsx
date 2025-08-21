@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Card, Empty, Input, List, Spin } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
@@ -302,7 +303,7 @@ const GoogleMap: React.FC<TProps> = ({ ...props }) => {
   };
 
   return (
-    <APIProvider apiKey={apiKey} libraries={['places']}>
+    <APIProvider apiKey={apiKey || ''} libraries={['places']}>
       <div style={{ display: 'flex', height: '600px', gap: '10px', position: 'relative' }}>
         {/* Debug Info */}
         <div
@@ -351,7 +352,7 @@ const GoogleMap: React.FC<TProps> = ({ ...props }) => {
               }}
             >
               <Input.Search
-                ref={inputRef}
+                // ref={inputRef}
                 placeholder="Tìm kiếm địa điểm..."
                 value={searchValue}
                 onChange={handleInputChange}
