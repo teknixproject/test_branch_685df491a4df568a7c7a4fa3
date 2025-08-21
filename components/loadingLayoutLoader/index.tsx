@@ -2,8 +2,10 @@
 'use client';
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
+import LoadingRemove from "./LoadingRemove";
 
 const component: any = {
+  "/about": LoadingRemove
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
