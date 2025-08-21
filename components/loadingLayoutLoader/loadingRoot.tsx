@@ -22,6 +22,7 @@ export default function LoadingRoot() {
         <Skeleton.Button size={"middle"} type={"primary"} shape={"default"} block={false} ghost={false} danger={false} disabled={false} htmlType={"button"}></Skeleton.Button>
       </div>
       <div style={{"display":"grid","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}></div>
+      <Skeleton.Node></Skeleton.Node>
     </div>
     </div>
   );
