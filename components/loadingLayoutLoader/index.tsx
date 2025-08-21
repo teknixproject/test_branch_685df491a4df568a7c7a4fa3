@@ -4,7 +4,10 @@
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
 
-const component: any = {"/about": LoadingRemove};
+const component: any = {
+  "/about": LoadingRemove,
+  "/": LoadingRemove
+};
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const Component = component[pathname]
