@@ -10,7 +10,6 @@ type Props = TableProps & {
 };
 
 const TableSpecial: React.FC<Props> = ({ ...props }) => {
-  console.log('🚀 ~ TableSpecial ~ props:', props);
   const configs = () => {
     let summary = null;
     if (props.enableFooter && (props.footerColumns?.length ?? 0) > 0) {

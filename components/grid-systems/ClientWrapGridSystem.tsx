@@ -8,22 +8,10 @@ import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
 
 import LoadingPage from './loadingPage';
 
-// const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
-//   loading: () => <LoadingPage />,
-//   ssr: false,
-// });
-
-const GridSystemContainer = dynamic(
-  () => new Promise(resolve => {
-    setTimeout(() => {
-      resolve(import('@/components/grid-systems'));
-    }, 300000); // 10 giây delay
-  }),
-  {
-    loading: () => <LoadingPage />,
-    ssr: false,
-  }
-);
+const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
+  loading: () => <LoadingPage />,
+  ssr: false,
+});
 
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
