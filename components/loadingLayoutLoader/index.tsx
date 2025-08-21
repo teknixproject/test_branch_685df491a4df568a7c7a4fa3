@@ -2,11 +2,9 @@
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingStudent from "./student";
-import LoadingRoot from "./loadingRoot";
 
 const component: any = {
   "/student": LoadingStudent,
-  "/": LoadingRoot
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
