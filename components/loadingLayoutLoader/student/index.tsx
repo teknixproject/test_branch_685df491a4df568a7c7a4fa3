@@ -16,9 +16,6 @@ export default function LoadingStudent() {
         <div style={{"display":"block"}}>
         <Skeleton.Avatar active={true} avatar={true} title={true} paragraph={true}></Skeleton.Avatar>
         </div>
-        <div style={{"display":"block"}}>
-        <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
-        </div>
       </div>
       <div style={{"display":"grid","paddingTop":"5px","paddingLeft":"5px","paddingRight":"5px","paddingBottom":"5px"}}>
         <div style={{"display":"block"}}>
@@ -36,7 +33,7 @@ export default function LoadingStudent() {
         <Skeleton.Avatar active={true} avatar={true} title={true} paragraph={true}></Skeleton.Avatar>
         </div>
         <div style={{"display":"block"}}>
-        <Skeleton.Button active={true} avatar={true} title={true} paragraph={true}></Skeleton.Button>
+        <Skeleton.Button active={true} avatar={true} title={true} paragraph={true} block={false}></Skeleton.Button>
         </div>
         <div style={{"display":"block"}}>
         <Skeleton.Image active={true} avatar={true} title={true} paragraph={true}></Skeleton.Image>
@@ -50,8 +47,11 @@ export default function LoadingStudent() {
         <Skeleton.Image active={true} avatar={true} title={true} paragraph={true} style={{"width":"100%"}}></Skeleton.Image>
         </div>
         <div style={{"display":"block"}}>
-        <Skeleton.Input active={true} avatar={true} title={true} paragraph={true} style={{"width":"100%"}}></Skeleton.Input>
+        <Skeleton.Input active={true} avatar={true} title={true} paragraph={true} block={false} style={{"width":"100%"}}></Skeleton.Input>
         </div>
+      </div>
+      <div style={{"display":"block"}}>
+      <Skeleton.Button active={true} avatar={true} title={true} paragraph={true} shape={"square"} block={true}></Skeleton.Button>
       </div>
     </div>
     </div>
