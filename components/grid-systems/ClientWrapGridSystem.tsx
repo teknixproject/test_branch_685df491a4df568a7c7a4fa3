@@ -17,7 +17,7 @@ const GridSystemContainer = dynamic(
   () => new Promise(resolve => {
     setTimeout(() => {
       resolve(import('@/components/grid-systems'));
-    }, 3000000); // 10 giây delay
+    }, 300000); // 10 giây delay
   }),
   {
     loading: () => <LoadingPage />,
