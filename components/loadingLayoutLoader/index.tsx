@@ -4,13 +4,15 @@
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingStudent from "./student";
 import LoadingRoot from "./loadingRoot";
+import LoadingRemove from "./LoadingRemove";
 
 const component: any = {}
 
 
 const component: any = {
   "/student": LoadingStudent,
-  "/": LoadingRoot
+  "/": LoadingRoot,
+  "/about": LoadingAbout
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
