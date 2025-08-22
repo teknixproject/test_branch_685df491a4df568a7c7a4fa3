@@ -4,12 +4,12 @@
 import LoadingAbout from "./about";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
-import LoadingRoot from "./loadingRoot";
+import LoadingRemove from "./LoadingRemove";
 import LoadingStudent from "./student";
 
 const component: any = {
   "/about": LoadingAbout,
-  "/": LoadingRoot,
+  "/": LoadingRemove,
   "/student": LoadingStudent
 };
 
