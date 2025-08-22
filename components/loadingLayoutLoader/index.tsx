@@ -1,17 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
-import LoadingRemove from "./LoadingRemove";
+import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 
-const component: any = {
-  "/": LoadingRemove
-};
+const component: any = {}
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
-  const Component = component[pathname];
-  return Component ? <Component /> : <LoadingDefaultXstudio />;
-};
+  const Component = component[pathname]
+
+  return Component ? <Component /> : <LoadingDefaultXstudio />
+}
 
 export default LoadingLayoutComponent;
