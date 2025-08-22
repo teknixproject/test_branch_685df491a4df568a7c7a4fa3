@@ -3,10 +3,10 @@
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
-import LoadingRemove from "./LoadingRemove";
+import LoadingRoot from "./loadingRoot";
 
 const component: any = {
-  "/": LoadingRemove
+  "/": LoadingRoot
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
