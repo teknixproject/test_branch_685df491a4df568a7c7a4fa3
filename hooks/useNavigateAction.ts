@@ -1,7 +1,7 @@
 import { useRouter } from 'next/navigation';
 
 import { TAction, TActionNavigate } from '@/types';
-import { buildPathFromPattern } from '@/uitls/pathname';
+import { buildPathFromPattern } from '@/utils/pathname';
 
 import { TActionsProps } from './useActions';
 import { THandleDataParams, useHandleData } from './useHandleData';

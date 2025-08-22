@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { FC, Suspense } from 'react';
+import { FC } from 'react';
 import { RenderUIClient } from '../grid-systems/ClientWrapGridSystem';
 
 export const dynamic = 'force-dynamic';
@@ -13,11 +13,7 @@ const EntryPage: FC = async () => {
     return <div>Error: Pathname not found</div>;
   }
 
-  return (
-    <Suspense fallback={<div>Loading UI...</div>}>
-      <RenderUIClient />
-    </Suspense>
-  );
+  return <RenderUIClient />;
 };
 
 export default EntryPage;

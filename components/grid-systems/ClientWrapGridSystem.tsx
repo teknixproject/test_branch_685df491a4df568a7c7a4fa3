@@ -1,17 +1,15 @@
 'use client';
 
 import _ from 'lodash';
-import dynamic from 'next/dynamic';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 
 import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
 
+import LoadingPage from './loadingPage';
+
 const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
   loading: () => <LoadingPage />,
-  ssr: false,
-});
-
-const LoadingPage = dynamic(() => import('./loadingPage'), {
   ssr: false,
 });
 
@@ -21,10 +19,11 @@ export const RenderUIClient: FC = () => {
 
   if (isLoading || !uid) {
     return <LoadingPage />;
+    // return
   }
 
   return (
-    <div className="relative ">
+    <div className="relative h-full">
       {!_.isEmpty(selectedBodyLayout) && (
         <GridSystemContainer page={selectedBodyLayout} deviceType={deviceType} isBody />
       )}
