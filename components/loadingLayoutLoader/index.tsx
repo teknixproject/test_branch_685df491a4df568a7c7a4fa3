@@ -1,5 +1,6 @@
 'use client';
 
+import LoadingRemove from "./LoadingRemove"
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 
 const component: any = {}
