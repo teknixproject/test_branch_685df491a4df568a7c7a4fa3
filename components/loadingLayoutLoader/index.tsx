@@ -4,9 +4,11 @@
 import LoadingAbout from "./about";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
+import LoadingRoot from "./loadingRoot";
 
 const component: any = {
-  "/about": LoadingAbout
+  "/about": LoadingAbout,
+  "/": LoadingRoot
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
