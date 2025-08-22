@@ -4,11 +4,11 @@
 import LoadingAbout from "./about";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
-import LoadingRoot from "./loadingRoot";
+import LoadingRemove from "./LoadingRemove";
 
 const component: any = {
   "/about": LoadingAbout,
-  "/": LoadingRoot
+  "/": LoadingRemove
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
