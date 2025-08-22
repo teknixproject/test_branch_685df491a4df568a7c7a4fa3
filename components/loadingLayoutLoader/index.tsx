@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client';
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
-import LoadingRemove from "./LoadingRemove"
+
 import LoadingRemove from "./LoadingRemove";
 
 const component: any = {
