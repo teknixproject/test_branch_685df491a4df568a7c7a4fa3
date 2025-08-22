@@ -5,10 +5,12 @@ import LoadingAbout from "./about";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
 import LoadingRoot from "./loadingRoot";
+import LoadingStudent from "./student";
 
 const component: any = {
   "/about": LoadingAbout,
-  "/": LoadingRoot
+  "/": LoadingRoot,
+  "/student": LoadingStudent
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
