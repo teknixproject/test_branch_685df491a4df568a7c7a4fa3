@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import dayjs from 'dayjs';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { JSONPath } from 'jsonpath-plus';
@@ -621,6 +620,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             data: data.customFunction,
             findCustomFunction: stableDeps.findCustomFunction,
             getData: getDataRef.current,
+            params: { valueStream, callbackArgs },
           });
         case 'condition':
           return await handleCondition(data);
