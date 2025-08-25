@@ -1,12 +1,18 @@
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
+import LoadingAbout from "./about";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
-import LoadingRoot from "./loadingRoot";
+import LoadingRemove from "./LoadingRemove";
+import LoadingStudent from "./student";
+import LoadingSubject from "./subject";
 
 const component: any = {
-  "/": LoadingRoot
+  "/about": LoadingAbout,
+  "/": LoadingRemove,
+  "/student": LoadingStudent,
+  "/subject": LoadingSubject
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
