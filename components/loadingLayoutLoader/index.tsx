@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client';
 
-import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
 import LoadingRoot from "./loadingRoot";
@@ -30,7 +29,6 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const componentMap: Record<string, React.ComponentType> = {
     'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
-    'LoadingRemove': LoadingRemove
   };
 
   const componentName = findMatchingRoute(pathname);
