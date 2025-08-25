@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
+import LoadingAbout from "./about";
 import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
@@ -16,7 +17,8 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
     const routes: any = [
       { pattern: '/student', component: 'LoadingStudent' },
-      { pattern: '/', component: 'LoadingRoot' }
+      { pattern: '/', component: 'LoadingRoot' },
+      { pattern: '/about', component: 'LoadingAbout' }
 
     ]
 
@@ -44,7 +46,7 @@ if (segments[0] === 'about' && segments[1]) {
     'LoadingStudent': LoadingStudent,
     'LoadingStudentId': LoadingStudentId,
     'LoadingRoot': LoadingRoot,
-    'LoadingAbout': LoadingRemove
+    'LoadingAbout': LoadingAbout
   };
 
   const componentName = findMatchingRoute(pathname);
