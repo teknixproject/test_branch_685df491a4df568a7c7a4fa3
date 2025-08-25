@@ -13,7 +13,7 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
   const findMatchingRoute = (pathname: string) => {
 
-    const normalizedPath = pathname === '/' ? '/' : pathname.replace(//$/, '')
+    const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
 
     const routes: any = [
       { pattern: '/student', component: 'LoadingStudent' },
