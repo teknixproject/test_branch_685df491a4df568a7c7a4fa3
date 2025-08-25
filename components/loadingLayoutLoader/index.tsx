@@ -7,6 +7,7 @@ import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
 import LoadingRoot from "./loadingRoot";
 import LoadingStudent from "./student";
+import LoadingStudentId from "./studentid";
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
@@ -31,6 +32,9 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 if (segments[0] === 'about' && segments[1]) {
       return 'LoadingAboutId';
     }
+    if (segments[0] === 'student' && segments[1]) {
+      return 'LoadingStudentId';
+    }
 
     return 'LoadingDefaultXstudio';
   }
@@ -41,7 +45,8 @@ if (segments[0] === 'about' && segments[1]) {
     'LoadingRemove': LoadingRemove,
     'LoadingAboutId': LoadingAboutId,
     'LoadingAbout': LoadingAbout,
-    'LoadingStudent': LoadingStudent
+    'LoadingStudent': LoadingStudent,
+    'LoadingStudentId': LoadingStudentId
   };
 
   const componentName = findMatchingRoute(pathname);
