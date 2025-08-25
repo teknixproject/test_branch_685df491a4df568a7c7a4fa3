@@ -4,7 +4,6 @@
 import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
-import LoadingRoot from "./loadingRoot";
 import LoadingStudent from "./student";
 import LoadingStudentId from "./studentid";
 
@@ -15,7 +14,6 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     const normalizedPath = pathname === '/' ? '/' : pathname.replace(//$/, '')
 
     const routes: any = [
-      { pattern: '/', component: 'LoadingRoot' },
       { pattern: '/student', component: 'LoadingStudent' }
 
     ]
@@ -38,7 +36,6 @@ if (segments[0] === 'about' && segments[1]) {
   }
 
   const componentMap: Record<string, React.ComponentType> = {
-    'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
     'LoadingRemove': LoadingRemove,
     'LoadingAboutId': LoadingAboutId,
