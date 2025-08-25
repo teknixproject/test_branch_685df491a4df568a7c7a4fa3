@@ -6,6 +6,7 @@ import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
 import LoadingRoot from "./loadingRoot";
+import LoadingStudent from "./student";
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
@@ -15,7 +16,8 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
     const routes: any = [
       { pattern: '/', component: 'LoadingRoot' },
-      { pattern: '/about', component: 'LoadingAbout' }
+      { pattern: '/about', component: 'LoadingAbout' },
+      { pattern: '/student', component: 'LoadingStudent' }
 
     ]
 
@@ -38,7 +40,8 @@ if (segments[0] === 'about' && segments[1]) {
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
     'LoadingRemove': LoadingRemove,
     'LoadingAboutId': LoadingAboutId,
-    'LoadingAbout': LoadingAbout
+    'LoadingAbout': LoadingAbout,
+    'LoadingStudent': LoadingStudent
   };
 
   const componentName = findMatchingRoute(pathname);
