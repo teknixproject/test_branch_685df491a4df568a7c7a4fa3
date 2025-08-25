@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
+import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
 import LoadingRoot from "./loadingRoot";
@@ -34,7 +35,7 @@ if (segments[0] === 'about' && segments[1]) {
     'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
     'LoadingRemove': LoadingRemove,
-    'LoadingAboutId': LoadingRemove
+    'LoadingAboutId': LoadingAboutId
   };
 
   const componentName = findMatchingRoute(pathname);
