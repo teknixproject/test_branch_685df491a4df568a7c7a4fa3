@@ -29,8 +29,7 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     }
 
     const segments = normalizedPath.split('/').filter(Boolean);
-
-    if (segments[0] === 'about' && segments[1]) {
+if (segments[0] === 'about' && segments[1]) {
       return 'LoadingAboutId';
     }
 
@@ -40,7 +39,8 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const componentMap: Record<string, React.ComponentType> = {
     'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
-    'LoadingAboutId': LoadingAboutId
+    'LoadingAboutId': LoadingAboutId,
+    'LoadingRemove': LoadingRemove
   };
 
   const componentName = findMatchingRoute(pathname);
