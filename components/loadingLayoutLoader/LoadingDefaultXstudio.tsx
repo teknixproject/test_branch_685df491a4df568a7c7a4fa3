@@ -68,7 +68,8 @@ export default function LoadingDefaultXstudio({
           <div className="text-center mb-8">
             <Image
               width={200}
-              src='https://componentx-studio-l8y4.vercel.app/logo.png'
+              // src='https://componentx-studio-l8y4.vercel.app/logo.png'
+              src='./logo.png'
               alt='logo-xstudio'
               preview={false}
             />

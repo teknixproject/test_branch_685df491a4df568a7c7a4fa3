@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client';
 
 import LoadingAboutId from "./aboutid";
@@ -10,7 +10,7 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
   const findMatchingRoute = (pathname: string) => {
 
-    const normalizedPath = pathname === '/' ? '/' : pathname.replace(//$/, '')
+    const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
 
     const routes: any = [
       { pattern: '/', component: 'LoadingRoot' }
@@ -24,7 +24,7 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     }
 
     const segments = normalizedPath.split('/').filter(Boolean);
-if (segments[0] === 'about' && segments[1]) {
+    if (segments[0] === 'about' && segments[1]) {
       return 'LoadingAboutId';
     }
 
