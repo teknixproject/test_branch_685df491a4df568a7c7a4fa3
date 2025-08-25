@@ -5,7 +5,8 @@
       "validate/*": true,
       "dev": true,
       "dev_2": true,
-      "dev_3": true
+      "dev_3": true,
+      "dev_4": true
     }
   },
   "github": {
