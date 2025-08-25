@@ -36,7 +36,6 @@ if (segments[0] === 'about' && segments[1]) {
   const componentMap: Record<string, React.ComponentType> = {
     'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
-    'LoadingAboutId': LoadingAboutId,
     'LoadingRemove': LoadingRemove
   };
 
