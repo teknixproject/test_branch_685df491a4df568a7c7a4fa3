@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
@@ -9,10 +9,11 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
   const findMatchingRoute = (pathname: string) => {
 
-    const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
+    const normalizedPath = pathname === '/' ? '/' : pathname.replace(//$/, '')
 
     const routes: any = [
       { pattern: '/', component: 'LoadingRoot' }
+
     ]
 
     for (const route of routes) {
@@ -22,6 +23,9 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     }
 
     const segments = normalizedPath.split('/').filter(Boolean);
+if (segments[0] === 'about' && segments[1]) {
+      return 'LoadingAboutId';
+    }
 
     return 'LoadingDefaultXstudio';
   }
@@ -29,7 +33,8 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   const componentMap: Record<string, React.ComponentType> = {
     'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
-    'LoadingRemove': LoadingRemove
+    'LoadingRemove': LoadingRemove,
+    'LoadingAboutId': LoadingRemove
   };
 
   const componentName = findMatchingRoute(pathname);
