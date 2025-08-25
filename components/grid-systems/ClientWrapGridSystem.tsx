@@ -17,8 +17,6 @@ const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
 export const RenderUIClient: FC = () => {
   const { deviceType, isLoading, selectedBodyLayout, uid } = useInitStateRender();
 
-  console.log('RenderUIClient');
-
   if (isLoading || !uid) {
     return <LoadingPage />;
     // return
