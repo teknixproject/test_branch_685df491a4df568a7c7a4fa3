@@ -6,11 +6,13 @@ import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove"
 import LoadingRemove from "./LoadingRemove";
 import LoadingStudent from "./student";
+import LoadingSubject from "./subject";
 
 const component: any = {
   "/about": LoadingAbout,
   "/": LoadingRemove,
-  "/student": LoadingStudent
+  "/student": LoadingStudent,
+  "/subject": LoadingSubject
 };
 
 const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
