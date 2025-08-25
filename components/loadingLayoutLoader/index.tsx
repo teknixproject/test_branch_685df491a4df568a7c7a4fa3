@@ -1,6 +1,7 @@
 
 'use client';
 
+import LoadingAbout from "./about";
 import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
@@ -15,8 +16,9 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
 
     const routes: any = [
+      { pattern: '/student', component: 'LoadingStudent' },
       { pattern: '/', component: 'LoadingRoot' },
-      { pattern: '/student', component: 'LoadingStudent' }
+      { pattern: '/about', component: 'LoadingAbout' }
 
     ]
 
@@ -38,12 +40,13 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
   }
 
   const componentMap: Record<string, React.ComponentType> = {
-    'LoadingRoot': LoadingRoot,
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
     'LoadingRemove': LoadingRemove,
     'LoadingAboutId': LoadingAboutId,
     'LoadingStudent': LoadingStudent,
-    'LoadingStudentId': LoadingStudentId
+    'LoadingStudentId': LoadingStudentId,
+    'LoadingRoot': LoadingRoot,
+    'LoadingAbout': LoadingAbout
   };
 
   const componentName = findMatchingRoute(pathname);
