@@ -19,8 +19,7 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
       { pattern: '/', component: 'LoadingRoot' },
       { pattern: '/about', component: 'LoadingAbout' },
       { pattern: '/student', component: 'LoadingStudent' },
-      { pattern: '/subject', component: 'LoadingSubject' },
-      { pattern: '/about/[id]', component: 'LoadingAboutId' }
+      { pattern: '/subject', component: 'LoadingSubject' }
     ]
 
     for (const route of routes) {
@@ -30,6 +29,10 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     }
 
     const segments = normalizedPath.split('/').filter(Boolean);
+
+    if (segments[0] === 'about' && segments[1]) {
+      return 'LoadingAboutId';
+    }
 
     return 'LoadingDefaultXstudio';
   }
