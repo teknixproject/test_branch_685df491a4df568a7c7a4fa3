@@ -1,7 +1,6 @@
 
 'use client';
 
-import LoadingAbout from "./about";
 import LoadingAboutId from "./aboutid";
 import LoadingDefaultXstudio from "./LoadingDefaultXstudio";
 import LoadingRemove from "./LoadingRemove";
@@ -17,7 +16,6 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
 
     const routes: any = [
       { pattern: '/', component: 'LoadingRoot' },
-      { pattern: '/about', component: 'LoadingAbout' },
       { pattern: '/student', component: 'LoadingStudent' }
 
     ]
@@ -44,7 +42,6 @@ const LoadingLayoutComponent = ({ pathname }: { pathname: string }) => {
     'LoadingDefaultXstudio': LoadingDefaultXstudio,
     'LoadingRemove': LoadingRemove,
     'LoadingAboutId': LoadingAboutId,
-    'LoadingAbout': LoadingAbout,
     'LoadingStudent': LoadingStudent,
     'LoadingStudentId': LoadingStudentId
   };
