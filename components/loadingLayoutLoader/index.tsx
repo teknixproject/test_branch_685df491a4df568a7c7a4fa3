@@ -40,7 +40,8 @@ if (segments[0] === 'about' && segments[1]) {
     'LoadingRemove': LoadingRemove,
     'LoadingAboutId': LoadingAboutId,
     'LoadingStudent': LoadingStudent,
-    'LoadingStudentId': LoadingStudentId
+    'LoadingStudentId': LoadingStudentId,
+    'LoadingRoot': LoadingRemove
   };
 
   const componentName = findMatchingRoute(pathname);
