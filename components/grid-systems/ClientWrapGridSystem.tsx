@@ -8,12 +8,7 @@ import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
 
 import LoadingPage from './loadingPage';
 
-const GridSystemContainer = dynamic(
-  () => new Promise(resolve => {
-    setTimeout(() => {
-      resolve(import('@/components/grid-systems'));
-    }, 0); // 10 giây delay
-  }),
+const GridSystemContainer: any = dynamic(
   {
     loading: () => <LoadingPage />,
     ssr: false,
@@ -26,7 +21,6 @@ export const RenderUIClient: FC = () => {
 
   if (isLoading || !uid) {
     return <LoadingPage />;
-    // return
   }
 
   return (
