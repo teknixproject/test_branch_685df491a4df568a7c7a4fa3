@@ -1,6 +1,6 @@
 import { Spin } from 'antd';
 /** @jsxImportSource @emotion/react */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { FC, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -26,8 +26,6 @@ const RenderForm: FC<TProps> = (props) => {
   const onSubmit = () => {
     rest?.onFinish();
   };
-
-  // if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
     <Spin spinning={isLoading} className="!w-full">

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
@@ -49,7 +49,6 @@ const RenderSliceItem: FC<TProps> = (props) => {
 
   if (!valueType) return <div></div>;
 
-  // if (isLoading) return <LoadingPage />;
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;

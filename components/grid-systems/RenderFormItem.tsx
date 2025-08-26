@@ -129,7 +129,7 @@ const RenderFormItem: FC<TProps> = (props) => {
               {...field}
               checked={field.value}
               onChange={(e: any) => {
-               
+
 
                 field.onChange(e);
                 if (typeof rest?.onChange === 'function') {
@@ -171,8 +171,6 @@ const RenderFormItem: FC<TProps> = (props) => {
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
   }
-
-  // if (isLoading) return <LoadingPage />;
 
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>

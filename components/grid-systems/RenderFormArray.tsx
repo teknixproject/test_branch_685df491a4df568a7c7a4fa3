@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /** @jsxImportSource @emotion/react */
 import { List } from 'antd';
 import { FC, useMemo } from 'react';
@@ -36,7 +36,6 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
   }
 
   if (valueType !== 'list') return <div></div>;
-  // if (isLoading) return <LoadingPage />;
 
   return (
     <List
