@@ -1,8 +1,9 @@
 import { Spin } from 'antd';
+import _ from 'lodash';
 /** @jsxImportSource @emotion/react */
-
 import { FC, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useDeepCompareEffect } from 'use-deep-compare';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
 
@@ -18,6 +19,10 @@ const RenderForm: FC<TProps> = (props) => {
     methods,
   });
 
+  useDeepCompareEffect(() => {
+    if (!_.isEmpty(propsCpn?.values)) methods.reset(propsCpn?.values);
+  }, [propsCpn?.values]);
+
   const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
 
   const { handleSubmit } = methods;
@@ -26,6 +31,8 @@ const RenderForm: FC<TProps> = (props) => {
   const onSubmit = () => {
     rest?.onFinish();
   };
+
+  // if (isLoading) return <LoadingPage></LoadingPage>;
 
   return (
     <Spin spinning={isLoading} className="!w-full">
