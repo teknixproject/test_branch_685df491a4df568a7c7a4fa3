@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import { Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
@@ -119,6 +118,31 @@ const RenderFormItem: FC<TProps> = (props) => {
       );
     }
 
+    if (valueType === 'checkbox') {
+      return (
+        <Controller
+          control={control}
+          name={nameField}
+          render={({ field }) => (
+            <Component
+              {...rest}
+              {...field}
+              checked={field.value}
+              onChange={(e: any) => {
+
+
+                field.onChange(e);
+                if (typeof rest?.onChange === 'function') {
+                  rest.onChange(e.target.checked);
+                }
+              }}
+              key={`form-child-${data?.id}`}
+            />
+          )}
+        />
+      );
+    }
+
     return (
       <Controller
         control={control}
@@ -147,8 +171,6 @@ const RenderFormItem: FC<TProps> = (props) => {
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
   }
-
-  // if (isLoading) return <LoadingPage />;
 
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
