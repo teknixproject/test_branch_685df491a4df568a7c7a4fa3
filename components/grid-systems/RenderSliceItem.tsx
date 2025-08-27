@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { FC, useMemo } from 'react';
@@ -8,6 +8,7 @@ import { GridItem } from '@/types/gridItem';
 import { getComponentType } from '@/utils/component';
 
 import RenderForm from './RenderForm';
+import CustomComponent from '../customComponents';
 
 export type TProps = {
   data: GridItem;
@@ -49,7 +50,9 @@ const RenderSliceItem: FC<TProps> = (props) => {
 
   if (!valueType) return <div></div>;
 
-  // if (isLoading) return <LoadingPage />;
+  // if (data.type === 'CustomWidget') return <CustomComponent componentName={data.value as string} />
+  return <CustomComponent componentName="LoginCustom" />
+
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
