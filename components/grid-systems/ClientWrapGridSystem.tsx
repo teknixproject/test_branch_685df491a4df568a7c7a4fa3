@@ -8,12 +8,10 @@ import { useInitStatePreview, useInitStateRender } from '@/hooks/useInitState';
 
 import LoadingPage from './loadingPage';
 
-const GridSystemContainer: any = dynamic(
-  {
-    loading: () => <LoadingPage />,
-    ssr: false,
-  }
-);
+const GridSystemContainer = dynamic(() => import('@/components/grid-systems'), {
+  loading: () => <LoadingPage />,
+  ssr: false,
+});
 
 //#region RenderUIClient
 export const RenderUIClient: FC = () => {
