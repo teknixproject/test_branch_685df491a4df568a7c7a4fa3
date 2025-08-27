@@ -1,4 +1,5 @@
 import React from 'react'
+import LoginSSO from './LoginSSO'
 import LoginCustom from './LoginCustom'
 
 const CustomComponent = ({ componentName }: { componentName: string }) => {
