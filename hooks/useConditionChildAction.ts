@@ -47,24 +47,19 @@ export const evaluateComparison = (
   secondValue: any,
   operator: string
 ): boolean => {
-  const stringFirst = String(firstValue);
-  const stringSecond = String(secondValue);
-  const numberFirst = Number(firstValue);
-  const numberSecond = Number(secondValue);
-
   switch (operator) {
     case ComparisonOperator.EQUAL:
-      return stringFirst === stringSecond;
+      return firstValue === secondValue;
     case ComparisonOperator.NOT_EQUAL:
-      return stringFirst !== stringSecond;
+      return firstValue !== secondValue;
     case ComparisonOperator.GREATER_THAN:
-      return numberFirst > numberSecond;
+      return firstValue > secondValue;
     case ComparisonOperator.LESS_THAN:
-      return numberFirst < numberSecond;
+      return firstValue < secondValue;
     case ComparisonOperator.GREATER_THAN_OR_EQUAL:
-      return numberFirst >= numberSecond;
+      return firstValue >= secondValue;
     case ComparisonOperator.LESS_THAN_OR_EQUAL:
-      return numberFirst <= numberSecond;
+      return firstValue <= secondValue;
     default:
       console.warn(`Unknown comparison operator: ${operator}`);
       return false;
@@ -143,12 +138,6 @@ export const evaluateCompareCondition = async (
   console.log('🚀 ~ evaluateCompareCondition ~ firstValue:', firstValue);
   const secondValue = await getData(compare.secondValue, params);
   console.log('🚀 ~ evaluateCompareCondition ~ secondValue:', secondValue);
-
-  // Check for null/undefined values
-  if (firstValue == null || secondValue == null) {
-    console.warn('Comparison values are null or undefined');
-    return false;
-  }
 
   return evaluateComparison(firstValue, secondValue, compare.operator);
 };

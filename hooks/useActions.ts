@@ -82,6 +82,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
 
       if (condition) {
         const isConditionMet = await executeActionFCType(condition, params);
+
         if (isConditionMet) return;
       }
     }
@@ -91,7 +92,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     params?: THandleDataParams
   ): Promise<any> => {
     if (!action?.fcType) return;
-
+    let valueReturnCondition = null;
     switch (action.fcType) {
       case 'action':
         await executeAction(action as TAction<TActionApiCall>, params);
@@ -104,6 +105,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
         const conditionChildData = action?.data as TConditionChildMap;
         if ((action.data as TConditionChildMap).label === 'else') {
           if (isReturnValue) return transformVariable(conditionChildData.valueReturn!);
+          valueReturnCondition = false;
           break;
         }
         const isMatch = await executeConditionalChild(
@@ -115,6 +117,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
           return transformVariable(conditionChildData.valueReturn!);
         }
         if (!isMatch) return; //prevent call next action
+        valueReturnCondition = true;
         break;
       case 'loop':
         await executeLoopOverList(action as TAction<TActionLoop>, params);
@@ -126,6 +129,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     if (action.next) {
       await executeActionFCType(findAction(action.next), params);
     }
+    return valueReturnCondition;
   };
 
   const mounted = useRef(false);
@@ -152,7 +156,6 @@ export const useActions = (props: TActionsProps): TUseActions => {
         case 'customFunction':
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'formState':
-          console.log('🚀 ~ executeAction ~ action: form', action);
           return await handleFormState(action as TAction<TActionFormState>, params);
         case 'message':
           return await executeMessageAction(action as TAction<TActionMessage>, params);
