@@ -81,7 +81,8 @@ export const useActions = (props: TActionsProps): TUseActions => {
       const condition = findAction(conditionId) as TAction<TConditionChildMap>;
 
       if (condition) {
-        await executeActionFCType(condition, params);
+        const isConditionMet = await executeActionFCType(condition, params);
+        if (isConditionMet) return;
       }
     }
   };
