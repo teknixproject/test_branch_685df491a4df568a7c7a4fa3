@@ -1,10 +1,7 @@
 import React from 'react'
-import LoginCustom from './LoginCustom'
 
 const CustomComponent = ({ componentName }: { componentName: string }) => {
-    const components = {
-        'LoginCustom': LoginCustom
-    }
+    const components: any = {}
 
     const Component = components[componentName as keyof typeof components]
 
