@@ -88,7 +88,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   const executeActionFCType = async (
     action?: TAction,
     params?: THandleDataParams
-  ): Promise<void> => {
+  ): Promise<any> => {
     if (!action?.fcType) return;
 
     switch (action.fcType) {
@@ -99,18 +99,21 @@ export const useActions = (props: TActionsProps): TUseActions => {
         await executeConditional(action as TAction<TConditional>, params);
         break;
       case 'conditionalChild':
+        const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
+        const conditionChildData = action?.data as TConditionChildMap;
+        if ((action.data as TConditionChildMap).label === 'else') {
+          if (isReturnValue) return transformVariable(conditionChildData.valueReturn!);
+          break;
+        }
         const isMatch = await executeConditionalChild(
           action as TAction<TConditionChildMap>,
           params
         );
-
-        const conditionChildData = action?.data as TConditionChildMap;
-
-        const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
+        //if or else if
         if (isReturnValue && isMatch) {
           return transformVariable(conditionChildData.valueReturn!);
         }
-        if (!isMatch) return;
+        if (!isMatch) return; //prevent call next action
         break;
       case 'loop':
         await executeLoopOverList(action as TAction<TActionLoop>, params);

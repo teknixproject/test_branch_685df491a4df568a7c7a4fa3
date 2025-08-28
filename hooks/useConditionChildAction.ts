@@ -224,6 +224,7 @@ export const processCondition = async (
   getData: (value: any) => any,
   params?: THandleDataParams
 ): Promise<boolean> => {
+  console.log('🚀 ~ processCondition ~ conditionChild:', conditionChild);
   if (!conditionChild?.data) {
     console.warn(`Condition data not found: ${conditionChild.id}`);
     return false;
