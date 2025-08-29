@@ -4,10 +4,11 @@ import LogOutSSO from './LogOutSSO'
 import LoginSSO from './LoginSSO'
 
 const CustomComponent = ({ componentName }: { componentName: string }) => {
-    const components: any = {'LoginSSO': LoginSSO,
-        'LogOutSSO': LogOutSSO,,
-    'PreviewOne': PreviewOne
-}
+    const components: any = {
+        'LoginSSO': LoginSSO,
+        'LogOutSSO': LogOutSSO,
+        'PreviewOne': PreviewOne
+    }
 
     const Component = components[componentName as keyof typeof components]
 
