@@ -22,6 +22,7 @@ const PreviewOne = ({ data, style }: PreviewOneProps) => {
       style={newStyle}
       className="text-[#858585]"
     >
+      123
       {title}
     </div>
   );
