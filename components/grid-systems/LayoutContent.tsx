@@ -100,7 +100,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
             />
           </div>
         )}
-        <Csmain className='h-screen' style={{ flex: 1, overflow: 'hidden' }}>
+        <Csmain className='h-screen' style={{ flex: 1}}>
           {children}
         </Csmain>
         {isSidebarRight && !_.isEmpty(selectedSidebarLayout) && (
