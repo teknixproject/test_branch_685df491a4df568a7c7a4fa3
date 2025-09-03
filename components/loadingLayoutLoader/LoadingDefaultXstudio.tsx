@@ -42,7 +42,7 @@ export default function LoadingDefaultXstudio({
   }, [duration, onLoadingComplete]);
 
   return (
-    <div className="relative !z-0 h-screen overflow-hidden bg-black">
+    <div className="relative !z-0 h-screen overflow-hidde">
       {/* Main Content */}
       <Flex className="relative z-10 h-full justify-center items-center">
         <div className="max-w-md w-full mx-4 px-8">
@@ -64,7 +64,7 @@ export default function LoadingDefaultXstudio({
                 className="bg-blue-500 h-1.5 rounded-full transition-all duration-300 ease-out relative shadow-lg"
                 style={{
                   width: `${progress}%`,
-                  boxShadow: '0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 30px #3b82f6'
+                  boxShadow: 'rgb(59, 130, 246) 0px 0px 10px, rgb(59, 130, 246) 0px 0px 0px, rgb(59, 125, 246) 0px 0px 1px'
                 }}
               >
                 {/* Inner glow */}
