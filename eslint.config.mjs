@@ -18,6 +18,7 @@ const eslintConfig = [
       'react/no-unescaped-entities': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-unused-vars': 'off',
     },
   },
 ];

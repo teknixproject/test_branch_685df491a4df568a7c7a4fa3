@@ -8,6 +8,7 @@ import { GridItem } from '@/types/gridItem';
 import { getComponentType } from '@/utils/component';
 
 import RenderForm from './RenderForm';
+import CustomComponent from '../customComponents';
 
 export type TProps = {
   data: GridItem;
@@ -48,6 +49,8 @@ const RenderSliceItem: FC<TProps> = (props) => {
   const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
 
   if (!valueType) return <div></div>;
+
+  if ((data.type as any) === 'CustomWidget') return <CustomComponent componentName={data.value as string} />
 
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
