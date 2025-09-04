@@ -13,6 +13,7 @@ import { ApiStoreProvider } from '@/providers';
 import AntdProvider from '@/providers/AntdProvider';
 import ReactQueryProvider from '@/providers/QueryClient';
 import { MetadataIcon } from '@/types/seo';
+import { Providers } from '@/components/provider/session-provider';
 
 import { fetchMetadata } from './actions/server';
 
@@ -173,7 +174,11 @@ export default async function RootLayout({
           <ApiStoreProvider>
             <LayoutProvider>
               <LayoutContent>
-                <AntdProvider>{children}</AntdProvider>
+                <AntdProvider>
+                  <Providers>
+                    {children}
+                  </Providers>
+                </AntdProvider>
               </LayoutContent>
             </LayoutProvider>
           </ApiStoreProvider>
