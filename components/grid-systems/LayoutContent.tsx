@@ -76,6 +76,45 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isSidebarLeft = sidebarPosition === 'left'
   const isSidebarRight = sidebarPosition === 'right'
 
+  const ComponentLayout = FirtLayoutContent
+
+  return (
+    <ComponentLayout
+      childrenCompo={children}
+      deviceType={deviceType}
+      headerRef={headerRef}
+      isSidebarLeft={isSidebarLeft}
+      isSidebarRight={isSidebarRight}
+      selectedFooterLayout={selectedFooterLayout}
+      selectedHeaderLayout={selectedHeaderLayout}
+      selectedSidebarLayout={selectedSidebarLayout}
+      sidebarStyle={sidebarStyle}
+    />
+  )
+}
+
+const FirtLayoutContent = ({
+  childrenCompo,
+  headerRef,
+  deviceType,
+  isSidebarLeft,
+  isSidebarRight,
+  sidebarStyle,
+  selectedHeaderLayout,
+  selectedSidebarLayout,
+  selectedFooterLayout,
+}: {
+  childrenCompo?: any,
+  headerRef: any,
+  deviceType: any,
+  isSidebarLeft: any,
+  isSidebarRight: any,
+  sidebarStyle: any,
+  selectedHeaderLayout: any,
+  selectedSidebarLayout: any,
+  selectedFooterLayout: any,
+}) => {
+
   return (
     <div className="relative !z-0 h-screen">
       {
@@ -92,7 +131,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       }
       <div className="z-10 flex">
         {isSidebarLeft && !_.isEmpty(selectedSidebarLayout) && (
-          <div id="sidebar" style={{ ...sidebarStyle }} className="sticky top-0 z-10 max-h-screen overflow-hidden">
+          <div id="sidebar" style={{ ...sidebarStyle, overflow: 'auto' }} className="sticky top-0 z-10 max-h-screen">
             <GridSystemContainer
               page={selectedSidebarLayout}
               deviceType={deviceType}
@@ -100,8 +139,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
             />
           </div>
         )}
-        <Csmain className='h-screen' style={{ flex: 1}}>
-          {children}
+        <Csmain className='h-screen' style={{ flex: 1 }}>
+          {childrenCompo}
         </Csmain>
         {isSidebarRight && !_.isEmpty(selectedSidebarLayout) && (
           <div id="sidebar" style={{ ...sidebarStyle }} className="sticky top-0 z-10 max-h-screen overflow-hidden">
