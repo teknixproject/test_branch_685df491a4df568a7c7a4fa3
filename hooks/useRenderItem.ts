@@ -105,7 +105,12 @@ export const useRenderItem = ({
     };
 
     staticProps.css = handleCssWithEmotion(staticProps);
-
+    if (staticProps.styles) {
+      // Chuyển từng phần sang Emotion
+      Object.keys(staticProps.styles).forEach((key) => {
+        staticProps.styles[key] = handleCssWithEmotion(staticProps.styles[key]);
+      });
+    }
     let result =
       valueType === 'menu'
         ? { ...staticProps, ...actions }
