@@ -1,27 +1,53 @@
- 
-
 import {
-    Avatar, Badge, Card, Checkbox, Collapse, DatePicker, Descriptions, Drawer, Form, Image, Input,
-    InputNumber, Radio, Select, Statistic, Switch, Tag, Typography, Upload
+  Avatar,
+  Badge,
+  Card,
+  Checkbox,
+  Collapse,
+  DatePicker,
+  Descriptions,
+  Drawer,
+  Form,
+  Image,
+  Input,
+  InputNumber,
+  Radio,
+  Select,
+  Statistic,
+  Switch,
+  Tag,
+  Typography,
+  Upload,
 } from 'antd';
 
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
 import { Icon } from '@iconify/react/dist/iconify.js';
 
 import { Button, Dropdown, List, Map, Modal, Table, Tabs, Tree } from '../special';
+import PlaceSearch from '../special/PlaceSearch';
 import ConfigMenu from './configComponent/ConfigMenu';
 
-export const componentRegistry = {
+export const componentSpecial = {
   button: Button,
+  dropdown: Dropdown,
+  list: List,
+  table: Table,
+  map: Map,
+  tree: Tree,
+  tabs: Tabs,
+  placesearch: PlaceSearch,
+};
+export const componentRegistry = {
+  // button: Button,
   text: Typography.Text,
   link: Typography.Link,
   title: Typography.Title,
   paragraph: Typography.Paragraph,
   image: Image,
-  list: List,
+  // list: List,
   inputtext: Input,
   inputnumber: InputNumber,
-  table: Table,
+  // table: Table,
   checkbox: Checkbox,
   radio: Radio.Group,
   select: Select,
@@ -29,8 +55,8 @@ export const componentRegistry = {
   formitem: Form.Item,
   collapse: Collapse,
   tag: Tag,
-  tabs: Tabs,
-  dropdown: Dropdown,
+  // tabs: Tabs,
+  // dropdown: Dropdown,
   card: Card,
   statistic: Statistic,
   linechart: Line,
@@ -50,20 +76,10 @@ export const componentRegistry = {
   datepicker: DatePicker,
   badge: Badge,
   icon: Icon,
-  map: Map,
   textarea: Input.TextArea,
-  tree: Tree,
   upload: Upload,
   description: Descriptions,
-};
-export const componentSpecial = {
-  button: Button,
-  dropdown: Dropdown,
-  list: List,
-  table: Table,
-  map: Map,
-  tree: Tree,
-  tabs: Tabs,
+  ...componentSpecial,
 };
 
 export const getName = (id: string) => id.split('$')[0];

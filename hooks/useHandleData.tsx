@@ -257,9 +257,12 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   const handleCallBack = async (data: TData, callbackArgs?: any[]) => {
     const state = data[data.type] as TData['callback'];
+    console.log('🚀 ~ handleCallBack ~ state:', state);
     if (!_.isEmpty(callbackArgs)) {
       const indexArg = state?.index;
       let value = callbackArgs?.[indexArg];
+      console.log('🚀 ~ handleCallBack ~ callbackArgs:', callbackArgs);
+      console.log('🚀 ~ handleCallBack ~ value:', value);
 
       if (value?.target?.value !== undefined) {
         value = value.target.value;
