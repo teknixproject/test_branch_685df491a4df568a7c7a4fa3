@@ -1,7 +1,8 @@
+'use client';
 /** @jsxImportSource @emotion/react */
 import { Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
@@ -19,7 +20,7 @@ const RenderFormItem: FC<TProps> = (props) => {
     valueStream,
     methods,
   });
-  const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
+  const { name, ...rest } = propsCpn;
 
   const currentFormKeys = formKeysArray || formKeys;
   const inFormKeys = currentFormKeys?.find((item) => item?.value === data?.name);
@@ -111,7 +112,6 @@ const RenderFormItem: FC<TProps> = (props) => {
                   rest.onChange(target);
                 }
               }}
-              key={`form-child-${data?.id}`}
             />
           )}
         />
@@ -129,14 +129,11 @@ const RenderFormItem: FC<TProps> = (props) => {
               {...field}
               checked={field.value}
               onChange={(e: any) => {
-
-
                 field.onChange(e);
                 if (typeof rest?.onChange === 'function') {
                   rest.onChange(e.target.checked);
                 }
               }}
-              key={`form-child-${data?.id}`}
             />
           )}
         />
@@ -157,7 +154,6 @@ const RenderFormItem: FC<TProps> = (props) => {
                 rest.onChange(target);
               }
             }}
-            key={`form-child-${data?.id}`}
           />
         )}
       />
@@ -178,7 +174,7 @@ const RenderFormItem: FC<TProps> = (props) => {
         <RenderFormItem
           {...props}
           data={child}
-          key={`form-child-${child.id}`}
+          key={`${child.id}`}
           parentPath={parentPath}
           index={index}
           formKeysArray={formKeysArray}

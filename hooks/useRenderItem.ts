@@ -55,11 +55,13 @@ const specialComponents = ['map', 'button', 'tree', 'tabs', 'dropdown', 'list', 
 export const useRenderItem = ({
   data,
   valueStream,
+  index,
   methods,
   methodsArray,
 }: {
   data: GridItem;
   valueStream?: any;
+  index?: number;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
   methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
 }) => {
@@ -68,7 +70,7 @@ export const useRenderItem = ({
   const { isLoading } = useActions({
     data,
     valueStream,
-    methods: methods,
+    methods,
     methodsArray,
     isCallPageLoad: true,
   });
@@ -79,6 +81,7 @@ export const useRenderItem = ({
     valueStream,
     valueType,
     activeData: data,
+    index,
   });
 
   const {
