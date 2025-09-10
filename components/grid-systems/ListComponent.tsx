@@ -35,6 +35,7 @@ export const componentSpecial = {
   map: Map,
   tree: Tree,
   tabs: Tabs,
+  modal: Modal,
   placesearch: PlaceSearch,
 };
 export const componentRegistry = {
@@ -71,7 +72,7 @@ export const componentRegistry = {
   avatar: Avatar,
   switch: Switch,
   menu: ConfigMenu,
-  modal: Modal,
+
   drawer: Drawer,
   datepicker: DatePicker,
   badge: Badge,

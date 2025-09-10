@@ -93,6 +93,7 @@ type TUseHandleData = {
   dataProp?: { name: string; data: TData }[];
   componentProps?: Record<string, TData>;
   valueStream?: any;
+  index?: number;
   valueType?: string;
   activeData?: GridItem;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
@@ -132,23 +133,25 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   );
 
   // FIX: Stabilize dependencies with useMemo
-  const stableDeps = useDeepCompareMemo(
-    () => ({
-      valueStream: props.valueStream,
-      methods: props.methods,
-      params,
-      findVariable,
-      findCustomFunction,
-    }),
-    [props.valueStream, props.methods, params, findVariable, findCustomFunction]
-  );
+  const stableDeps = {
+    index: props.index,
+    valueStream: props.valueStream,
+    methods: props.methods,
+    params,
+    findVariable,
+    findCustomFunction,
+  };
 
   const handleInputValue = async (data: TData['valueInput']): Promise<any> => {
     return data;
   };
 
   const handleItemInList = (data: TData, valueStream: any) => {
-    const { jsonPath } = data.itemInList;
+    const { jsonPath, getIndex } = data.itemInList;
+    if (getIndex) {
+      console.log('🚀 ~ handleItemInList ~ stableDeps.index:', stableDeps.index);
+      return stableDeps.index;
+    }
     if (jsonPath) {
       const result = JSONPath({
         json: valueStream || stableDeps.valueStream,

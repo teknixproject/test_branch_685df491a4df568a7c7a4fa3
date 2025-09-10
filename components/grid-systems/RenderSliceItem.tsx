@@ -1,14 +1,14 @@
-
+'use client';
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
 import { GridItem } from '@/types/gridItem';
 import { getComponentType } from '@/utils/component';
 
-import RenderForm from './RenderForm';
 import CustomComponent from '../customComponents';
+import RenderForm from './RenderForm';
 
 export type TProps = {
   data: GridItem;
@@ -42,15 +42,16 @@ export const ComponentRenderer: FC<{
 };
 
 const RenderSliceItem: FC<TProps> = (props) => {
-  const { data, valueStream } = useMemo(() => props, [props]);
+  const { data, valueStream } = props;
 
-  const { isLoading, valueType, Component, propsCpn } = useRenderItem({ data, valueStream });
+  const { isLoading, valueType, Component, propsCpn } = useRenderItem(props);
 
   const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
 
   if (!valueType) return <div></div>;
 
-  if ((data.type as any) === 'CustomWidget') return <CustomComponent componentName={data.value as string} />
+  if ((data.type as any) === 'CustomWidget')
+    return <CustomComponent componentName={data.value as string} />;
 
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
@@ -83,11 +84,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
   return (
     <ComponentRenderer Component={Component} propsCpn={propsCpn} data={data}>
       {data?.childs?.map((child, index) => (
-        <RenderSliceItem
-          {...props}
-          data={child}
-          key={child.id ? String(child.id) : `child-${index}`}
-        />
+        <RenderSliceItem {...props} data={child} key={child.id ? String(child.id) : index} />
       ))}
     </ComponentRenderer>
   );

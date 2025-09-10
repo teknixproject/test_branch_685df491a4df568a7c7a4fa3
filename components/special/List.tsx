@@ -14,10 +14,10 @@ const List: React.FC<Props> = ({ ...props }) => {
   return (
     <ListAntd
       {...props}
-      renderItem={(item: any) => {
+      renderItem={(item: any, index: number) => {
         return (
           <ListAntd.Item>
-            <RenderSliceItem data={props.box} valueStream={item} />
+            <RenderSliceItem data={props.box} valueStream={item} index={index} />
           </ListAntd.Item>
         );
       }}
