@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 import _ from 'lodash';
 import { useRouter } from 'next/navigation';
@@ -6,6 +5,7 @@ import queryString from 'query-string';
 import { useCallback } from 'react';
 
 import { stateManagementStore } from '@/stores';
+import { getSession } from 'next-auth/react';
 import { authSettingStore } from '@/stores/authSetting';
 import {
   TAction,
@@ -20,7 +20,6 @@ import { variableUtil } from '@/utils';
 
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
-// import { useCustomFunction } from './useCustomFunction';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
 const { isUseVariable, extractAllValuesFromTemplate } = variableUtil;
@@ -45,9 +44,7 @@ const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string 
       url,
       query: convertQuery(apiCallMember),
     },
-    {
-      // encode: false,
-    }
+    {}
   );
 };
 const convertQuery = (apiCallMember: TApiCallValue) => {
@@ -133,12 +130,27 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     }, {} as Record<string, any>);
   }, []);
 
-  const convertHeader = (apiCallMember: TApiCallValue) => {
+  const convertHeader = async (apiCallMember: TApiCallValue) => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
       const headers = apiCallMember?.headers || ({ 'Content-Type': 'application/json' } as any);
-      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+      if (!headers['Authorization']) {
+        // Lấy token từ localStorage
+        let accessToken = localStorage.getItem('accessToken');
 
+        // Nếu localStorage không có token, thử lấy từ session
+        if (!accessToken) {
+          console.log('convertHeader', accessToken);
+
+          const session: any = await getSession();
+          accessToken = session?.accessToken;
+        }
+
+        // Merge headers mặc định với token nếu có
+
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+      }
       return headers;
     } catch (error) {
       console.log('🚀 ~ convertHeader ~ error:', error);
@@ -161,7 +173,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
         baseURL: apiCall?.baseUrl || '',
         method: apiCall?.method?.toUpperCase(),
         url: convertUrl(apiCall),
-        headers: convertHeader(apiCall),
+        headers: await convertHeader(apiCall),
         data: ['POST', 'PUT', 'PATCH'].includes(apiCall?.method?.toUpperCase() || '') && body,
         // params:
         //   ['GET', 'DELETE'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),
