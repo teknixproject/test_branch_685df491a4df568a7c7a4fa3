@@ -16,6 +16,7 @@ const RenderFormItem: FC<TProps> = (props) => {
   const methods = useFormContext();
   const { control } = methods;
   const { isLoading, valueType, Component, propsCpn } = useRenderItem({
+    ...props,
     data,
     valueStream,
     methods,

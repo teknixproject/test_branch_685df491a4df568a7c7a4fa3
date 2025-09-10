@@ -26,6 +26,7 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { Button, Dropdown, List, Map, Modal, Table, Tabs, Tree } from '../special';
 import PlaceSearch from '../special/PlaceSearch';
 import ConfigMenu from './configComponent/ConfigMenu';
+import InputText from '../special/InputText';
 
 export const componentSpecial = {
   button: Button,
@@ -46,7 +47,7 @@ export const componentRegistry = {
   paragraph: Typography.Paragraph,
   image: Image,
   // list: List,
-  inputtext: Input,
+  inputtext: InputText,
   inputnumber: InputNumber,
   // table: Table,
   checkbox: Checkbox,
@@ -80,7 +81,7 @@ export const componentRegistry = {
   textarea: Input.TextArea,
   upload: Upload,
   description: Descriptions,
-  ...componentSpecial,
+  ...componentSpecial
 };
 
 export const getName = (id: string) => id.split('$')[0];
