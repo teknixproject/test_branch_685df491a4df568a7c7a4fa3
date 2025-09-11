@@ -1,3 +1,4 @@
+'use client';
 import {
   Avatar,
   Badge,
@@ -19,14 +20,16 @@ import {
   Typography,
   Upload,
 } from 'antd';
+import dynamic from 'next/dynamic';
 
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
-import { Icon } from '@iconify/react/dist/iconify.js';
 
 import { Button, Dropdown, List, Map, Modal, Table, Tabs, Tree } from '../special';
+import InputText from '../special/InputText';
 import PlaceSearch from '../special/PlaceSearch';
 import ConfigMenu from './configComponent/ConfigMenu';
-import InputText from '../special/InputText';
+
+const Icon = dynamic(() => import('@iconify/react').then((m) => m.Icon), { ssr: false });
 
 export const componentSpecial = {
   button: Button,
@@ -81,7 +84,7 @@ export const componentRegistry = {
   textarea: Input.TextArea,
   upload: Upload,
   description: Descriptions,
-  ...componentSpecial
+  ...componentSpecial,
 };
 
 export const getName = (id: string) => id.split('$')[0];

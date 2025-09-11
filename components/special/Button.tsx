@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import { Button, ButtonProps } from 'antd';
 import _ from 'lodash';
+import dynamic from 'next/dynamic';
 import React from 'react';
 
-import { Icon } from '@iconify/react/dist/iconify.js';
-
+const Icon = dynamic(() => import('@iconify/react').then((m) => m.Icon), { ssr: false });
 type Props = ButtonProps & {
   iconData?: {
     name: string;
@@ -12,6 +12,7 @@ type Props = ButtonProps & {
   };
 };
 const convertIconStringToComponent = (iconString: string) => {
+  console.log('🚀 ~ convertIconStringToComponent ~ iconString:', iconString);
   if (!iconString || typeof iconString !== 'string') {
     return null;
   }
@@ -21,6 +22,8 @@ const convertIconStringToComponent = (iconString: string) => {
 
 const ButtonSpecial: React.FC<Props> = ({ ...props }) => {
   const buttonProps = _.cloneDeep(props) || {};
+  console.log('🚀 ~ ButtonSpecial ~ buttonProps:', buttonProps);
+
   if (buttonProps.iconData && buttonProps.iconData.name) {
     buttonProps.icon = convertIconStringToComponent(buttonProps.iconData.name);
     // Xóa iconData khỏi props vì Button component không cần nó

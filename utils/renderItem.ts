@@ -48,10 +48,6 @@ export const cleanProps = (props: any, valueType: string) => {
       delete cleanData.children;
     }
 
-    if (lowerValueType === 'button') {
-      delete cleanData.iconData;
-    }
-
     // Filter out empty/invalid values safely
     const result: Record<string, any> = {};
 
