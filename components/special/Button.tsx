@@ -12,7 +12,6 @@ type Props = ButtonProps & {
   };
 };
 const convertIconStringToComponent = (iconString: string) => {
-  console.log('🚀 ~ convertIconStringToComponent ~ iconString:', iconString);
   if (!iconString || typeof iconString !== 'string') {
     return null;
   }
@@ -22,7 +21,6 @@ const convertIconStringToComponent = (iconString: string) => {
 
 const ButtonSpecial: React.FC<Props> = ({ ...props }) => {
   const buttonProps = _.cloneDeep(props) || {};
-  console.log('🚀 ~ ButtonSpecial ~ buttonProps:', buttonProps);
 
   if (buttonProps.iconData && buttonProps.iconData.name) {
     buttonProps.icon = convertIconStringToComponent(buttonProps.iconData.name);
