@@ -58,12 +58,7 @@ const RenderSliceItem: FC<TProps> = (props) => {
     return null;
   }
   if (isNoChildren || isChart) return <Component key={data?.id} {...propsCpn} />;
-  if (isMap)
-    return (
-      <div style={{ width: propsCpn.width || '100%', height: propsCpn.height || '400px' }}>
-        <Component key={data?.id} {...propsCpn} />
-      </div>
-    );
+
   if (isBagde) {
     const isBadgeStatus = data.componentProps?.badgeStatus?.valueInput;
     if (isBadgeStatus)

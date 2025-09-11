@@ -58,7 +58,6 @@ const PlaceSearch: React.FC<Props> = ({ onSelect, ...props }) => {
   // Handle selection
   const handleSelect = (value: string | undefined) => {
     const location = data.find((item: any) => item.place_id === value);
-    console.log('🚀 ~ handleSelect ~ location:', location);
 
     if (onSelect) {
       onSelect(

@@ -1,26 +1,44 @@
 'use client';
 /** @jsxImportSource @emotion/react */
 
+import './map.css';
+
 import { Button } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 
+import { css, keyframes } from '@emotion/react';
+import { Icon } from '@iconify/react/dist/iconify.js';
 import {
+  AdvancedMarker,
   APIProvider,
   InfoWindow,
   Map,
   MapMouseEvent,
   MapProps,
-  Marker,
   useMap,
 } from '@vis.gl/react-google-maps';
+
+const blink = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 #E62727; }
+  50% { box-shadow: 0 0 16px 8px #E62727; }
+`;
+
+const blinkStyle = css`
+  display: inline-block;
+  border-radius: 50%;
+  animation: ${blink} 1s infinite;
+`;
 
 type LatLng = { lat: number; lng: number };
 function isLatLng(obj: any): obj is LatLng {
   if (!_.isObject(obj)) return false;
   return 'lat' in obj && 'lng' in obj;
 }
-type TProps = MapProps & { makers: { lat: number; lng: number }[] };
+type TProps = MapProps & {
+  makers: { lat: number; lng: number }[];
+  language?: string;
+};
 const apiKey = process.env.NEXT_PUBLIC_MAP || '';
 const MapWithMarkers: React.FC<{
   makers: LatLng[];
@@ -75,37 +93,37 @@ const MapWithMarkers: React.FC<{
   return (
     <>
       {makers?.filter(isLatLng).map((item, index) => (
-        <Marker
-          key={index}
-          position={item}
-          icon="http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-          onClick={() => setSelected(item)}
-        />
+        <AdvancedMarker position={item} onClick={() => setSelected(item)} key={index}>
+          <div className="loader"></div>
+        </AdvancedMarker>
       ))}
       {current && (
-        <Marker
-          position={current}
-          icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-          title="Vị trí hiện tại của bạn"
-          onClick={() => setSelected(current)}
-        />
+        <AdvancedMarker position={current} onClick={() => setSelected(current)}>
+          <Icon icon="line-md:map-marker-filled-loop" className="text-[#00dbdb] size-10" />
+        </AdvancedMarker>
       )}
       {pos && (
-        <Marker
-          position={pos}
-          icon="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
-          title="Vị trí bạn chọn"
-          onClick={() => setSelected(pos)}
-        />
+        <AdvancedMarker position={pos} title="Vị trí bạn chọn" onClick={() => setSelected(pos)}>
+          <Icon icon="line-md:map-marker-filled-loop" className="text-[#0078db] size-10" />
+          {selected && (
+            <InfoWindow position={selected} onCloseClick={() => setSelected(null)}>
+              <div style={{ maxWidth: '200px' }}>
+                <strong>📍 Địa chỉ:</strong>
+                <div>{address || 'Đang tìm địa chỉ...'}</div>
+              </div>
+            </InfoWindow>
+          )}
+        </AdvancedMarker>
       )}
-      {selected && (
+
+      {/* {selected && (
         <InfoWindow position={selected} onCloseClick={() => setSelected(null)}>
           <div style={{ maxWidth: '200px' }}>
             <strong>📍 Địa chỉ:</strong>
             <div>{address || 'Đang tìm địa chỉ...'}</div>
           </div>
         </InfoWindow>
-      )}
+      )} */}
     </>
   );
 };
@@ -146,8 +164,14 @@ const GoogleMap: React.FC<TProps> = ({ ...props }) => {
   };
 
   return (
-    <APIProvider apiKey={apiKey} libraries={['places']}>
-      <Map {...rest} gestureHandling={'greedy'} center={null} onClick={handleOnClick}>
+    <APIProvider apiKey={apiKey} libraries={['places']} language={rest.language || 'en'}>
+      <Map
+        {...rest}
+        gestureHandling={'greedy'}
+        center={null}
+        onClick={handleOnClick}
+        mapId={process.env.NEXT_PUBLIC_MAP}
+      >
         <MapWithMarkers makers={makers} current={current} pos={pos} />
         <Button
           onClick={locateMe}
