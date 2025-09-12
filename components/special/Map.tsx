@@ -95,17 +95,21 @@ const MapWithMarkers: React.FC<{
       {makers?.filter(isLatLng).map((item, index) => (
         <AdvancedMarker position={item} onClick={() => setSelected(item)} key={index}>
           <div className="loader"></div>
+          {selected && selected.lat === item.lat && selected.lng === item.lng && (
+            <InfoWindow position={selected} onCloseClick={() => setSelected(null)}>
+              <div style={{ maxWidth: '200px' }}>
+                <strong>📍 Địa chỉ:</strong>
+                <div>{address || 'Đang tìm địa chỉ...'}</div>
+              </div>
+            </InfoWindow>
+          )}
         </AdvancedMarker>
       ))}
+
       {current && (
         <AdvancedMarker position={current} onClick={() => setSelected(current)}>
           <Icon icon="line-md:map-marker-filled-loop" className="text-[#00dbdb] size-10" />
-        </AdvancedMarker>
-      )}
-      {pos && (
-        <AdvancedMarker position={pos} title="Vị trí bạn chọn" onClick={() => setSelected(pos)}>
-          <Icon icon="line-md:map-marker-filled-loop" className="text-[#0078db] size-10" />
-          {selected && (
+          {selected && selected.lat === current.lat && selected.lng === current.lng && (
             <InfoWindow position={selected} onCloseClick={() => setSelected(null)}>
               <div style={{ maxWidth: '200px' }}>
                 <strong>📍 Địa chỉ:</strong>
@@ -116,14 +120,19 @@ const MapWithMarkers: React.FC<{
         </AdvancedMarker>
       )}
 
-      {/* {selected && (
-        <InfoWindow position={selected} onCloseClick={() => setSelected(null)}>
-          <div style={{ maxWidth: '200px' }}>
-            <strong>📍 Địa chỉ:</strong>
-            <div>{address || 'Đang tìm địa chỉ...'}</div>
-          </div>
-        </InfoWindow>
-      )} */}
+      {pos && (
+        <AdvancedMarker position={pos} title="Vị trí bạn chọn" onClick={() => setSelected(pos)}>
+          <Icon icon="line-md:map-marker-filled-loop" className="text-[#0078db] size-10" />
+          {selected && selected.lat === pos.lat && selected.lng === pos.lng && (
+            <InfoWindow position={selected} onCloseClick={() => setSelected(null)}>
+              <div style={{ maxWidth: '200px' }}>
+                <strong>📍 Địa chỉ:</strong>
+                <div>{address || 'Đang tìm địa chỉ...'}</div>
+              </div>
+            </InfoWindow>
+          )}
+        </AdvancedMarker>
+      )}
     </>
   );
 };

@@ -12,7 +12,11 @@ import { stateManagementStore } from '@/stores';
 import { GridItem } from '@/types/gridItem';
 import { getComponentType } from '@/utils/component';
 import { cleanProps } from '@/utils/renderItem';
-import { convertCssObjectToCamelCase, convertToEmotionStyle } from '@/utils/styleInline';
+import {
+  convertCssObjectToCamelCase,
+  convertCSSTringToObject,
+  convertToEmotionStyle,
+} from '@/utils/styleInline';
 import { convertToPlainProps } from '@/utils/transfromProp';
 import { css } from '@emotion/react';
 
@@ -34,8 +38,18 @@ const getPropData = (data: GridItem) =>
 
 const getPropActions = (data: GridItem) =>
   data?.componentProps?.dataProps?.filter((item: any) => item.type.includes('MouseEventHandler'));
-const handleCssWithEmotion = (staticProps: Record<string, any>) => {
-  const advancedCss = convertToEmotionStyle(staticProps?.styleMultiple);
+
+const buildStyle = (staticProps: Record<string, any>) => {
+  const cssObject = convertCSSTringToObject(staticProps?.styleExtra);
+  console.log('🚀 ~ buildStyle ~ cssObject:', cssObject);
+
+  const advancedCss = {
+    ...convertToEmotionStyle({
+      ...staticProps?.styleMultiple,
+    }),
+    ...cssObject,
+  };
+
   let cssMultiple;
 
   if (typeof advancedCss === 'string') {
@@ -51,7 +65,7 @@ const handleCssWithEmotion = (staticProps: Record<string, any>) => {
 
   return cssMultiple;
 };
-const specialComponents = ['map', 'button', 'tree', 'tabs', 'dropdown', 'list', 'table'];
+
 export const useRenderItem = ({
   data,
   valueStream,
@@ -103,17 +117,11 @@ export const useRenderItem = ({
 
   const propsCpn = useDeepCompareMemo(() => {
     const staticProps: Record<string, any> = {
-      // ...convertProps({ initialProps: dataState, valueType }),
       ...dataState,
     };
 
-    staticProps.css = handleCssWithEmotion(staticProps);
-    if (staticProps.styles) {
-      // Chuyển từng phần sang Emotion
-      Object.keys(staticProps.styles).forEach((key) => {
-        staticProps.styles[key] = handleCssWithEmotion(staticProps.styles[key]);
-      });
-    }
+    staticProps.css = buildStyle(staticProps);
+
     let result =
       valueType === 'menu'
         ? { ...staticProps, ...actions }
@@ -126,12 +134,13 @@ export const useRenderItem = ({
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
     }
+
     if ('styleMultiple' in result) _.unset(result, 'styleMultiple');
     if ('dataProps' in result) _.unset(result, 'dataProps');
+
     const plainProps = convertToPlainProps(result);
 
     result = cleanProps(plainProps, valueType);
-    // console.log(`🚀 ~ useRenderItem ~ result: ${data.id}`, result);
 
     return result;
   }, [actions, dataState, isNoChildren, valueType]);

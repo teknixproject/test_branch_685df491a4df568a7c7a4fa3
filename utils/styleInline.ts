@@ -1,4 +1,4 @@
-import { kebabCase } from 'lodash';
+import _, { kebabCase } from 'lodash';
 
 import { CSSObject } from '@emotion/react';
 
@@ -81,4 +81,33 @@ export const convertCssObjectToCamelCase = (cssObj: Record<string, any>): Record
   });
 
   return convertedObj;
+};
+
+/**
+ * Converts a CSS string to a JavaScript object.
+ *
+ * @example
+ * const cssString = '.class{color: red; font-size: 16px}';
+ * const cssObject = convertCSSTringToObject(cssString);
+ * // { color: 'red', fontSize: '16px' }
+ *
+ * @param {string} cssString CSS string
+ * @returns {Record<string, any>} CSS object
+ */
+export const convertCSSTringToObject = (cssString: string): Record<string, any> => {
+  console.log('🚀 ~ convertCSSTringToObject ~ cssString:', cssString);
+  if (_.isObject(cssString)) return cssString;
+  if (!_.isString(cssString)) return {};
+  const match = cssString?.match(/\{([\s\S]*?)\}/);
+  if (!match) return {};
+  const rules = match[1]
+    .trim()
+    .split(';')
+    .filter(Boolean)
+    .map((line) => {
+      const [prop, value] = line.split(':').map((s) => s.trim());
+      return [_.camelCase(prop), value];
+    });
+
+  return Object.fromEntries(rules);
 };
