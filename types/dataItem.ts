@@ -35,7 +35,7 @@ export type TData = {
   parameters: {
     paramName: string;
   };
-  itemInList: { jsonPath?: string };
+  itemInList: { jsonPath?: string; getIndex?: boolean };
   formData: {
     select: 'formData' | 'fieldValue';
     fieldName: string;

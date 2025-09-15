@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { JSONPath } from 'jsonpath-plus';
 import _, { isEqual } from 'lodash';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -93,6 +93,7 @@ type TUseHandleData = {
   dataProp?: { name: string; data: TData }[];
   componentProps?: Record<string, TData>;
   valueStream?: any;
+  index?: number;
   valueType?: string;
   activeData?: GridItem;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
@@ -132,23 +133,25 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   );
 
   // FIX: Stabilize dependencies with useMemo
-  const stableDeps = useDeepCompareMemo(
-    () => ({
-      valueStream: props.valueStream,
-      methods: props.methods,
-      params,
-      findVariable,
-      findCustomFunction,
-    }),
-    [props.valueStream, props.methods, params, findVariable, findCustomFunction]
-  );
+  const stableDeps = {
+    index: props.index,
+    valueStream: props.valueStream,
+    methods: props.methods,
+    params,
+    findVariable,
+    findCustomFunction,
+  };
 
   const handleInputValue = async (data: TData['valueInput']): Promise<any> => {
     return data;
   };
 
   const handleItemInList = (data: TData, valueStream: any) => {
-    const { jsonPath } = data.itemInList;
+    const { jsonPath, getIndex } = data.itemInList;
+    if (getIndex) {
+      console.log('🚀 ~ handleItemInList ~ stableDeps.index:', stableDeps.index);
+      return stableDeps.index;
+    }
     if (jsonPath) {
       const result = JSONPath({
         json: valueStream || stableDeps.valueStream,
@@ -172,7 +175,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case OPTIONS_HANDLE.NO_ACTION:
           break;
         case 'jsonPath':
-          const jsonPathValue = await getDataRef.current(optionItem.jsonPath as TData, {});
+          const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
           const valueJsonPath = JSONPath({
             json: value,
             path: jsonPathValue || '',
@@ -181,7 +184,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           break;
 
         case 'itemAtIndex':
-          const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+          const index = await getData(optionItem?.itemAtIndex as TData, {});
           let indexValid: number = 0;
           if (typeof index !== 'number') {
             indexValid = parseInt(index);
@@ -195,7 +198,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
               itemInList.current = item;
               const result = handleCompareValue({
                 conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                getData: getDataRef.current,
+                getData: getData,
               });
               return result;
             });
@@ -205,7 +208,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
         case 'sort':
           if (Array.isArray(value)) {
             const sortOption = optionItem.sortOrder || 'asc';
-            const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+            const jsonPath = await getData(optionItem.jsonPath as TData, {});
 
             value = [...value].sort((a: any, b: any) => {
               let aVal = a;
@@ -251,15 +254,18 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
   const handleCondition = async (data: TData) => {
     if (!data?.condition) return;
-    const value = await executeConditionalInData(data?.condition, getDataRef.current);
+    const value = await executeConditionalInData(data?.condition, getData);
     return value;
   };
 
   const handleCallBack = async (data: TData, callbackArgs?: any[]) => {
     const state = data[data.type] as TData['callback'];
+    console.log('🚀 ~ handleCallBack ~ state:', state);
     if (!_.isEmpty(callbackArgs)) {
       const indexArg = state?.index;
       let value = callbackArgs?.[indexArg];
+      console.log('🚀 ~ handleCallBack ~ callbackArgs:', callbackArgs);
+      console.log('🚀 ~ handleCallBack ~ value:', value);
 
       if (value?.target?.value !== undefined) {
         value = value.target.value;
@@ -274,7 +280,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case OPTIONS_HANDLE.NO_ACTION:
             break;
           case OPTIONS_HANDLE.JSON_PATH:
-            const jsonPathValue = await getDataRef.current(optionItem.jsonPath as TData, {});
+            const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
             const valueJsonPath = JSONPath({
               json: value,
               path: jsonPathValue || '',
@@ -283,7 +289,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             break;
 
           case 'itemAtIndex':
-            const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+            const index = await getData(optionItem?.itemAtIndex as TData, {});
             let indexValid: number = 0;
             if (typeof index !== 'number') {
               indexValid = parseInt(index);
@@ -297,7 +303,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
                 itemInList.current = item;
                 const result = handleCompareValue({
                   conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                  getData: getDataRef.current,
+                  getData: getData,
                 });
                 return result;
               });
@@ -307,7 +313,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case OPTIONS_HANDLE.SORT:
             if (Array.isArray(value)) {
               const sortOption = optionItem.sortOrder || 'asc';
-              const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+              const jsonPath = await getData(optionItem.jsonPath as TData, {});
 
               value = [...value].sort((a: any, b: any) => {
                 let aVal = a;
@@ -361,10 +367,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'noAction':
             break;
           case 'jsonPath':
-            const jsonPathValue = (await getDataRef.current(
-              optionItem.jsonPath as TData,
-              {}
-            )) as string;
+            const jsonPathValue = (await getData(optionItem.jsonPath as TData, {})) as string;
             const valueJsonPath = JSONPath({
               json: value,
               path: jsonPathValue || '',
@@ -373,7 +376,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             break;
 
           case 'itemAtIndex':
-            const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+            const index = await getData(optionItem?.itemAtIndex as TData, {});
             let indexValid: number = 0;
             if (typeof index !== 'number') {
               indexValid = parseInt(index);
@@ -387,7 +390,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
                 itemInList.current = item;
                 const result = handleCompareValue({
                   conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                  getData: getDataRef.current,
+                  getData: getData,
                 });
                 return result;
               });
@@ -397,7 +400,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'sort':
             if (Array.isArray(value)) {
               const sortOption = optionItem.sortOrder || 'asc';
-              const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+              const jsonPath = await getData(optionItem.jsonPath as TData, {});
 
               value = [...value].sort((a: any, b: any) => {
                 let aVal = a;
@@ -452,7 +455,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           case 'jsonPath':
             const valueJsonPath = JSONPath({
               json: value?.value,
-              path: (await getDataRef.current(item.jsonPath as TData, {})) || '',
+              path: (await getData(item.jsonPath as TData, {})) || '',
             }) as any[];
             return valueJsonPath?.[0];
           case 'statusCode':
@@ -508,7 +511,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'noAction':
               break;
             case 'jsonPath':
-              const jsonPathValue = await getDataRef.current(optionItem.jsonPath as TData, {});
+              const jsonPathValue = await getData(optionItem.jsonPath as TData, {});
               const valueJsonPath = JSONPath({
                 json: value,
                 path: jsonPathValue || '',
@@ -517,7 +520,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
               break;
 
             case 'itemAtIndex':
-              const index = await getDataRef.current(optionItem?.itemAtIndex as TData, {});
+              const index = await getData(optionItem?.itemAtIndex as TData, {});
               let indexValid: number = 0;
               if (typeof index !== 'number') {
                 indexValid = parseInt(index);
@@ -531,7 +534,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
                   itemInList.current = item;
                   const result = handleCompareValue({
                     conditionChildMap: optionItem.filterCondition?.data as TConditionChildMap,
-                    getData: getDataRef.current,
+                    getData: getData,
                   });
                   return result;
                 });
@@ -541,7 +544,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
             case 'sort':
               if (Array.isArray(value)) {
                 const sortOption = optionItem.sortOrder || 'asc';
-                const jsonPath = await getDataRef.current(optionItem.jsonPath as TData, {});
+                const jsonPath = await getData(optionItem.jsonPath as TData, {});
 
                 value = [...value].sort((a: any, b: any) => {
                   let aVal = a;
@@ -619,7 +622,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
           return await handleCustomFunction({
             data: data.customFunction,
             findCustomFunction: stableDeps.findCustomFunction,
-            getData: getDataRef.current,
+            getData: getData,
             params: { valueStream, callbackArgs },
           });
         case 'condition':
@@ -634,11 +637,6 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
     },
     [handleApiResponse, handleState, stableDeps]
   );
-
-  // FIX: Update ref when getData changes
-  useEffect(() => {
-    getDataRef.current = getData;
-  }, [getData]);
 
   // FIX: Use deep comparison for props to prevent unnecessary re-runs
   const stableProps = useDeepCompareMemo(
@@ -658,7 +656,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
 
       if (stableProps.dataProp?.length) {
         const dataPromises = stableProps.dataProp.map(async (item) => {
-          const value = await getDataRef.current(item.data, {
+          const value = await getData(item.data, {
             valueStream: stableProps.valueStream,
           });
           return { name: item.name, value };
@@ -679,7 +677,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
                 [value.type]: value[value.type],
               } as TData;
 
-              let valueConvert = await getDataRef.current(data, {
+              let valueConvert = await getData(data, {
                 valueStream: stableProps.valueStream,
               });
 
@@ -713,12 +711,12 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   }, [stableProps]); // FIX: Only depend on stable props
 
   const getTrackedData = useCallback((data: TData | null | undefined, valueStream?: any) => {
-    return getDataRef.current(data, { valueStream });
+    return getData(data, { valueStream });
   }, []);
 
   // FIX: Only run once on mount and when stableProps change significantly
   const hasInitialized = useRef(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
       processDataState();
@@ -726,14 +724,14 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   }, []);
 
   // FIX: Run when stable props actually change
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (hasInitialized.current) {
       processDataState();
     }
   }, [processDataState]);
 
   // Subscribe to state changes - FIX: Prevent multiple subscriptions
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!variableids.length) {
       return;
     }

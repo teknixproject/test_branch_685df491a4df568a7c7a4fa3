@@ -3,7 +3,6 @@ import './globals.css';
 
 import _ from 'lodash';
 import { Geist, Geist_Mono } from 'next/font/google';
-// import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
 
@@ -13,6 +12,7 @@ import { ApiStoreProvider } from '@/providers';
 import AntdProvider from '@/providers/AntdProvider';
 import ReactQueryProvider from '@/providers/QueryClient';
 import { MetadataIcon } from '@/types/seo';
+import { Providers } from '@/components/provider/session-provider';
 
 import { fetchMetadata } from './actions/server';
 
@@ -21,31 +21,6 @@ const DEFAULT_ICONS = {
   shortcut:
     'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
   apple: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
-};
-
-export const fetchSEOData = async (path: string) => {
-  try {
-    const response = await fetch(process.env.NEXT_SEO_URL as string, {
-      headers: {
-        Authorization: process.env.NEXT_AUTHORIZATION as string,
-        'X-Branch': process.env.NEXT_PUBLIC_BRANCH as string,
-      },
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return _.find(_.get(data, 'docs'), {
-      projectID: process.env.NEXT_SEO_PROJECTID as string,
-      path_name: path,
-    });
-  } catch (err) {
-    console.error('Failed to fetch SEO data:', err);
-    return null;
-  }
 };
 
 const geistSans = Geist({
@@ -58,20 +33,8 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  let pathname = 'NextJS';
-
-  try {
-    // Safer way to get pathname
-    const headersList = await headers();
-    pathname =
-      headersList.get('x-path-name') ||
-      headersList.get('x-pathname') ||
-      headersList.get('pathname') ||
-      'NextJS';
-  } catch (error) {
-    console.warn('Could not get pathname from headers:', error);
-  }
+export async function generateMetadata({ params, searchParams }: { params: any; searchParams: any }): Promise<Metadata> {
+  const pathname = params?.slug ? `/${params.slug.join('/')}` : '/';
 
   let metadata;
   try {
@@ -83,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const formMetadata = _.get(metadata, 'data.form');
 
-  const baseMetadata: Metadata = {
+  const baseMetadata: any = {
     title: {
       default: 'NextJS PAGE',
       template: '%s | NextJS PAGE',
@@ -184,13 +147,12 @@ export default async function RootLayout({
         <ReactQueryProvider>
           <ApiStoreProvider>
             <LayoutProvider>
-              {/* <Suspense fallback={<div>Loading...</div>}>
-                <LayoutContent>
-                  <AntdProvider>{children}</AntdProvider>
-                </LayoutContent>
-              </Suspense> */}
               <LayoutContent>
-                <AntdProvider>{children}</AntdProvider>
+                <AntdProvider>
+                  <Providers>
+                    {children}
+                  </Providers>
+                </AntdProvider>
               </LayoutContent>
             </LayoutProvider>
           </ApiStoreProvider>

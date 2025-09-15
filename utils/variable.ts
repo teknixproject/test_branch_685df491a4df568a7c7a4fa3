@@ -18,3 +18,12 @@ const extractAllValuesFromTemplate = (template: string): string => {
   return template;
 };
 export const variableUtil = { isUseVariable, extractAllValuesFromTemplate };
+
+export const replaceEnv = (str: string): string => {
+  return str.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
+    const env = process.env.NEXT_PUBLIC_API;
+    const envs = process.env;
+
+    return env ?? `{{${key}}}`;
+  });
+};

@@ -1,0 +1,28 @@
+.loader {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    transform: rotate(45deg);
+}
+
+.loader:before,
+.loader:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50% 50% 0 50%;
+    background: #0000;
+    background-image: radial-gradient(circle 8px at 50% 50%, #0000 74%, #ff4750);
+}
+
+.loader:after {
+    animation: pulse-ytk0dhmd 1s infinite;
+    transform: perspective(240px) translateZ(0px);
+}
+
+@keyframes pulse-ytk0dhmd {
+    to {
+        transform: perspective(240px) translateZ(120px);
+        opacity: 0;
+    }
+}
