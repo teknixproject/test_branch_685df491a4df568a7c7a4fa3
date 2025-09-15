@@ -1,6 +1,0 @@
-components/loadingLayoutLoader/index.tsx merge=ours
-components/customComponents/index.tsx merge=ours
-middleware.ts merge=ours
-app/api merge=ours
-config/ merge=ours
-public/uploads/ merge=ours
