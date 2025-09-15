@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import _, { isEqual } from 'lodash';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
 import { useConstructorDataAPI, usePreviewUI } from '@/app/actions/use-constructor';
@@ -166,7 +166,7 @@ export const useInitStatePreview = () => {
   }, [state, setStateManagement]);
 
   // Effect for data initialization
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!uid || !projectId) return;
 
     const initializeData = async () => {
@@ -254,7 +254,7 @@ export const useInitStateRender = () => {
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
     const handleResize = () => {
       setDeviceType(getDeviceType());
@@ -265,7 +265,7 @@ export const useInitStateRender = () => {
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (enable) {
       const pageRole = pages.find(
         (item: TAuthSetting['pages'][number]) => item.documentId.uid === pathname

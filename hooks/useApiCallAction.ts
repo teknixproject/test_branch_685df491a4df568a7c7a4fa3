@@ -1,11 +1,11 @@
 import axios from 'axios';
 import _ from 'lodash';
+import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import queryString from 'query-string';
 import { useCallback } from 'react';
 
 import { stateManagementStore } from '@/stores';
-import { getSession } from 'next-auth/react';
 import { authSettingStore } from '@/stores/authSetting';
 import {
   TAction,
@@ -16,7 +16,7 @@ import {
   TData,
   TTypeSelect,
 } from '@/types';
-import { variableUtil } from '@/utils';
+import { replaceEnv, variableUtil } from '@/utils';
 
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
@@ -30,15 +30,15 @@ export type TUseActions = {
     params?: THandleDataParams
   ) => Promise<void>;
 };
-const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string => {
-  const baseUrl = apiCallMember?.url || fallbackUrl || '';
+const convertUrl = (apiCallMember: TApiCallValue): string => {
+  const baseUrl = apiCallMember?.url || '';
 
   if (!apiCallMember?.variables?.length) return baseUrl;
 
-  const url = apiCallMember.variables.reduce(
-    (url, { key, value }) => url.replace(`[${key}]`, String(value)),
-    baseUrl
-  );
+  const url = apiCallMember.variables.reduce((url, { key, value }) => {
+    return url.replace(`[${key}]`, String(value));
+  }, baseUrl);
+
   return queryString.stringifyUrl(
     {
       url,
@@ -170,9 +170,9 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     });
     try {
       const response = await axios.request({
-        baseURL: apiCall?.baseUrl || '',
+        baseURL: replaceEnv(apiCall?.baseUrl || ''),
         method: apiCall?.method?.toUpperCase(),
-        url: convertUrl(apiCall),
+        url: replaceEnv(convertUrl(apiCall)),
         headers: await convertHeader(apiCall),
         data: ['POST', 'PUT', 'PATCH'].includes(apiCall?.method?.toUpperCase() || '') && body,
         // params:

@@ -36,7 +36,7 @@ export const cleanProps = (props: any, valueType: string) => {
     }
 
     // Remove specific props
-    const propsToRemove = ['styleMultiple', 'dataProps'];
+    const propsToRemove = ['styleMultiple', 'dataProps', 'styleExtra'];
     propsToRemove.forEach((prop) => {
       delete cleanData[prop];
     });
