@@ -3,7 +3,6 @@ import './globals.css';
 
 import _ from 'lodash';
 import { Geist, Geist_Mono } from 'next/font/google';
-// import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
 
@@ -22,31 +21,6 @@ const DEFAULT_ICONS = {
   shortcut:
     'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
   apple: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/metadata-5381957-4568609.png?f=webp',
-};
-
-export const fetchSEOData = async (path: string) => {
-  try {
-    const response = await fetch(process.env.NEXT_SEO_URL as string, {
-      headers: {
-        Authorization: process.env.NEXT_AUTHORIZATION as string,
-        'X-Branch': process.env.NEXT_PUBLIC_BRANCH as string,
-      },
-      // cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return _.find(_.get(data, 'docs'), {
-      projectID: process.env.NEXT_SEO_PROJECTID as string,
-      path_name: path,
-    });
-  } catch (err) {
-    console.error('Failed to fetch SEO data:', err);
-    return null;
-  }
 };
 
 const geistSans = Geist({
