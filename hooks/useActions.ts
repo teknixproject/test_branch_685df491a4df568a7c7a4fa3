@@ -81,16 +81,18 @@ export const useActions = (props: TActionsProps): TUseActions => {
       const condition = findAction(conditionId) as TAction<TConditionChildMap>;
 
       if (condition) {
-        await executeActionFCType(condition, params);
+        const isConditionMet = await executeActionFCType(condition, params);
+
+        if (isConditionMet) return;
       }
     }
   };
   const executeActionFCType = async (
     action?: TAction,
     params?: THandleDataParams
-  ): Promise<void> => {
+  ): Promise<any> => {
     if (!action?.fcType) return;
-
+    let valueReturnCondition = null;
     switch (action.fcType) {
       case 'action':
         await executeAction(action as TAction<TActionApiCall>, params);
@@ -99,18 +101,23 @@ export const useActions = (props: TActionsProps): TUseActions => {
         await executeConditional(action as TAction<TConditional>, params);
         break;
       case 'conditionalChild':
+        const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
+        const conditionChildData = action?.data as TConditionChildMap;
+        if ((action.data as TConditionChildMap).label === 'else') {
+          if (isReturnValue) return transformVariable(conditionChildData.valueReturn!);
+          valueReturnCondition = false;
+          break;
+        }
         const isMatch = await executeConditionalChild(
           action as TAction<TConditionChildMap>,
           params
         );
-
-        const conditionChildData = action?.data as TConditionChildMap;
-
-        const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
+        //if or else if
         if (isReturnValue && isMatch) {
           return transformVariable(conditionChildData.valueReturn!);
         }
-        if (!isMatch) return;
+        if (!isMatch) return; //prevent call next action
+        valueReturnCondition = true;
         break;
       case 'loop':
         await executeLoopOverList(action as TAction<TActionLoop>, params);
@@ -122,6 +129,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
     if (action.next) {
       await executeActionFCType(findAction(action.next), params);
     }
+    return valueReturnCondition;
   };
 
   const mounted = useRef(false);
@@ -148,7 +156,6 @@ export const useActions = (props: TActionsProps): TUseActions => {
         case 'customFunction':
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
         case 'formState':
-          console.log('🚀 ~ executeAction ~ action: form', action);
           return await handleFormState(action as TAction<TActionFormState>, params);
         case 'message':
           return await executeMessageAction(action as TAction<TActionMessage>, params);

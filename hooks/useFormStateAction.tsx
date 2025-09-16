@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import _ from 'lodash';
 
 import { TAction, TActionFormState } from '@/types';
@@ -21,7 +20,6 @@ export const useFormStateAction = (props: TActionsProps): TUseActions => {
     if (!methods) return;
     const { setValue } = methods;
     const updates = action?.data?.update;
-    console.log('🚀 ~ handleUpdate ~ updates:', updates);
 
     if (_.isEmpty(updates)) return;
 
@@ -50,7 +48,7 @@ export const useFormStateAction = (props: TActionsProps): TUseActions => {
     const unregisters = action?.data?.unregister;
     for (const item of unregisters || []) {
       const { name } = item;
-
+      if (!name) continue;
       unregister(name);
     }
   };

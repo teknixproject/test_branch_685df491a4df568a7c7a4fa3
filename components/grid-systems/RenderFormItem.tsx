@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 /** @jsxImportSource @emotion/react */
-import { Upload, UploadFile } from 'antd';
+import { Checkbox, DatePicker, Switch, Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { useRenderItem } from '@/hooks/useRenderItem';
@@ -16,11 +16,12 @@ const RenderFormItem: FC<TProps> = (props) => {
   const methods = useFormContext();
   const { control } = methods;
   const { isLoading, valueType, Component, propsCpn } = useRenderItem({
+    ...props,
     data,
     valueStream,
     methods,
   });
-  const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
+  const { name, ...rest } = propsCpn;
 
   const currentFormKeys = formKeysArray || formKeys;
   const inFormKeys = currentFormKeys?.find((item) => item?.value === data?.name);
@@ -60,7 +61,7 @@ const RenderFormItem: FC<TProps> = (props) => {
           control={control}
           name={nameField}
           render={({ field }) => (
-            <Component
+            <Upload
               {...rest}
               fileList={field.value?.map((base64: string, index: number) => ({
                 uid: `-${index}`,
@@ -87,7 +88,7 @@ const RenderFormItem: FC<TProps> = (props) => {
               beforeUpload={() => false}
             >
               {rest.children || <button>Upload</button>}
-            </Component>
+            </Upload>
           )}
         />
       );
@@ -102,7 +103,7 @@ const RenderFormItem: FC<TProps> = (props) => {
           control={control}
           name={nameField}
           render={({ field }) => (
-            <Component
+            <DatePicker
               {...rest}
               {...field}
               value={field.value ? dayjs(field.value) : null}
@@ -112,13 +113,54 @@ const RenderFormItem: FC<TProps> = (props) => {
                   rest.onChange(target);
                 }
               }}
-              key={`form-child-${data?.id}`}
             />
           )}
         />
       );
     }
 
+    if (valueType === 'checkbox') {
+      return (
+        <Controller
+          control={control}
+          name={nameField}
+          render={({ field }) => (
+            <Checkbox
+              {...rest}
+              {...field}
+              checked={field.value}
+              onChange={(e: any) => {
+                field.onChange(e);
+                if (typeof rest?.onChange === 'function') {
+                  rest.onChange(e.target.checked);
+                }
+              }}
+            />
+          )}
+        />
+      );
+    }
+    if (valueType === 'switch') {
+      return (
+        <Controller
+          control={control}
+          name={nameField}
+          render={({ field }) => (
+            <Switch
+              {...rest}
+              {...field}
+              checked={field.value}
+              onChange={(e: any) => {
+                field.onChange(e);
+                if (typeof rest?.onChange === 'function') {
+                  rest.onChange(e.target.checked);
+                }
+              }}
+            />
+          )}
+        />
+      );
+    }
     return (
       <Controller
         control={control}
@@ -133,7 +175,6 @@ const RenderFormItem: FC<TProps> = (props) => {
                 rest.onChange(target);
               }
             }}
-            key={`form-child-${data?.id}`}
           />
         )}
       />
@@ -148,15 +189,13 @@ const RenderFormItem: FC<TProps> = (props) => {
     return null;
   }
 
-  // if (isLoading) return <LoadingPage />;
-
   return (
     <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
       {data?.childs?.map((child) => (
         <RenderFormItem
           {...props}
           data={child}
-          key={`form-child-${child.id}`}
+          key={`${child.id}`}
           parentPath={parentPath}
           index={index}
           formKeysArray={formKeysArray}

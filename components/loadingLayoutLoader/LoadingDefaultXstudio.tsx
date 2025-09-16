@@ -24,7 +24,6 @@ export default function LoadingDefaultXstudio({
       const newProgress = Math.min((elapsed / duration) * 100, 95); // Max 95% to avoid completion before actual loading
 
       setProgress(newProgress);
-
     }, incrementInterval);
 
     // Complete loading after specified duration
@@ -43,71 +42,54 @@ export default function LoadingDefaultXstudio({
   }, [duration, onLoadingComplete]);
 
   return (
-    <div className="relative !z-0 h-screen overflow-hidden">
-      {/* Animated Background Gradient */}
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900"
-        style={{
-          backgroundSize: '400% 400%',
-          animation: 'gradientShift 8s ease infinite'
-        }}
-      />
-
-      {/* Floating Orbs */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-400/20 rounded-full blur-xl animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}></div>
-        <div className="absolute top-3/4 right-1/4 w-24 h-24 bg-purple-400/20 rounded-full blur-xl animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-20 h-20 bg-indigo-400/20 rounded-full blur-xl animate-bounce" style={{ animationDelay: '2s', animationDuration: '2.5s' }}></div>
-      </div>
-
+    <div className="relative !z-0 h-screen overflow-hidde">
       {/* Main Content */}
       <Flex className="relative z-10 h-full justify-center items-center">
-        <div className="backdrop-blur-md bg-white/10 rounded-3xl border border-white/20 shadow-2xl p-8 max-w-2xl w-full mx-4">
+        <div className="max-w-md w-full mx-4 px-8">
 
           {/* Header Section */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-12">
             <Image
               width={200}
-              src='https://componentx-studio-l8y4.vercel.app/logo.png'
+              src="./logo.png"
               alt='logo-xstudio'
               preview={false}
             />
           </div>
 
-          <Progress
-            percent={Math.floor(progress)}
-            strokeColor={{
-              '0%': '#3b82f6',
-              '50%': '#8b5cf6',
-              '100%': '#6366f1',
-            }}
-            trailColor="rgba(255, 255, 255, 0.1)"
-            strokeWidth={8}
-            format={(percent) => (
-              <span className="text-purple-300 font-bold text-sm">
-                {percent}%
+          {/* Custom Progress Bar */}
+          <div className="w-full">
+            <div className="w-full bg-gray-800 rounded-full h-1.5 mb-4 overflow-visible">
+              <div
+                className="bg-blue-500 h-1.5 rounded-full transition-all duration-300 ease-out relative shadow-lg"
+                style={{
+                  width: `${progress}%`,
+                  boxShadow: 'rgb(59, 130, 246) 0px 0px 10px, rgb(59, 130, 246) 0px 0px 0px, rgb(59, 125, 246) 0px 0px 1px'
+                }}
+              >
+                {/* Inner glow */}
+                <div className="absolute inset-0 bg-blue-400 rounded-full opacity-75 animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Progress percentage */}
+            <div className="text-center">
+              <span className="text-blue-400 font-medium text-sm">
+                {Math.floor(progress)}%
               </span>
-            )}
-            style={{
-              fontSize: '14px'
-            }}
-          />
+            </div>
+          </div>
         </div>
       </Flex>
 
       <style jsx>{`
-        @keyframes gradientShift {
-          0%, 100% { background-position: 0% 50% }
-          50% { background-position: 100% 50% }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.75 }
+          50% { opacity: 1 }
         }
         
-        @keyframes shimmer-fast {
-          0% { transform: translateX(-300%) }
-          100% { transform: translateX(400%) }
-        }
-        
-        .animate-shimmer-fast {
-          animation: shimmer-fast 2s infinite;
+        .animate-pulse {
+          animation: pulse 2s infinite;
         }
       `}</style>
     </div>

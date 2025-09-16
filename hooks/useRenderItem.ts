@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import _ from 'lodash';
 import { useMemo } from 'react';
@@ -13,7 +12,11 @@ import { stateManagementStore } from '@/stores';
 import { GridItem } from '@/types/gridItem';
 import { getComponentType } from '@/utils/component';
 import { cleanProps } from '@/utils/renderItem';
-import { convertCssObjectToCamelCase, convertToEmotionStyle } from '@/utils/styleInline';
+import {
+  convertCssObjectToCamelCase,
+  convertCSSTringToObject,
+  convertToEmotionStyle,
+} from '@/utils/styleInline';
 import { convertToPlainProps } from '@/utils/transfromProp';
 import { css } from '@emotion/react';
 
@@ -35,8 +38,18 @@ const getPropData = (data: GridItem) =>
 
 const getPropActions = (data: GridItem) =>
   data?.componentProps?.dataProps?.filter((item: any) => item.type.includes('MouseEventHandler'));
-const handleCssWithEmotion = (staticProps: Record<string, any>) => {
-  const advancedCss = convertToEmotionStyle(staticProps?.styleMultiple);
+
+const buildStyle = (staticProps: Record<string, any>) => {
+  const cssObject = convertCSSTringToObject(staticProps?.styleExtra);
+  console.log('🚀 ~ buildStyle ~ cssObject:', cssObject);
+
+  const advancedCss = {
+    ...convertToEmotionStyle({
+      ...staticProps?.styleMultiple,
+    }),
+    ...cssObject,
+  };
+
   let cssMultiple;
 
   if (typeof advancedCss === 'string') {
@@ -52,15 +65,17 @@ const handleCssWithEmotion = (staticProps: Record<string, any>) => {
 
   return cssMultiple;
 };
-const specialComponents = ['map', 'button', 'tree', 'tabs', 'dropdown', 'list', 'table'];
+
 export const useRenderItem = ({
   data,
   valueStream,
+  index,
   methods,
   methodsArray,
 }: {
   data: GridItem;
   valueStream?: any;
+  index?: number;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
   methodsArray?: UseFieldArrayReturn<FieldValues, string, 'id'>;
 }) => {
@@ -69,7 +84,7 @@ export const useRenderItem = ({
   const { isLoading } = useActions({
     data,
     valueStream,
-    methods: methods,
+    methods,
     methodsArray,
     isCallPageLoad: true,
   });
@@ -80,6 +95,7 @@ export const useRenderItem = ({
     valueStream,
     valueType,
     activeData: data,
+    index,
   });
 
   const {
@@ -101,11 +117,10 @@ export const useRenderItem = ({
 
   const propsCpn = useDeepCompareMemo(() => {
     const staticProps: Record<string, any> = {
-      // ...convertProps({ initialProps: dataState, valueType }),
       ...dataState,
     };
 
-    staticProps.css = handleCssWithEmotion(staticProps);
+    staticProps.css = buildStyle(staticProps);
 
     let result =
       valueType === 'menu'
@@ -119,12 +134,13 @@ export const useRenderItem = ({
     if (isNoChildren && 'children' in result) {
       _.unset(result, 'children');
     }
+
     if ('styleMultiple' in result) _.unset(result, 'styleMultiple');
     if ('dataProps' in result) _.unset(result, 'dataProps');
+
     const plainProps = convertToPlainProps(result);
 
     result = cleanProps(plainProps, valueType);
-    // console.log(`🚀 ~ useRenderItem ~ result: ${data.id}`, result);
 
     return result;
   }, [actions, dataState, isNoChildren, valueType]);

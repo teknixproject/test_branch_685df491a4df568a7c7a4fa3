@@ -19,7 +19,6 @@ export const useUpdateData = ({ dataProp }: TProps): TUpdateData => {
     return { type, variableId };
   }, [dataProp]);
   const updateData = (value: any) => {
-    console.log('🚀 ~ updateData ~ value:', value);
     if (_.isEmpty(dataProp)) return;
     const variable = findVariable({ id: variableId, type: type });
     if (!variable) return;

@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 import _ from 'lodash';
+import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import queryString from 'query-string';
 import { useCallback } from 'react';
@@ -16,11 +16,10 @@ import {
   TData,
   TTypeSelect,
 } from '@/types';
-import { variableUtil } from '@/utils';
+import { replaceEnv, variableUtil } from '@/utils';
 
 import { TActionsProps } from './useActions';
 import { useApiCall } from './useApiCall';
-// import { useCustomFunction } from './useCustomFunction';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
 const { isUseVariable, extractAllValuesFromTemplate } = variableUtil;
@@ -31,23 +30,21 @@ export type TUseActions = {
     params?: THandleDataParams
   ) => Promise<void>;
 };
-const convertUrl = (apiCallMember: TApiCallValue, fallbackUrl?: string): string => {
-  const baseUrl = apiCallMember?.url || fallbackUrl || '';
+const convertUrl = (apiCallMember: TApiCallValue): string => {
+  const baseUrl = apiCallMember?.url || '';
 
   if (!apiCallMember?.variables?.length) return baseUrl;
 
-  const url = apiCallMember.variables.reduce(
-    (url, { key, value }) => url.replace(`[${key}]`, String(value)),
-    baseUrl
-  );
+  const url = apiCallMember.variables.reduce((url, { key, value }) => {
+    return url.replace(`[${key}]`, String(value));
+  }, baseUrl);
+
   return queryString.stringifyUrl(
     {
       url,
       query: convertQuery(apiCallMember),
     },
-    {
-      // encode: false,
-    }
+    {}
   );
 };
 const convertQuery = (apiCallMember: TApiCallValue) => {
@@ -133,12 +130,27 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     }, {} as Record<string, any>);
   }, []);
 
-  const convertHeader = (apiCallMember: TApiCallValue) => {
+  const convertHeader = async (apiCallMember: TApiCallValue) => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
       const headers = apiCallMember?.headers || ({ 'Content-Type': 'application/json' } as any);
-      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+      if (!headers['Authorization']) {
+        // Lấy token từ localStorage
+        let accessToken = localStorage.getItem('accessToken');
 
+        // Nếu localStorage không có token, thử lấy từ session
+        if (!accessToken) {
+          console.log('convertHeader', accessToken);
+
+          const session: any = await getSession();
+          accessToken = session?.accessToken;
+        }
+
+        // Merge headers mặc định với token nếu có
+
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+      }
       return headers;
     } catch (error) {
       console.log('🚀 ~ convertHeader ~ error:', error);
@@ -158,10 +170,10 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     });
     try {
       const response = await axios.request({
-        baseURL: apiCall?.baseUrl || '',
+        baseURL: replaceEnv(apiCall?.baseUrl || ''),
         method: apiCall?.method?.toUpperCase(),
-        url: convertUrl(apiCall),
-        headers: convertHeader(apiCall),
+        url: replaceEnv(convertUrl(apiCall)),
+        headers: await convertHeader(apiCall),
         data: ['POST', 'PUT', 'PATCH'].includes(apiCall?.method?.toUpperCase() || '') && body,
         // params:
         //   ['GET', 'DELETE'].includes(apiCall?.method?.toUpperCase() || '') && convertQuery(apiCall),

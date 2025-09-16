@@ -1,7 +1,7 @@
+
 import { Menu } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
-
 import { Icon } from '@iconify/react/dist/iconify.js';
 
 interface NavigationMenuProps {
@@ -20,6 +20,13 @@ interface NavigationMenuProps {
   onSelect?: (param: any) => void;
   onDeselect?: (param: any) => void;
   onOpenChange?: (openKeys: string[]) => void;
+  // Color configuration props
+  textColor?: string;
+  textHoverColor?: string;
+  hoverBackgroundColor?: string;
+  activeBackgroundColor?: string;
+  activeTextColor?: string;
+  borderRadius?: number;
 }
 
 const convertIconStringToComponent = (iconString: string) => {
@@ -28,6 +35,7 @@ const convertIconStringToComponent = (iconString: string) => {
   }
   return <Icon icon={iconString} />;
 };
+
 const ConfigMenu: React.FC<NavigationMenuProps> = ({
   items,
   mode = 'horizontal',
@@ -44,99 +52,59 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
   onSelect,
   onDeselect,
   onOpenChange,
+  // Color props
+  textColor = '#000000',
+  textHoverColor = '#000000',
+  hoverBackgroundColor = '#f5f5f5',
+  activeBackgroundColor = '#1890ff',
+  activeTextColor = '#ffffff',
+  borderRadius = 0,
   ...props
 }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Process menu items với icon conversion và clean up invalid props
+  // Generate unique class name for this instance
+  const uniqueClassName = useMemo(() => `custom-menu-${Math.random().toString(36).substr(2, 9)}`, []);
+
+  // Process menu items with icon conversion
   const processMenuItems = useCallback((menuItems: any[]): any[] => {
     if (!Array.isArray(menuItems)) return menuItems;
 
     return menuItems.map((item) => {
       const processedItem = { ...item };
-      processedItem.onClick = handleMenuClick;
 
-      // Chuyển đổi icon string thành Icon component
+      // Convert icon string to Icon component
       if (processedItem.icon && typeof processedItem.icon === 'string') {
         processedItem.icon = convertIconStringToComponent(processedItem.icon);
       }
 
-      // Xử lý đệ quy cho children
+      // Process children recursively
       if (processedItem.children && Array.isArray(processedItem.children)) {
         processedItem.children = processMenuItems(processedItem.children);
       }
 
-      // Đảm bảo có key nếu chưa có
+      // Ensure key exists if not present
       if (!processedItem.key && processedItem.label) {
         processedItem.key = processedItem.label.toLowerCase().replace(/\s+/g, '-');
       }
 
-      // Clean up invalid DOM attributes - Mở rộng danh sách
-      const invalidDomAttributes = [
-        'collapsible',
-        'collapsed',
-        'expandable',
-        'expanded',
-        'selectable',
-        'checkable',
-        'checked',
-        'loading',
-        'ghost',
-        'block',
-        'danger',
-        'size',
-        'shape',
-        'htmlType',
-        'minWidth',
-        'maxWidth',
-        'resizable',
-        'sortable',
-        'filterable',
-        'width',
-        'height',
-        'flex',
-        'flexDirection',
-        'justifyContent',
-        'alignItems',
-      ];
-
-      invalidDomAttributes.forEach((attr) => {
-        if (processedItem.hasOwnProperty(attr)) {
-          delete processedItem[attr];
-        }
-      });
-
-      // Chuyển đổi boolean false thành undefined cho các thuộc tính boolean
-      if (processedItem.collapsible === false) {
-        processedItem.collapsible = undefined;
-      }
-      if (processedItem.selectable === false) {
-        processedItem.selectable = undefined;
-      }
-      if (processedItem.disabled === false) {
-        processedItem.disabled = undefined;
-      }
-
       return processedItem;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Tìm selectedKeys dựa trên pathname
+  // Find selectedKeys based on pathname
   const getSelectedKeysFromPathname = useCallback(
     (menuItems: any[], currentPath: string): string[] => {
       const selectedKeys: string[] = [];
 
       const findMatchingKeys = (items: any[], path: string) => {
         for (const item of items || []) {
-          // Kiểm tra nếu item.value khớp với pathname
           if (item.key === path) {
             selectedKeys.push(item.key);
             return true;
           }
 
-          // Kiểm tra children nếu có
           if (item.children && Array.isArray(item.children)) {
             if (findMatchingKeys(item.children, path)) {
               selectedKeys.push(item.key);
@@ -157,7 +125,6 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
   const handleMenuClick = useCallback(
     (menuInfo: { key: string }) => {
       const key = menuInfo.key;
-
       router.push(key);
     },
     [router]
@@ -165,36 +132,120 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
 
   // Processed items
   const processedItems = useMemo(() => processMenuItems(items), [items, processMenuItems]);
-  // Selected keys dựa trên pathname
+
+  // Selected keys based on pathname
   const selectedKeys = useMemo(() => {
     const pathBasedKeys = getSelectedKeysFromPathname(items, pathname);
     return pathBasedKeys.length > 0 ? pathBasedKeys : defaultSelectedKeys;
   }, [items, pathname, defaultSelectedKeys, getSelectedKeysFromPathname]);
 
-  // Menu props với style được cải thiện
+  // Generate CSS styles
+  const customStyles = useMemo(() => {
+    return `
+      .${uniqueClassName}.ant-menu {
+        background: transparent !important;
+        border: none !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-item {
+        color: ${textColor} !important;
+        border-radius: ${borderRadius}px !important;
+        margin: 2px 0 !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-item:hover {
+        background-color: ${hoverBackgroundColor} !important;
+        color: ${textHoverColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-item-selected {
+        background-color: ${activeBackgroundColor} !important;
+        color: ${activeTextColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-item-active {
+        background-color: ${activeBackgroundColor} !important;
+        color: ${activeTextColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-submenu-title {
+        color: ${textColor} !important;
+        border-radius: ${borderRadius}px !important;
+        margin: 2px 0 !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-submenu-title:hover {
+        background-color: ${hoverBackgroundColor} !important;
+        color: ${textHoverColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-submenu-selected > .ant-menu-submenu-title {
+        background-color: ${activeBackgroundColor} !important;
+        color: ${activeTextColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-submenu-arrow {
+        color: inherit !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-sub {
+        background: transparent !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-sub .ant-menu-item {
+        color: ${textColor} !important;
+        border-radius: ${borderRadius}px !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-sub .ant-menu-item:hover {
+        background-color: ${hoverBackgroundColor} !important;
+        color: ${textHoverColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-sub .ant-menu-item-selected {
+        background-color: ${activeBackgroundColor} !important;
+        color: ${activeTextColor} !important;
+        border-right: none !important;
+      }
+      
+      .${uniqueClassName} .ant-menu-submenu .ant-menu-submenu-title {
+        border-radius: ${borderRadius}px !important;
+        border-right: none !important;
+      }
+    `;
+  }, [uniqueClassName, textColor, textHoverColor, hoverBackgroundColor, activeBackgroundColor, activeTextColor, borderRadius]);
+
+  // Menu props
   const menuProps = useMemo(() => {
     const props: any = {
       items: processedItems,
       mode,
       theme,
       style: {
-        // Đảm bảo menu có đủ không gian
         width: '100%',
         minWidth: mode === 'horizontal' ? '800px' : 'auto',
-        // Ngăn menu bị wrap xuống dòng
         whiteSpace: 'nowrap',
-        // Đảm bảo overflow được xử lý đúng
         overflow: mode === 'horizontal' ? 'visible' : 'hidden',
         ...style,
       },
       selectedKeys,
       defaultSelectedKeys,
-      // onClick: handleMenuClick,
-      // Tắt chế độ overflow menu nếu cần
+      className: uniqueClassName,
+      onClick: handleMenuClick,
       overflowedIndicator: mode === 'horizontal' ? null : undefined,
     };
 
-    // Chỉ thêm các props nếu chúng được định nghĩa và không phải false
+    // Only add props if they are defined and not false
     if (defaultOpenKeys.length > 0) props.defaultOpenKeys = defaultOpenKeys;
     if (multiple !== undefined && multiple !== false) props.multiple = multiple;
     if (selectable !== undefined && selectable !== false) props.selectable = selectable;
@@ -209,7 +260,6 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
     if (onOpenChange) props.onOpenChange = onOpenChange;
 
     return props;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     processedItems,
     mode,
@@ -217,6 +267,8 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
     style,
     selectedKeys,
     defaultSelectedKeys,
+    uniqueClassName,
+    handleMenuClick,
     defaultOpenKeys,
     multiple,
     selectable,
@@ -224,13 +276,17 @@ const ConfigMenu: React.FC<NavigationMenuProps> = ({
     inlineIndent,
     triggerSubMenuAction,
     forceSubMenuRender,
-    handleMenuClick,
     onSelect,
     onDeselect,
     onOpenChange,
   ]);
 
-  return <Menu {...props} {...menuProps} />;
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: customStyles }} />
+      <Menu {...menuProps} />
+    </>
+  );
 };
 
 export default ConfigMenu;

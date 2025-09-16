@@ -36,7 +36,7 @@ export const cleanProps = (props: any, valueType: string) => {
     }
 
     // Remove specific props
-    const propsToRemove = ['styleMultiple', 'dataProps'];
+    const propsToRemove = ['styleMultiple', 'dataProps', 'styleExtra'];
     propsToRemove.forEach((prop) => {
       delete cleanData[prop];
     });
@@ -46,10 +46,6 @@ export const cleanProps = (props: any, valueType: string) => {
 
     if (isNoChildren) {
       delete cleanData.children;
-    }
-
-    if (lowerValueType === 'button') {
-      delete cleanData.iconData;
     }
 
     // Filter out empty/invalid values safely

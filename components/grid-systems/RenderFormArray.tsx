@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 /** @jsxImportSource @emotion/react */
 import { List } from 'antd';
 import { FC, useMemo } from 'react';
@@ -23,6 +23,7 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
   });
 
   const { isLoading, valueType, propsCpn } = useRenderItem({
+    ...props,
     data,
     valueStream,
     methods,
@@ -36,7 +37,6 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
   }
 
   if (valueType !== 'list') return <div></div>;
-  // if (isLoading) return <LoadingPage />;
 
   return (
     <List

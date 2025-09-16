@@ -28,16 +28,13 @@ import { Button, Dropdown, List, Map, Table, Tabs, Tree } from '../special';
 import ConfigMenu from './configComponent/ConfigMenu';
 
 export const componentRegistry = {
-  // button: Button,
   text: Typography.Text,
   link: Typography.Link,
   title: Typography.Title,
   paragraph: Typography.Paragraph,
   image: Image,
-  // list: List,
   inputtext: Input,
   inputnumber: InputNumber,
-  // table: Table,
   checkbox: Checkbox,
   radio: Radio.Group,
   select: Select,
@@ -45,8 +42,6 @@ export const componentRegistry = {
   formitem: Form.Item,
   collapse: Collapse,
   tag: Tag,
-  // tabs: Tabs,
-  // dropdown: Dropdown,
   card: Card,
   statistic: Statistic,
   linechart: Line,

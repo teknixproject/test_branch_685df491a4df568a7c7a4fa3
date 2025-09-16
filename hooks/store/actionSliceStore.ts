@@ -59,18 +59,15 @@ export const actionHookSliceStore = create<TState & TActions>()(
       findAction: (actionId) => {
         const trigger = get().triggerName;
         const action = get().actions[trigger]?.[actionId];
-        console.log('[findAction]', { trigger, actionId, action });
         return action || undefined;
       },
 
       getFormData: () => {
         const data = get().formData;
-        console.log('[getFormData]', data);
         return data;
       },
 
       reset: () => {
-        console.log('[reset]');
         set(
           {
             actions: {},

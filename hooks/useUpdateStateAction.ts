@@ -39,7 +39,6 @@ export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
     params?: THandleDataParams
   ): Promise<void> => {
     const updates = action?.data?.update;
-    console.log('🚀 ~ handleUpdateStateAction ~ updates:', updates);
 
     if (_.isEmpty(updates)) return;
 
@@ -53,7 +52,6 @@ export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
       });
 
       const variableSecond = await getData(item.secondState, params);
-      console.log('🚀 ~ handleUpdateStateAction ~ variableSecond:', variableSecond);
 
       if (!variableFirst) return;
 
