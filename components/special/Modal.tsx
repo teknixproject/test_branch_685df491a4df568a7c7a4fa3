@@ -12,15 +12,15 @@ const Modal: React.FC<Props> = ({ styleMultiple, ...props }) => {
     content: {
       pointerEvents: 'auto',
       margin: '0',
-      padding: '0'
+      padding: '0',
     },
     body: {
       padding: '20px 24px',
-      ...styleMultiple
+      ...styleMultiple,
     },
   };
 
-  return <ModalAntd styles={mergedStyles} {...props} />
+  return <ModalAntd {...props} />;
 };
 
 export default Modal;
