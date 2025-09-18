@@ -139,8 +139,6 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
 
         // Nếu localStorage không có token, thử lấy từ session
         if (!accessToken) {
-          console.log('convertHeader', accessToken);
-
           const session: any = await getSession();
           accessToken = session?.accessToken;
         }

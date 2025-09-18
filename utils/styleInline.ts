@@ -95,7 +95,6 @@ export const convertCssObjectToCamelCase = (cssObj: Record<string, any>): Record
  * @returns {Record<string, any>} CSS object
  */
 export const convertCSSTringToObject = (cssString: string): Record<string, any> => {
-  console.log('🚀 ~ convertCSSTringToObject ~ cssString:', cssString);
   if (_.isObject(cssString)) return cssString;
   if (!_.isString(cssString)) return {};
   const match = cssString?.match(/\{([\s\S]*?)\}/);

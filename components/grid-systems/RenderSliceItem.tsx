@@ -7,7 +7,6 @@ import { useRenderItem } from '@/hooks/useRenderItem';
 import { GridItem } from '@/types/gridItem';
 import { getComponentType } from '@/utils/component';
 
-import CustomComponent from '../customComponents';
 import RenderForm from './RenderForm';
 
 export type TProps = {
@@ -32,7 +31,7 @@ export const ComponentRenderer: FC<{
   const { style, ...newPropsCpn } = propsCpn;
   try {
     return (
-      <Component key={data?.id} {...newPropsCpn}>
+      <Component key={data?.id} {...newPropsCpn} styleMultiple={data?.componentProps?.styleMultiple?.normal}>
         {!_.isEmpty(data?.childs) ? children : propsCpn.children}
       </Component>
     );
@@ -49,9 +48,6 @@ const RenderSliceItem: FC<TProps> = (props) => {
   const { isForm, isNoChildren, isChart, isMap, isBagde } = getComponentType(data?.value || '');
 
   if (!valueType) return <div></div>;
-
-  if ((data.type as any) === 'CustomWidget')
-    return <CustomComponent componentName={data.value as string} />;
 
   if (isForm) return <RenderForm {...props} />;
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {

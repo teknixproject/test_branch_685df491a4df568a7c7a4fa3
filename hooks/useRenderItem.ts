@@ -41,7 +41,6 @@ const getPropActions = (data: GridItem) =>
 
 const buildStyle = (staticProps: Record<string, any>) => {
   const cssObject = convertCSSTringToObject(staticProps?.styleExtra);
-  console.log('🚀 ~ buildStyle ~ cssObject:', cssObject);
 
   const advancedCss = {
     ...convertToEmotionStyle({

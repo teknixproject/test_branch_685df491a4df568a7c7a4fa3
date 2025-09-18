@@ -13,7 +13,6 @@ import {
   Input,
   InputNumber,
   Radio,
-  Select,
   Statistic,
   Switch,
   Tag,
@@ -24,7 +23,7 @@ import dynamic from 'next/dynamic';
 
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
 
-import { Button, Dropdown, List, Map, Modal, Table, Tabs, Tree } from '../special';
+import { Button, Dropdown, List, Map, Modal, Select, Table, Tabs, Tree } from '../special';
 import InputText from '../special/InputText';
 import PlaceSearch from '../special/PlaceSearch';
 import ConfigMenu from './configComponent/ConfigMenu';
@@ -43,16 +42,13 @@ export const componentSpecial = {
   placesearch: PlaceSearch,
 };
 export const componentRegistry = {
-  // button: Button,
   text: Typography.Text,
   link: Typography.Link,
   title: Typography.Title,
   paragraph: Typography.Paragraph,
   image: Image,
-  // list: List,
   inputtext: InputText,
   inputnumber: InputNumber,
-  // table: Table,
   checkbox: Checkbox,
   radio: Radio.Group,
   select: Select,
@@ -60,8 +56,6 @@ export const componentRegistry = {
   formitem: Form.Item,
   collapse: Collapse,
   tag: Tag,
-  // tabs: Tabs,
-  // dropdown: Dropdown,
   card: Card,
   statistic: Statistic,
   linechart: Line,
@@ -76,7 +70,6 @@ export const componentRegistry = {
   avatar: Avatar,
   switch: Switch,
   menu: ConfigMenu,
-
   drawer: Drawer,
   datepicker: DatePicker,
   badge: Badge,
