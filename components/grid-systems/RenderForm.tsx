@@ -33,7 +33,7 @@ const RenderForm: FC<TProps> = (props) => {
   };
 
   return (
-    <Spin spinning={isLoading} wrapperClassName="!w-full">
+    <Spin spinning={isLoading} wrapperClassName="!w-full !h-full">
       <FormProvider {...methods}>
         <Form {...rest} onFinish={() => handleSubmit(onSubmit)()}>
           {data?.childs?.map((child, index) => (
