@@ -31,7 +31,11 @@ export const ComponentRenderer: FC<{
   const { style, ...newPropsCpn } = propsCpn;
   try {
     return (
-      <Component key={data?.id} {...newPropsCpn} styleMultiple={data?.componentProps?.styleMultiple?.normal}>
+      <Component
+        key={data?.id}
+        {...newPropsCpn}
+        styleMultiple={data?.componentProps?.styleMultiple?.normal}
+      >
         {!_.isEmpty(data?.childs) ? children : propsCpn.children}
       </Component>
     );
