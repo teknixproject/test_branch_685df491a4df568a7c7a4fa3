@@ -1,9 +1,10 @@
 export { default as Button } from './Button';
+export { default as Collapse } from './Collapse';
 export { default as Dropdown } from './Dropdown';
 export { default as List } from './List';
 export { default as Map } from './Map';
 export { default as Modal } from './Modal';
+export { default as Select } from './Select';
 export { default as Table } from './Table';
 export { default as Tabs } from './Tabs';
 export { default as Tree } from './Tree';
-export { default as Select } from './Select';

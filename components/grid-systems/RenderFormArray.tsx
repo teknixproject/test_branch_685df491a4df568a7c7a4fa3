@@ -44,7 +44,7 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
       dataSource={methodsArray.fields}
       renderItem={(item: any, index: number) => (
         <List.Item key={item.id}>
-          {propsCpn?.box?.childs?.map((child: any) => (
+          {/* {propsCpn?.box?.childs?.map((child: any) => (
             <RenderFormItem
               key={`${arrayFieldName}-${index}-${child.id}`}
               data={child}
@@ -54,7 +54,16 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
               parentPath={arrayFieldName}
               formKeys={formKeys}
             />
-          ))}
+          ))} */}
+          <RenderFormItem
+            key={`${arrayFieldName}-${index}-${propsCpn?.box.id}`}
+            data={propsCpn?.box}
+            valueStream={item}
+            formKeysArray={inFormKeys?.formKeys}
+            index={index}
+            parentPath={arrayFieldName}
+            formKeys={formKeys}
+          />
         </List.Item>
       )}
     />

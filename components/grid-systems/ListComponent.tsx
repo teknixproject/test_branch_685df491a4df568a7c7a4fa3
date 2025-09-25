@@ -4,7 +4,6 @@ import {
   Badge,
   Card,
   Checkbox,
-  Collapse,
   DatePicker,
   Descriptions,
   Drawer,
@@ -23,7 +22,18 @@ import dynamic from 'next/dynamic';
 
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
 
-import { Button, Dropdown, List, Map, Modal, Select, Table, Tabs, Tree } from '../special';
+import {
+  Button,
+  Collapse,
+  Dropdown,
+  List,
+  Map,
+  Modal,
+  Select,
+  Table,
+  Tabs,
+  Tree,
+} from '../special';
 import InputText from '../special/InputText';
 import PlaceSearch from '../special/PlaceSearch';
 import ConfigMenu from './configComponent/ConfigMenu';
@@ -40,6 +50,7 @@ export const componentSpecial = {
   tabs: Tabs,
   modal: Modal,
   placesearch: PlaceSearch,
+  collapse: Collapse,
 };
 export const componentRegistry = {
   text: Typography.Text,
@@ -54,7 +65,6 @@ export const componentRegistry = {
   select: Select,
   form: Form,
   formitem: Form.Item,
-  collapse: Collapse,
   tag: Tag,
   card: Card,
   statistic: Statistic,
