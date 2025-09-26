@@ -22,7 +22,7 @@ const PreviewTwo = ({ data, style }: PreviewTwoProps) => {
       style={newStyle}
       className="text-[#858585]"
     >
-      3456
+      34567
       {title}
     </div>
   );
