@@ -5,7 +5,7 @@
 import _ from "lodash";
 import { CSSProperties } from "react";
 
-interface YourNameComponentProps {
+interface TestCreateComponent4 {
   data?: any;
   style?: CSSProperties;
 }
@@ -27,4 +27,4 @@ const YourNameComponent = ({ data, style }: YourNameComponentProps) => {
   );
 };
 
-export default YourNameComponent;
+export default TestCreateComponent4;
