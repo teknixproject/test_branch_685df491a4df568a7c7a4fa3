@@ -1,19 +1,13 @@
-import React from 'react'
-import PreviewOne from './PreviewOne'
-import PreviewTwo2 from './PreviewTwo2'
+import { components } from "./const"
 
-const CustomComponent = ({ componentName }: { componentName: string }) => {
-    const components: any = {'PreviewTwo2': PreviewTwo2,
-    'PreviewOne': PreviewOne
+function convertKeysToLowercase(obj: any) {
+    const newObj: any = {}
+
+    Object.keys(obj).forEach(key => {
+        newObj[key.toLowerCase()] = obj[key]
+    })
+
+    return newObj
 }
 
-    const Component = components[componentName as keyof typeof components]
-
-    if (!Component) {
-        return null
-    }
-
-    return <Component />
-}
-
-export default CustomComponent
+export const componentCodes = convertKeysToLowercase(components)

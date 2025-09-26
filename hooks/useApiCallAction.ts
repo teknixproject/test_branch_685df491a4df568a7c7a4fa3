@@ -202,7 +202,10 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
             type: typeStore,
             dataUpdate: {
               ...outputVariable,
-
+              value: {
+                ...error,
+                response: error?.response?.data,
+              },
               statusCode: error?.response?.status || 500,
               succeeded: false,
               message: error?.message,
