@@ -5,12 +5,12 @@
 import _ from "lodash";
 import { CSSProperties } from "react";
 
-interface CreateCpn2 {
+interface CreateCpn2Props {
   data?: any;
   style?: CSSProperties;
 }
 
-const YourNameComponent = ({ data, style }: YourNameComponentProps) => {
+const CreateCpn2 = ({ data, style }: CreateCpn2Props) => {
   const title = _.get(data, "title", "Title Header");
 
   const newStyle: CSSProperties = {
