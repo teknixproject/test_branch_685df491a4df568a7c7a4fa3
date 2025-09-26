@@ -1,4 +1,4 @@
 import React from 'react'
 import TestCreateComponent from './TestCreateComponent'
 
-export const components = {};
+export const components: any = {};
