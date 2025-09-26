@@ -1,8 +1,6 @@
 'use client';
 /** @jsxImportSource @emotion/react */
 
-import './map.css';
-
 import { Button } from 'antd';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';

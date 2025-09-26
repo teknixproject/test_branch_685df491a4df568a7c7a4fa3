@@ -6,7 +6,7 @@ export type TVariable = {
   value: any;
 };
 
-export type TTypeVariable = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Date' | 'Object';
+export type TTypeVariable = 'string' | 'integer' | 'float' | 'boolean' | 'date' | 'object';
 
 // Helper function: parse object string safely
 const parseObjectString = (str: string): Record<string, any> => {
@@ -25,17 +25,17 @@ const parseObjectString = (str: string): Record<string, any> => {
 // Get default fallback value
 const getDefaultValue = (type: TTypeVariable): any => {
   switch (type) {
-    case 'String':
+    case 'string':
       return '';
-    case 'Integer':
+    case 'integer':
       return 0;
-    case 'Float':
+    case 'float':
       return 0.0;
-    case 'Boolean':
+    case 'boolean':
       return false;
-    case 'Date':
+    case 'date':
       return new Date();
-    case 'Object':
+    case 'object':
       return {};
     default:
       return null;
@@ -53,25 +53,25 @@ export const transformVariable = (variable: Omit<TVariable, 'id' | 'key'>): any 
 
     try {
       switch (type) {
-        case 'String':
+        case 'string':
           return String(value);
 
-        case 'Integer':
+        case 'integer':
           return typeof value === 'string'
             ? parseInt(value, 10) || 0
             : Math.floor(Number(value)) || 0;
 
-        case 'Float':
+        case 'float':
           return typeof value === 'string' ? parseFloat(value) || 0.0 : Number(value) || 0.0;
 
-        case 'Boolean':
+        case 'boolean':
           if (typeof value === 'string') {
             const lower = value.toLowerCase().trim();
             return lower === 'true' || lower === '1' || lower === 'yes';
           }
           return Boolean(value);
 
-        case 'Date':
+        case 'date':
           if (value instanceof Date) return value;
           const date = new Date(value);
           return isNaN(date.getTime()) ? new Date() : date;

@@ -89,6 +89,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       selectedHeaderLayout={selectedHeaderLayout}
       selectedSidebarLayout={selectedSidebarLayout}
       sidebarStyle={sidebarStyle}
+      maxHeight={`calc(100vh - ${headerHeight}px)`}
     />
   )
 }
@@ -103,6 +104,7 @@ const FirtLayoutContent = ({
   selectedHeaderLayout,
   selectedSidebarLayout,
   selectedFooterLayout,
+  maxHeight
 }: {
   childrenCompo?: any,
   headerRef: any,
@@ -113,6 +115,7 @@ const FirtLayoutContent = ({
   selectedHeaderLayout: any,
   selectedSidebarLayout: any,
   selectedFooterLayout: any,
+  maxHeight: any
 }) => {
 
   return (
@@ -139,7 +142,7 @@ const FirtLayoutContent = ({
             />
           </div>
         )}
-        <Csmain className='h-screen' style={{ flex: 1 }}>
+        <Csmain className='h-screen overflow-y-auto overflow-x-hidden' style={{ flex: 1, maxHeight }}>
           {childrenCompo}
         </Csmain>
         {isSidebarRight && !_.isEmpty(selectedSidebarLayout) && (

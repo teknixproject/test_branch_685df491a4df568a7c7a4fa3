@@ -1,15 +1,13 @@
-import React from 'react'
+import { components } from "./const"
 
-const CustomComponent = ({ componentName }: { componentName: string }) => {
-    const components: any = {}
+function convertKeysToLowercase(obj: any) {
+    const newObj: any = {}
 
-    const Component = components[componentName as keyof typeof components]
+    Object.keys(obj).forEach(key => {
+        newObj[key.toLowerCase()] = obj[key]
+    })
 
-    if (!Component) {
-        return null
-    }
-
-    return <Component />
+    return newObj
 }
 
-export default CustomComponent
+export const componentCodes = convertKeysToLowercase(components)

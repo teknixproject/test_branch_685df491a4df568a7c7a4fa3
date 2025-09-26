@@ -139,8 +139,6 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
 
         // Nếu localStorage không có token, thử lấy từ session
         if (!accessToken) {
-          console.log('convertHeader', accessToken);
-
           const session: any = await getSession();
           accessToken = session?.accessToken;
         }
@@ -194,7 +192,6 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
 
       return response.data;
     } catch (error: unknown) {
-      console.log('🚀 ~ useApiCallAction ~ error:', error);
       if (axios.isAxiosError(error)) {
         if (error.status === forbiddenCode) {
           await handleRefreshToken(apiCall, body, getOldOutput(ouptut as any), params);
@@ -205,8 +202,10 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
             type: typeStore,
             dataUpdate: {
               ...outputVariable,
-
-              value: error,
+              value: {
+                ...error,
+                response: error?.response?.data,
+              },
               statusCode: error?.response?.status || 500,
               succeeded: false,
               message: error?.message,
