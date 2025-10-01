@@ -76,6 +76,8 @@ const RenderSliceItem: FC<TProps> = (props) => {
         />
       );
   }
+  console.log('RenderSliceItem', { data, Component });
+
   return (
     <ComponentRenderer Component={Component} propsCpn={propsCpn} data={data}>
       {data?.childs?.map((child, index) => (

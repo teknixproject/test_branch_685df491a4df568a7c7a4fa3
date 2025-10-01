@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
         runtimeChunk: false,
       };
     }
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
     return config;
   },
   typescript: {
