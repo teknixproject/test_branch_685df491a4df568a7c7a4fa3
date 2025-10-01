@@ -1,1 +1,1 @@
-export const components = {};
+export const components: any = {};
