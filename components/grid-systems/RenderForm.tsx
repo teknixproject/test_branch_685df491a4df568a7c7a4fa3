@@ -18,6 +18,7 @@ const RenderForm: FC<TProps> = (props) => {
     ...props,
     methods,
   });
+  console.log('🚀 ~ RenderForm ~ propsCpn:', propsCpn);
 
   useDeepCompareEffect(() => {
     if (!_.isEmpty(propsCpn?.values)) methods.reset(propsCpn?.values);

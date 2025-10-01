@@ -31,6 +31,7 @@ export const useMessageAction = (props: TActionsProps) => {
     params?: THandleDataParams
   ) => {
     const messageType = action.data?.option;
+    console.log('🚀 ~ executeMessageAction ~ messageType:', messageType);
     if (!messageType) return;
     switch (messageType) {
       case MESSAGE_TYPE.SHOW:

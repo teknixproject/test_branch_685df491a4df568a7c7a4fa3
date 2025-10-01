@@ -38,11 +38,11 @@ const nextConfig: NextConfig = {
   compiler: {
     styledComponents: true,
   },
-  experimental: {
-    turbo: {
-      disabled: true, // Tắt Turbopack rõ ràng
-    },
-  },
+  // experimental: {
+  //   turbo: {
+  //     disabled: true, // Tắt Turbopack rõ ràng
+  //   },
+  // },
   productionBrowserSourceMaps: true,
 };
 

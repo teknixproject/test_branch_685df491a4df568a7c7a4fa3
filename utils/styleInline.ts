@@ -1,6 +1,6 @@
 import _, { kebabCase } from 'lodash';
 
-import { CSSObject } from '@emotion/react';
+import { css, CSSObject } from '@emotion/react';
 
 type TForm = {
   normal: React.CSSProperties;
@@ -109,4 +109,29 @@ export const convertCSSTringToObject = (cssString: string): Record<string, any> 
     });
 
   return Object.fromEntries(rules);
+};
+export const buildStyle = (staticProps: Record<string, any>) => {
+  const cssObject = convertCSSTringToObject(staticProps?.styleExtra);
+
+  const advancedCss = {
+    ...convertToEmotionStyle({
+      ...staticProps?.styleMultiple,
+    }),
+    ...cssObject,
+  };
+
+  let cssMultiple;
+
+  if (typeof advancedCss === 'string') {
+    cssMultiple = css`
+      ${advancedCss}
+    `;
+  } else if (advancedCss && typeof advancedCss === 'object') {
+    const convertedCssObj = convertCssObjectToCamelCase(advancedCss);
+    cssMultiple = css(convertedCssObj);
+  } else {
+    cssMultiple = css``;
+  }
+
+  return cssMultiple;
 };

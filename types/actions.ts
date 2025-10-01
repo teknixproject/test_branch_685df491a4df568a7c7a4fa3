@@ -48,7 +48,8 @@ export type TTriggerValue =
   | 'onEnter'
   | 'onMouseDown'
   | 'onChange'
-  | 'onSubmit';
+  | 'onSubmit'
+  | string;
 export const OPERATORS: {
   name: string;
   value: TOperatorCompare;
@@ -219,11 +220,20 @@ export type TAction<T = unknown> = {
   data?: T;
   delay?: number;
 };
-export type TTriggerActionValue = {
-  [key: string]: TAction;
+export interface Arg {
+  name: string;
+  index: number;
+  type: string;
+  isList: boolean;
+}
+export type TTriggerActionValue<T = unknown> = {
+  data: Record<string, TAction<T>>;
+  name: string;
+  label: string;
+  args: Arg[];
 };
-export type TTriggerActions = {
-  [key in TTriggerValue]?: TTriggerActionValue;
+export type TTriggerActions<T = unknown> = {
+  [key in TTriggerValue]?: TTriggerActionValue<T>;
 };
 
 export type TActionStateManagement = {
