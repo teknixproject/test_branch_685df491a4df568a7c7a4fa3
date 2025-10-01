@@ -23,13 +23,33 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  webpack(config, { dev }) {
-    if (dev) {
-      config.optimization = {
-        ...config.optimization,
-        runtimeChunk: false,
-      };
+  webpack(config) {
+    // Tìm và exclude SVG khỏi file-loader mặc định của Next.js
+    const fileLoaderRule = config.module.rules.find((rule: any) =>
+      rule.test?.test?.('.svg')
+    );
+
+    if (fileLoaderRule) {
+      fileLoaderRule.exclude = /\.svg$/i;
     }
+
+    // Thêm rule mới cho SVG
+    config.module.rules.push(
+      {
+        test: /\.svg$/i,
+        issuer: /\.[jt]sx?$/,
+        use: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              typescript: true,
+              ext: 'tsx',
+            },
+          },
+        ],
+      }
+    );
+
     return config;
   },
   typescript: {
@@ -37,11 +57,6 @@ const nextConfig: NextConfig = {
   },
   compiler: {
     styledComponents: true,
-  },
-  experimental: {
-    turbo: {
-      disabled: true, // Tắt Turbopack rõ ràng
-    },
   },
   productionBrowserSourceMaps: true,
 };
