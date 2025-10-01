@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
 import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "@/icons";
-import { Badge } from "../ui/badge";
+import Badge from "../tailAdminUI/ui/badge/Badge";
 
-const EcommerceMetricCards = () => {
+const EcommerceMetricCard = () => {
+  console.log('EcommerceMetricCards')
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
@@ -53,4 +54,4 @@ const EcommerceMetricCards = () => {
   );
 };
 
-export default EcommerceMetricCards
+export default EcommerceMetricCard
