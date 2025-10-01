@@ -86,8 +86,8 @@
     "xhub-chat-dashboard": "^0.0.5",
     "zod": "^3.25.67",
     "zustand": "^5.0.3",
-    "@": "latest",
-    "..": "latest"
+    "swiper": "^11.2.0",
+    "@popperjs/core": "^2.11.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
