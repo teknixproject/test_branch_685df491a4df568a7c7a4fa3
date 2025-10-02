@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { useEffect, useRef } from 'react';
 
 import { stateManagementStore } from '@/stores';
 import { TAction, TActionUpdateState, TTypeSelectState } from '@/types';
@@ -20,17 +19,6 @@ export const useUpdateStateAction = (props: TActionsProps): TUseActions => {
   // Store hooks
   const { getData } = useHandleData(props);
   const { findVariable, updateVariables } = stateManagementStore();
-  // Memoized actions from data
-
-  const mounted = useRef(false);
-
-  useEffect(() => {
-    mounted.current = true;
-
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
 
   //#region Action Handlers
 

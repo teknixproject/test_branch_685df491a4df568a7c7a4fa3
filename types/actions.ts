@@ -2,7 +2,36 @@ import { TData } from './dataItem';
 import { TVariable } from './stateManagement';
 
 export type TApiResponseOption = 'jsonBody' | 'statusCode' | 'succeeded';
+/**
+ *
+ * This is type of node to render in action flow
+ * @enum ACTION_FC_TYPE
+ */
+export enum ACTION_FC_TYPE {
+  ACTION = 'action',
+  CONDITIONAL = 'conditional',
+  CONDITIONAL_CHILD = 'conditionalChild',
+  LOOP_OVER_LIST = 'loopOverList',
+  LOOP = 'loop',
+}
 
+/**
+ *
+ * This is type of execute action
+ * @enum ACTION_TYPE
+ */
+export enum ACTION_TYPE {
+  NAVIGATE = 'navigate',
+  API_CALL = 'apiCall',
+  UPDATE_STATE_MANAGEMENT = 'updateStateManagement',
+  CONDITIONAL_CHILD = 'conditionalChild',
+  CONDITIONAL = 'conditional',
+  LOOP_OVER_LIST = 'loopOverList',
+  LOOP = 'loop',
+  CUSTOM_FUNCTION = 'customFunction',
+  FORM_STATE = 'formState',
+  MESSAGE = 'message',
+}
 export type TSourceValue =
   | 'combineText'
   | 'appState'

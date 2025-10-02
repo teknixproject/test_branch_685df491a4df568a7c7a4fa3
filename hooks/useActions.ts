@@ -142,6 +142,7 @@ export const useActions = (props: TActionsProps): TUseActions => {
   }, []);
 
   const executeAction = async (action: TAction, params?: THandleDataParams): Promise<void> => {
+    console.log('🚀 ~ executeAction ~ action:', action);
     if (!action) return;
     if (!action.type) return;
 

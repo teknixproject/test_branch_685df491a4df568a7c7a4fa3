@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import _ from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import { FieldValues, UseFieldArrayReturn, UseFormReturn } from 'react-hook-form';
 
 import {
+  ACTION_FC_TYPE,
+  ACTION_TYPE,
   TAction,
   TActionApiCall,
   TActionCustomFunction,
@@ -15,6 +17,7 @@ import {
   TConditional,
   TConditionChildMap,
   TTriggerActions,
+  TTriggerActionValue,
   TTriggerValue,
 } from '@/types';
 import { GridItem } from '@/types/gridItem';
@@ -35,10 +38,9 @@ import { useUpdateStateAction } from './useUpdateStateAction';
 export type TUseActions = {
   handleAction: (
     triggerType: TTriggerValue,
-    action?: TTriggerActions,
+    action?: TTriggerActionValue,
     params?: THandleDataParams
   ) => Promise<void>;
-  isLoading: boolean;
   executeTriggerActions: (
     triggerActions: TTriggerActions,
     triggerType: TTriggerValue,
@@ -56,31 +58,29 @@ export type TActionsProps = {
 };
 
 export const useActionsV2 = (props: TActionsProps): TUseActions => {
-  const { data } = useMemo(() => {
-    return props;
-  }, [props]);
+  const { data } = props;
 
-  // const actions = useMemo(() => _.get(data, 'actions') as TTriggerActions, [data]);
-  const actions = useMemo(() => getPropActions(data!) as TTriggerActions, [data]);
-  console.log(`🚀 ~ useActions ~ actions: ${data?.id}`, actions);
   const setMultipleActions = actionHookSliceStore((state) => state.setMultipleActions);
+  const setTriggerName = actionHookSliceStore((state) => state.setTriggerName);
+  const findTriggerFullByNodeId = actionHookSliceStore((state) => state.findTriggerFullByNodeId);
   const findAction = actionHookSliceStore((state) => state.findAction);
   const { handleApiCallAction } = useApiCallAction(props);
-  // const { executeConditional } = useConditionAction();
   const { executeConditionalChild } = useConditionChildAction(props);
   const { handleUpdateStateAction } = useUpdateStateAction(props);
   const { handleCustomFunction } = useCustomFunction(props);
   const { handleFormState } = useFormStateAction(props);
   const { handleNavigateAction } = useNavigateAction(props);
-  const { executeLoopOverList } = useLoopActions();
-  const { executeMessageAction } = useMessageAction(props);
-  const [isLoading, setIsLoading] = useState(false);
+  const { executeLoopOverList } = useLoopActions(props);
+  const { handleMessageAction } = useMessageAction(props);
 
   const executeConditional = async (action: TAction<TConditional>, params?: THandleDataParams) => {
     const conditions = action?.data?.conditions as string[];
     if (_.isEmpty(conditions)) return;
     for (const conditionId of conditions) {
-      const condition = findAction(conditionId) as TAction<TConditionChildMap>;
+      const condition = findAction({
+        nodeId: data?.id as string,
+        actionId: conditionId,
+      }) as TAction<TConditionChildMap>;
 
       if (condition) {
         const isConditionMet = await executeActionFCType(condition, params);
@@ -96,13 +96,13 @@ export const useActionsV2 = (props: TActionsProps): TUseActions => {
     if (!action?.fcType) return;
     let valueReturnCondition = null;
     switch (action.fcType) {
-      case 'action':
+      case ACTION_FC_TYPE.ACTION:
         await executeAction(action as TAction<TActionApiCall>, params);
         break;
-      case 'conditional':
+      case ACTION_FC_TYPE.CONDITIONAL:
         await executeConditional(action as TAction<TConditional>, params);
         break;
-      case 'conditionalChild':
+      case ACTION_FC_TYPE.CONDITIONAL_CHILD:
         const isReturnValue = (action?.data as TConditionChildMap)?.isReturnValue;
         const conditionChildData = action?.data as TConditionChildMap;
         if ((action.data as TConditionChildMap).label === 'else') {
@@ -121,7 +121,7 @@ export const useActionsV2 = (props: TActionsProps): TUseActions => {
         if (!isMatch) return; //prevent call next action
         valueReturnCondition = true;
         break;
-      case 'loop':
+      case ACTION_FC_TYPE.LOOP:
         await executeLoopOverList(action as TAction<TActionLoop>, params);
         break;
 
@@ -129,39 +129,31 @@ export const useActionsV2 = (props: TActionsProps): TUseActions => {
         console.error(`Unknown fcType: ${action.fcType}`);
     }
     if (action.next) {
-      await executeActionFCType(findAction(action.next), params);
+      const nextAction = findAction({ nodeId: data?.id as string, actionId: action.next });
+      console.log(`🚀 ~ executeActionFCType ~ nextAction: ${data?.id}`, nextAction);
+      await executeActionFCType(nextAction, params);
     }
     return valueReturnCondition;
   };
 
-  const mounted = useRef(false);
-
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
   const executeAction = async (action: TAction, params?: THandleDataParams): Promise<void> => {
-    console.log('🚀 ~ executeAction ~ action:', action);
     if (!action) return;
     if (!action.type) return;
 
     try {
       switch (action.type) {
-        case 'navigate':
+        case ACTION_TYPE.NAVIGATE:
           return await handleNavigateAction(action as TAction<TActionNavigate>, params);
-        case 'apiCall':
+        case ACTION_TYPE.API_CALL:
           return await handleApiCallAction(action as TAction<TActionApiCall>, params);
-        case 'updateStateManagement':
+        case ACTION_TYPE.UPDATE_STATE_MANAGEMENT:
           return await handleUpdateStateAction(action as TAction<TActionUpdateState>, params);
-        case 'customFunction':
+        case ACTION_TYPE.CUSTOM_FUNCTION:
           return await handleCustomFunction(action as TAction<TActionCustomFunction>, params);
-        case 'formState':
+        case ACTION_TYPE.FORM_STATE:
           return await handleFormState(action as TAction<TActionFormState>, params);
-        case 'message':
-          return await executeMessageAction(action as TAction<TActionMessage>, params);
+        case ACTION_TYPE.MESSAGE:
+          return await handleMessageAction(action as TAction<TActionMessage>, params);
         default:
           console.error(`Unknown action type: ${action.type}`);
       }
@@ -175,18 +167,15 @@ export const useActionsV2 = (props: TActionsProps): TUseActions => {
     triggerType: TTriggerValue,
     params?: THandleDataParams
   ): Promise<void> => {
-    const triggerValues = triggerActions || data?.action;
-    console.log(`🚀 ~ executeTriggerActions ~ triggerValues: ${data?.id}`, triggerValues);
+    const triggerValues = triggerActions;
     const actionsToExecute = triggerValues[triggerType]?.data;
 
-    await setMultipleActions({
-      actions: triggerActions,
-      triggerName: triggerType,
-    });
     if (!actionsToExecute) return;
 
     // Find and execute the root action (parentId === null)
-    const rootAction = Object.values(actionsToExecute).find((action) => !action.parentId);
+    const rootAction = Object.values(actionsToExecute).find(
+      (action) => !action.parentId && action.id
+    );
 
     if (rootAction) {
       await executeActionFCType(rootAction, params);
@@ -196,39 +185,29 @@ export const useActionsV2 = (props: TActionsProps): TUseActions => {
   const handleAction = useCallback(
     async (
       triggerType: TTriggerValue,
-      action?: TTriggerActions,
+      action?: TTriggerActionValue,
       params?: THandleDataParams
     ): Promise<void> => {
-      console.log('🚀 ~ useActionsV2 ~ triggerType:', triggerType);
+      // console.log(`🚀 ~ useActionsV2 ~ action:${data?.id}`, action);
       try {
-        await executeTriggerActions(getPropActions(data!), triggerType, params);
+        let triggerFull = findTriggerFullByNodeId(data?.id as string);
+        if (!triggerFull) {
+          triggerFull = getPropActions(data!);
+          if (_.isEmpty(triggerFull)) return;
+          setMultipleActions({
+            actions: {
+              [data?.id as string]: triggerFull,
+            },
+            triggerName: triggerType,
+          });
+        }
+        setTriggerName(triggerType);
+        await executeTriggerActions(triggerFull, triggerType, params);
       } finally {
       }
     },
-    [data?.actions, executeTriggerActions]
+    [data, executeTriggerActions]
   );
-  const renderedIdRef = useRef<Set<string>>(new Set());
 
-  return { handleAction, isLoading, executeTriggerActions, executeActionFCType };
-};
-export const handleActionExternal = async (
-  triggerType: TTriggerValue,
-  actions: TTriggerActions = {},
-  params: THandleDataParams,
-  executeTriggerActions: (
-    triggerActions: TTriggerActions,
-    triggerType: TTriggerValue,
-    params?: THandleDataParams
-  ) => Promise<void>
-): Promise<void> => {
-  if (typeof executeTriggerActions !== 'function') {
-    console.warn('No executeTriggerActions function provided.');
-    return;
-  }
-
-  try {
-    await executeTriggerActions(actions, triggerType, params);
-  } catch (error) {
-    console.error('Error while executing trigger actions:', error);
-  }
+  return { handleAction, executeTriggerActions, executeActionFCType };
 };

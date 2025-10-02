@@ -1,10 +1,13 @@
 'use client';
 /** @jsxImportSource @emotion/react */
 import { List } from 'antd';
-import { FC, useMemo } from 'react';
+import { FC, useEffect } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
+import { useActionsV2 } from '@/hooks/useActionsV2';
 import { useRenderItem } from '@/hooks/useRenderItem';
+import { getPropActions, prepareActions } from '@/utils';
 
 import RenderFormItem from './RenderFormItem';
 import { TProps } from './RenderSliceItem';
@@ -12,17 +15,18 @@ import { TProps } from './RenderSliceItem';
 const RenderFormArrayItem: FC<TProps> = (props) => {
   const { data, formKeys, valueStream, parentPath = '' } = props;
   const inFormKeys = formKeys?.find((item) => item?.value === data?.name);
-  const methods = useFormContext();
-
   // The field name for this array
   const arrayFieldName = parentPath ? `${parentPath}.${inFormKeys?.key}` : inFormKeys?.key || '';
+
+  //#region hooks
+  const methods = useFormContext();
 
   const methodsArray = useFieldArray({
     control: methods.control,
     name: arrayFieldName,
   });
 
-  const { isLoading, valueType, propsCpn } = useRenderItem({
+  const { valueType, propsCpn } = useRenderItem({
     ...props,
     data,
     valueStream,
@@ -30,7 +34,26 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
     methodsArray,
   });
 
-  const { name, ...rest } = useMemo(() => propsCpn, [propsCpn]);
+  //handle page load for actions
+  useEffect(() => {
+    const actionsProps = getPropActions(data);
+    if ('onPageLoad' in actionsProps || {}) handleAction('onPageLoad');
+  }, []);
+
+  //handle actions
+  const { handleAction } = useActionsV2({
+    data,
+    valueStream: props.valueStream,
+    methods,
+    methodsArray,
+  });
+
+  //prepare actions
+  const events = useDeepCompareMemo(() => {
+    return prepareActions({ data, handleAction, props });
+  }, [data, handleAction]);
+
+  const { name, ...rest } = { ...propsCpn, ...events };
 
   if (valueType === 'container' && propsCpn && 'mount' in propsCpn && !propsCpn.mount) {
     return null;
@@ -44,17 +67,6 @@ const RenderFormArrayItem: FC<TProps> = (props) => {
       dataSource={methodsArray.fields}
       renderItem={(item: any, index: number) => (
         <List.Item key={item.id}>
-          {/* {propsCpn?.box?.childs?.map((child: any) => (
-            <RenderFormItem
-              key={`${arrayFieldName}-${index}-${child.id}`}
-              data={child}
-              valueStream={item}
-              formKeysArray={inFormKeys?.formKeys}
-              index={index}
-              parentPath={arrayFieldName}
-              formKeys={formKeys}
-            />
-          ))} */}
           <RenderFormItem
             key={`${arrayFieldName}-${index}-${propsCpn?.box.id}`}
             data={propsCpn?.box}

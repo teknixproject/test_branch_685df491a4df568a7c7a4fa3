@@ -83,7 +83,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
   const forbiddenCode = authSettingStore((state) => state.forbiddenCode);
   const findVariable = stateManagementStore((state) => state.findVariable);
   const updateVariables = stateManagementStore((state) => state.updateVariables);
-  // const { handleCustomFunction } = useCustomFunction(props);
+
   const convertActionVariables = useCallback(
     async (
       actionVariables: TActionVariable[],
@@ -242,6 +242,7 @@ export const useApiCallAction = (props: TActionsProps): TUseActions => {
     };
   const handleBody = (apiCall: TApiCallValue, variables: Record<string, any>) => {
     const formData = props.methods?.getValues();
+    console.log('🚀 ~ handleBody ~ formData:', formData);
     return formData || convertApiCallBody(apiCall?.body, variables);
   };
   const handleApiCallAction = async (

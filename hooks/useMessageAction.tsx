@@ -26,12 +26,11 @@ export const useMessageAction = (props: TActionsProps) => {
       duration: duration,
     });
   };
-  const executeMessageAction = async (
+  const handleMessageAction = async (
     action: TAction<TActionMessage>,
     params?: THandleDataParams
   ) => {
     const messageType = action.data?.option;
-    console.log('🚀 ~ executeMessageAction ~ messageType:', messageType);
     if (!messageType) return;
     switch (messageType) {
       case MESSAGE_TYPE.SHOW:
@@ -45,5 +44,5 @@ export const useMessageAction = (props: TActionsProps) => {
     }
   };
 
-  return { executeMessageAction };
+  return { handleMessageAction };
 };
