@@ -5,6 +5,8 @@ import _ from 'lodash';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
+import "swiper/swiper-bundle.css";
+import "simplebar-react/dist/simplebar.min.css";
 
 import LayoutContent from '@/components/grid-systems/LayoutContent';
 import { LayoutProvider } from '@/context/LayoutContext';
@@ -13,6 +15,7 @@ import AntdProvider from '@/providers/AntdProvider';
 import ReactQueryProvider from '@/providers/QueryClient';
 import { MetadataIcon } from '@/types/seo';
 import { Providers } from '@/components/provider/session-provider';
+import { ThemeProvider } from "@/context/ThemeContext";
 
 import { fetchMetadata } from './actions/server';
 
@@ -144,19 +147,22 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href={shortcutIcon || DEFAULT_ICONS.apple} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ReactQueryProvider>
-          <ApiStoreProvider>
-            <LayoutProvider>
-              <LayoutContent>
-                <AntdProvider>
-                  <Providers>
-                    {children}
-                  </Providers>
-                </AntdProvider>
-              </LayoutContent>
-            </LayoutProvider>
-          </ApiStoreProvider>
-        </ReactQueryProvider>
+        <ThemeProvider>
+          <ReactQueryProvider>
+            <ApiStoreProvider>
+              <LayoutProvider>
+                <LayoutContent>
+                  <AntdProvider>
+                    <Providers>
+                      {children}
+                    </Providers>
+                  </AntdProvider>
+                </LayoutContent>
+              </LayoutProvider>
+            </ApiStoreProvider>
+          </ReactQueryProvider>
+        </ThemeProvider>
+
       </body>
     </html>
   );
