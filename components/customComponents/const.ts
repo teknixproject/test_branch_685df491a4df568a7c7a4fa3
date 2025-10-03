@@ -1,1 +1,5 @@
-export const components: any = {};
+import IntegrationCardTailAdmin from "./IntegrationCardTailAdmin";
+
+export const components: any = {
+      'IntegrationCardTailAdmin': IntegrationCardTailAdmin
+};
