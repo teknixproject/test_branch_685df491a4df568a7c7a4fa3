@@ -1,4 +1,3 @@
-import React from 'react'
 import TestCpn from './TestCpn'
 import IntegrationCardTailAdmin from './IntegrationCardTailAdmin'
 import SupportMetricsTailAdmin from './SupportMetricsTailAdmin'
