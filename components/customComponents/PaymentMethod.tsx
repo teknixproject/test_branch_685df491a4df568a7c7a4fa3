@@ -2,9 +2,10 @@ import React from "react";
 interface PaymentMethodProps {
   title: string
   onAlert: any
+  onClickAPI: any
 }
 
-export default function PaymentMethod({ title, onAlert }: PaymentMethodProps) {
+export default function PaymentMethod({ title, onAlert, onClickAPI }: PaymentMethodProps) {
   return (
     <div className="mb-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="flex flex-col justify-between gap-5 px-6 py-5 sm:flex-row sm:items-start">
@@ -91,7 +92,7 @@ export default function PaymentMethod({ title, onAlert }: PaymentMethodProps) {
                 <button onClick={() => onAlert(5, 10)} className="shadow-theme-xs inline-flex h-6 items-center justify-center rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                   Edit
                 </button>
-                <button className="shadow-theme-xs inline-flex h-6 items-center justify-center rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                <button onClick={onClickAPI} className="shadow-theme-xs inline-flex h-6 items-center justify-center rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
                   Delete
                 </button>
               </div>
