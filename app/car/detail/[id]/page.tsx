@@ -1,11 +1,8 @@
-import React from 'react';
-
 import EntryPage from '@/components/page/EntryPage';
 
-type Props = object;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-const Page: React.FC<Props> = ({}) => {
-  return <EntryPage></EntryPage>;
-};
-
-export default Page;
+export default async function Home() {
+  return <EntryPage />;
+}

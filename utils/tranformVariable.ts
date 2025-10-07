@@ -95,12 +95,14 @@ export const transformVariable = (variable: Omit<TVariable, 'id' | 'key'>): any 
   if (variable.isList) {
     if (!Array.isArray(variable.value)) {
       console.warn('Expected array but got:', variable);
-      return [transformSingleValue(variable.value, variable.type)];
+      return [transformSingleValue(variable.value, variable.type?.toLowerCase() as TTypeVariable)];
     }
-    return variable.value.map((item) => transformSingleValue(item, variable.type));
+    return variable.value.map((item) =>
+      transformSingleValue(item, variable.type?.toLowerCase() as TTypeVariable)
+    );
   }
 
-  return transformSingleValue(variable.value, variable.type);
+  return transformSingleValue(variable.value, variable.type?.toLowerCase() as TTypeVariable);
 };
 
 // With validation

@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { JSONPath } from 'jsonpath-plus';
 import _, { isEqual } from 'lodash';
 import { useParams } from 'next/navigation';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
@@ -127,10 +127,7 @@ export const useHandleData = (props: TUseHandleData): UseHandleDataReturn => {
   // FIX: Use ref to prevent infinite re-renders
   const getDataRef = useRef<any>(null);
 
-  const variableids = useDeepCompareMemo(
-    () => extractVariableIdsWithLodash(props.activeData),
-    [props.activeData]
-  );
+  const variableids = useMemo(() => extractVariableIdsWithLodash(props.activeData), []);
 
   // FIX: Stabilize dependencies with useMemo
   const stableDeps = {

@@ -50,7 +50,6 @@ export const useNavigateAction = ({ data, valueStream, methods }: TProps): TUseA
     try {
       // Accept absolute URLs with valid protocol
       const parsed = new URL(url);
-      console.log('🚀 ~ isValidUrl ~ parsed:', parsed);
 
       return ['http:', 'https:'].includes(parsed.protocol);
     } catch {

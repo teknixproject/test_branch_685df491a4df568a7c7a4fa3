@@ -1,9 +1,14 @@
 import { stateManagementStore } from '@/stores';
 import {
-    TAction, TActionLoop, TActionLoopOverList, TConditionChildMap, TTypeSelectState
+  TAction,
+  TActionLoop,
+  TActionLoopOverList,
+  TConditionChildMap,
+  TTypeSelectState,
 } from '@/types';
 
 import { actionHookSliceStore } from './store/actionSliceStore';
+import { TActionsProps } from './useActionsV2';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
 // Hằng số cấu hình
@@ -87,23 +92,29 @@ const handleListLoop = async (
 };
 
 // Main hook
-export const useLoopActions = () => {
+export const useLoopActions = (props: TActionsProps) => {
   const { getData } = useHandleData({});
   const findVariable = stateManagementStore((state) => state.findVariable);
   const findAction = actionHookSliceStore((state) => state.findAction);
   // const { handleCompareCondition } = useConditionAction();
-
+  const { data } = props;
   const executeLoopOverList = async (action: TAction<TActionLoop>, params?: THandleDataParams) => {
     const option = action.data?.option;
 
     if (option === 'while') {
-      const loopCondition = findAction(action.data?.while?.condition || '');
+      const loopCondition = findAction({
+        nodeId: data?.id as string,
+        actionId: action.data?.while?.condition as string,
+      });
       if (!loopCondition) return;
 
       // await handleWhileLoop(loopCondition as TAction<TConditionChildMap>, handleCompareCondition);
     } else if (option === 'overList') {
       const overListId = action.data?.overList?.condition;
-      const overList = findAction(overListId || '') as TAction<TActionLoopOverList>;
+      const overList = findAction({
+        nodeId: data?.id as string,
+        actionId: overListId as string,
+      }) as TAction<TActionLoopOverList>;
 
       if (!overList?.data) return;
 

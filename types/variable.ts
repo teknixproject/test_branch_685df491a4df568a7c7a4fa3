@@ -1,1 +1,1 @@
-export type TTypeVariable = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Date' | 'Object';
+export type TTypeVariable = 'string' | 'integer' | 'float' | 'boolean' | 'date' | 'object';
