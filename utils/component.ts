@@ -1,7 +1,8 @@
 export const getComponentType = (value: string) => {
   const valueType = value.toLowerCase();
   const isForm = ['form'].includes(valueType);
-  const isNoChildren = ['list', 'collapse', 'icon'].includes(valueType);
+  const isNoChildren =
+    ['list', 'collapse', 'icon'].includes(valueType) || valueType.includes('chart');
   const isChart = valueType.includes('chart');
   const isUseOptionsData = ['select', 'radio', 'checkbox'].includes(valueType);
   const isInput = [

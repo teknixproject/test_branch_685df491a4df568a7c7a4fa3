@@ -26,7 +26,7 @@ export const useMessageAction = (props: TActionsProps) => {
       duration: duration,
     });
   };
-  const executeMessageAction = async (
+  const handleMessageAction = async (
     action: TAction<TActionMessage>,
     params?: THandleDataParams
   ) => {
@@ -44,5 +44,5 @@ export const useMessageAction = (props: TActionsProps) => {
     }
   };
 
-  return { executeMessageAction };
+  return { handleMessageAction };
 };

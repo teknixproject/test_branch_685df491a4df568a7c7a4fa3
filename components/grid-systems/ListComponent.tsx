@@ -21,9 +21,11 @@ import dynamic from 'next/dynamic';
 
 import { Bar, Column, Histogram, Line, Liquid, Pie, Radar, Rose, Stock } from '@ant-design/plots';
 
+import { componentCodes } from '../customComponents';
 import {
   Button,
   Collapse,
+  DatePicker,
   Dropdown,
   List,
   Map,
@@ -32,12 +34,10 @@ import {
   Table,
   Tabs,
   Tree,
-  DatePicker
 } from '../special';
 import InputText from '../special/InputText';
 import PlaceSearch from '../special/PlaceSearch';
 import ConfigMenu from './configComponent/ConfigMenu';
-import { componentCodes } from '../customComponents';
 
 const Icon = dynamic(() => import('@iconify/react').then((m) => m.Icon), { ssr: false });
 
@@ -52,6 +52,7 @@ export const componentSpecial = {
   modal: Modal,
   placesearch: PlaceSearch,
   collapse: Collapse,
+  badge: Badge,
 };
 export const componentRegistry = {
   text: Typography.Text,
@@ -83,13 +84,12 @@ export const componentRegistry = {
   menu: ConfigMenu,
   drawer: Drawer,
   datepicker: DatePicker,
-  badge: Badge,
   icon: Icon,
   textarea: Input.TextArea,
   upload: Upload,
   description: Descriptions,
   ...componentSpecial,
-  ...componentCodes
+  ...componentCodes,
 };
 
 export const getName = (id: string) => id.split('$')[0];

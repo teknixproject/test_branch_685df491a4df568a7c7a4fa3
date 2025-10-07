@@ -2,29 +2,55 @@
 /** @jsxImportSource @emotion/react */
 import { Checkbox, DatePicker, Switch, Upload, UploadFile } from 'antd';
 import dayjs from 'dayjs';
-import { FC } from 'react';
+import _ from 'lodash';
+import { FC, useEffect, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useDeepCompareMemo } from 'use-deep-compare';
 
+import { useActionsV2 } from '@/hooks/useActionsV2';
 import { useRenderItem } from '@/hooks/useRenderItem';
+import { getPropActions, prepareActions } from '@/utils';
 import { getComponentType } from '@/utils/component';
 
+import { componentRegistry } from './ListComponent';
+import RenderComponent from './RenderComponent';
 import RenderFormArrayItem from './RenderFormArray';
-import { ComponentRenderer, TProps } from './RenderSliceItem';
+import { TProps } from './RenderSliceItem';
 
 const RenderFormItem: FC<TProps> = (props) => {
   const { data, formKeys, valueStream, formKeysArray, index, parentPath = '' } = props;
+  //hooks
   const methods = useFormContext();
-  const { control } = methods;
-  const { isLoading, valueType, Component, propsCpn } = useRenderItem({
+  //handle actions
+  const { handleAction } = useActionsV2({ data, valueStream: props.valueStream, methods });
+
+  const { valueType, propsCpn } = useRenderItem({
     ...props,
     data,
     valueStream,
     methods,
   });
-  const { name, ...rest } = propsCpn;
+  //prepare actions
+  const events = useDeepCompareMemo(() => {
+    return prepareActions({ data, handleAction, props });
+  }, [data, handleAction]);
 
+  const { name, ...rest } = { ...propsCpn, ...events };
+  const { control } = methods;
   const currentFormKeys = formKeysArray || formKeys;
   const inFormKeys = currentFormKeys?.find((item) => item?.value === data?.name);
+
+  //registy a component
+  const Component = useMemo(
+    () => (valueType ? _.get(componentRegistry, valueType) || 'div' : 'div'),
+    [valueType]
+  );
+
+  //handle page load for actions
+  useEffect(() => {
+    const actionsProps = getPropActions(data);
+    if ('onPageLoad' in actionsProps || {}) handleAction('onPageLoad');
+  }, []);
 
   const getFieldName = () => {
     if (!inFormKeys) return '';
@@ -190,7 +216,7 @@ const RenderFormItem: FC<TProps> = (props) => {
   }
 
   return (
-    <ComponentRenderer Component={Component} propsCpn={rest} data={data}>
+    <RenderComponent Component={Component} propsCpn={rest} data={data}>
       {data?.childs?.map((child) => (
         <RenderFormItem
           {...props}
@@ -201,7 +227,7 @@ const RenderFormItem: FC<TProps> = (props) => {
           formKeysArray={formKeysArray}
         />
       ))}
-    </ComponentRenderer>
+    </RenderComponent>
   );
 };
 export default RenderFormItem;

@@ -1,6 +1,6 @@
 import { TAction, TConditionalChild, TConditionChildMap } from '@/types';
 
-import { actionHookSliceStore } from './store/actionSliceStore';
+import { actionHookSliceStore, TActionHookActions } from './store/actionSliceStore';
 import { TActionsProps } from './useActions';
 import { THandleDataParams, useHandleData } from './useHandleData';
 
@@ -128,7 +128,6 @@ export const evaluateCompareCondition = async (
   getData: (value: any, params?: THandleDataParams) => any,
   params?: THandleDataParams
 ): Promise<boolean> => {
-  console.log('🚀 ~ evaluateCompareCondition ~ compare:', compare);
   if (!compare?.firstValue || !compare?.secondValue) {
     console.warn('Missing comparison values');
     return false;
@@ -209,11 +208,10 @@ export const handleCompareCondition = async (
  */
 export const processCondition = async (
   conditionChild: TAction<TConditionChildMap>,
-  findAction: (id: string) => TAction | undefined,
+  findAction: TActionHookActions['findAction'],
   getData: (value: any) => any,
   params?: THandleDataParams
 ): Promise<boolean> => {
-  console.log('🚀 ~ processCondition ~ conditionChild:', conditionChild);
   if (!conditionChild?.data) {
     console.warn(`Condition data not found: ${conditionChild.id}`);
     return false;

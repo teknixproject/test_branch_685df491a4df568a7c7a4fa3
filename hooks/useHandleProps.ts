@@ -8,11 +8,11 @@ import { GridItem } from '@/types/gridItem';
 
 import { useActions } from './useActions';
 
-interface TDataProps {
-  name: string;
-  type: 'data' | 'MouseEventHandler';
-  data: TTriggerActions;
-}
+// interface TDataProps {
+//   name: string;
+//   type: 'data' | 'MouseEventHandler';
+//   data: TTriggerActions;
+// }
 
 interface UseHandlePropsResult {
   actions: Record<string, React.MouseEventHandler<HTMLButtonElement>>;
@@ -21,7 +21,7 @@ interface UseHandlePropsResult {
 }
 
 interface UseHandlePropsProps {
-  dataProps: TDataProps[];
+  dataProps: TTriggerActions;
   valueStream: any;
   data?: GridItem;
   methods?: UseFormReturn<FieldValues, any, FieldValues>;
@@ -43,17 +43,17 @@ const FC_TYPES = {
 
 const DEFAULT_TRIGGER: TTriggerValue = 'onClick';
 
-const createActionsMap = (dataProps: TDataProps[]): Record<string, TTriggerActions> => {
-  const map: Record<string, TTriggerActions> = {};
+// const createActionsMap = (dataProps: TTriggerActions): Record<string, TTriggerActions> => {
+//   const map: Record<string, TTriggerActions> = {};
 
-  dataProps?.forEach((item) => {
-    if (!_.isEmpty(item.data)) {
-      map[item.name] = item.data;
-    }
-  });
+//   dataProps?.forEach((item) => {
+//     if (!_.isEmpty(item.data)) {
+//       map[item.name] = item.data;
+//     }
+//   });
 
-  return map;
-};
+//   return map;
+// };
 
 const findRootAction = (actionsToExecute: Record<string, TAction>): TAction | undefined => {
   return Object.values(actionsToExecute).find((action) => !action.parentId);
@@ -69,6 +69,7 @@ const validateActionMap = (actionMap: TTriggerActions | undefined, actionName: s
 
 const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   const { dataProps } = props;
+  console.log('🚀 ~ useHandleProps ~ dataProps:', dataProps);
 
   // FIX: Add loading states
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
@@ -77,23 +78,24 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   const debouncedFunctionsRef = useRef<Record<string, any>>({});
 
   // Step 1: Tạo actions map từ dataProps
-  const actionsMap = useMemo(() => {
-    return createActionsMap(dataProps);
-  }, [dataProps]);
+  // const actionsMap = useMemo(() => {
+  //   return createActionsMap(dataProps);
+  // }, [dataProps]);
 
+  const actionsMap = dataProps;
   // Step 2: Lấy executeTriggerActions từ useActions hook
   const { executeTriggerActions } = useActions({ ...props, isCallPageLoad: false });
 
   // FIX: Helper functions for loading state management
   const setActionLoading = useCallback((actionName: string, loading: boolean) => {
-    setLoadingStates((prev) => ({
-      ...prev,
-      [actionName]: loading,
-    }));
+    // setLoadingStates((prev) => ({
+    //   ...prev,
+    //   [actionName]: loading,
+    // }));
   }, []);
 
   const resetAllLoadingStates = useCallback(() => {
-    setLoadingStates({});
+    // setLoadingStates({});
   }, []);
 
   // FIX: Computed loading state
@@ -141,54 +143,55 @@ const useHandleProps = (props: UseHandlePropsProps): UseHandlePropsResult => {
   );
 
   // Step 4: Tạo mouse event handlers với stable debounce - FIX: Enhanced with loading
+  // Step 4: Tạo mouse event handlers với stable debounce - FIX: dùng key
   const mouseEventHandlers = useDeepCompareMemo(() => {
-    if (!Array.isArray(dataProps)) return {};
+    if (!actionsMap) return {};
 
-    const validActions = dataProps.filter((item) => !_.isEmpty(item.data?.onClick));
     const result: Record<string, React.MouseEventHandler<HTMLButtonElement>> = {};
+    const actionJson = actionsMap;
+    // Lọc data không rỗng và iterate key/value
+    Object.entries(actionJson).forEach(([key, value]) => {
+      if (!value) return;
+      const actionData = { ...(value.data?.onClick || {}), ...(value.data || {}) };
+      // Lấy root action
+      const rootAction = findRootAction(actionData);
 
-    for (const item of validActions) {
-      const rootAction = findRootAction(item.data?.onClick || {});
-      const actionMap = actionsMap[item.name];
-
-      if (!actionMap) continue;
+      const actionMap = actionsMap[key];
+      if (!actionMap) return;
 
       // Tạo execute handler
-      const executeHandler = createExecuteHandler(actionMap, item.name);
+      const executeHandler = createExecuteHandler(actionMap, key);
 
-      // Kiểm tra xem có cần debounce không
+      // Kiểm tra debounce
       if (rootAction?.delay && rootAction.delay > 0) {
-        // Kiểm tra xem đã có debounced function cho item này chưa
-        const cacheKey = `${item.name}_${rootAction.delay}`;
+        const cacheKey = `${key}_${rootAction.delay}`;
 
         if (!debouncedFunctionsRef.current[cacheKey]) {
-          // FIX: Enhanced debounced function with loading state
           const debouncedHandler = _.debounce(async (...args: any[]) => {
             await executeHandler(...args);
           }, rootAction.delay);
 
-          // FIX: Wrap debounced function to handle loading state properly
+          // Wrap để xử lý loading state
           debouncedFunctionsRef.current[cacheKey] = async (...args: any[]) => {
-            // Set loading immediately when debounced function is called
-            setActionLoading(item.name, true);
+            setActionLoading(key, true);
 
             try {
               await debouncedHandler(...args);
             } catch (error) {
-              console.error(`Error in debounced action ${item.name}:`, error);
-              // Clear loading state if there's an error
-              setActionLoading(item.name, false);
+              console.error(`Error in debounced action ${key}:`, error);
+              setActionLoading(key, false);
             }
-            // Note: loading state will be cleared by the actual executeHandler
+            // Note: loading state sẽ được clear trong executeHandler
           };
         }
 
-        result[item.name] = debouncedFunctionsRef.current[cacheKey];
+        result[key] = debouncedFunctionsRef.current[cacheKey];
       } else {
-        result[item.name] = executeHandler;
+        result[key] = executeHandler;
       }
-    }
+    });
 
+    console.log('🚀 ~ useHandleProps ~ result:', result);
     return result;
   }, [dataProps, actionsMap, createExecuteHandler, setActionLoading]);
 
