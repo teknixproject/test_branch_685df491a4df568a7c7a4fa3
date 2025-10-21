@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Label from '../../tailAdminUI/components/form/Label';
+import Label from '../tailAdminUI/components/form/Label';
 import Input from '../tailAdminUI/components/form/input/InputField';
 
 const x = 5550;
