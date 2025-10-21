@@ -1,4 +1,5 @@
 import React from 'react'
+import OtpFormTailAdmin from './OtpFormTailAdmin'
 import ResetFromMarket from './ResetFromMarket'
 
 import PaymentMethod from './PaymentMethod'
@@ -13,5 +14,6 @@ export const components: any = {'TicketDetailsTailAdmin': TicketDetailsTailAdmin
     'IntegrationCardTailAdmin': IntegrationCardTailAdmin,
     'TestCpn': TestCpn,
     'PaymentMethod': PaymentMethod,
-    'ResetFromMarket': ResetFromMarket
+    'ResetFromMarket': ResetFromMarket,
+    'OtpFormTailAdmin': OtpFormTailAdmin
 };
