@@ -83,8 +83,7 @@
     "xhub-auth": "^0.0.29",
     "xhub-chat-dashboard": "^0.0.5",
     "zod": "^3.25.67",
-    "zustand": "^5.0.3",
-    "..": "latest"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
